@@ -17,6 +17,10 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
 sudo npm install -g @angular/cli
 
+node -v
+npm -v
+ng version
+
 # PostgreSQL
 sudo apt install postgresql postgresql-contrib
 sudo systemctl start postgresql
@@ -61,7 +65,8 @@ cd InventoryBackend
 
 install
 ```bash
-ng new InventoryFrontend --routing=false --style=css
+#   ng new InventoryFrontend --routing=false --style=css
+ng new InventoryFrontend --routing=true --style=css
 cd InventoryFrontend
 npm install
 
@@ -81,4 +86,12 @@ CREATE src/app/products/products.html (23 bytes)
 kraudy@Ubuntu:~/grind/thegrind/InventoryFrontend$ ng generate service product
 CREATE src/app/product.spec.ts (326 bytes)
 CREATE src/app/product.ts (112 bytes)
+```
+
+Start both
+```bash
+# Backend
+./mvnw clean spring-boot:run
+# Frontend
+ng serve --proxy-config proxy.conf.json
 ```
