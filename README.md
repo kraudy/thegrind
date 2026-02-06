@@ -15,6 +15,7 @@ sudo apt install openjdk-21-jdk maven
 # Node.js + npm (for Angular)
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
+sudo npm install -g @angular/cli
 
 # PostgreSQL
 sudo apt install postgresql postgresql-contrib
@@ -22,6 +23,7 @@ sudo systemctl start postgresql
 sudo systemctl enable postgresql
 ```
 
+## Backend
 
 Start postgress
 ```bash
@@ -53,4 +55,30 @@ https://start.spring.io/
 // init server
 cd InventoryBackend
 ./mvnw clean spring-boot:run
+```
+
+## Front End
+
+install
+```bash
+ng new InventoryFrontend --routing=false --style=css
+cd InventoryFrontend
+npm install
+
+```
+
+```bash
+ng generate component products
+ng generate service product
+```
+
+```bash
+kraudy@Ubuntu:~/grind/thegrind/InventoryFrontend$ ng generate component products
+CREATE src/app/products/products.css (0 bytes)
+CREATE src/app/products/products.spec.ts (545 bytes)
+CREATE src/app/products/products.ts (194 bytes)
+CREATE src/app/products/products.html (23 bytes)
+kraudy@Ubuntu:~/grind/thegrind/InventoryFrontend$ ng generate service product
+CREATE src/app/product.spec.ts (326 bytes)
+CREATE src/app/product.ts (112 bytes)
 ```
