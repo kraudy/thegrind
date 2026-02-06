@@ -12,16 +12,17 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let product of products">
-      <td>{{product.id}}</td>
-      <td>{{product.name}}</td>
-      <td>{{product.description}}</td>
-      <td>{{product.quantity}}</td>
-      <td>
-        <button (click)="selectProduct(product)">Edit</button>
-        <button (click)="deleteProduct(product.id)">Delete</button>
-      </td>
-    </tr>
+    @for (product of products; track product.id) {
+      <tr>
+        <td>{{ product.name }}</td>
+        <td>{{ product.description }}</td>
+        <td>{{ product.quantity }}</td>
+        <td>
+          <button (click)="selectProduct(product)">Edit</button>
+          <button (click)="deleteProduct(product.id)">Delete</button>
+        </td>
+      </tr>
+    }
   </tbody>
 </table>
 
@@ -32,5 +33,7 @@
   <input [(ngModel)]="selectedProduct.description" placeholder="Description"><br>
   <input type="number" [(ngModel)]="selectedProduct.quantity" placeholder="Quantity" required><br>
   <button type="submit">Save</button>
-  <button type="button" *ngIf="selectedProduct?.id" (click)="selectedProduct = {}">Cancel</button>
+  @if (selectedProduct?.id) {
+    <button type="button" (click)="selectedProduct = { name: '', description: '', quantity: 0 }">Cancel</button>
+  }
 </form>
