@@ -26,16 +26,31 @@ sudo systemctl enable postgresql
 Start postgress
 ```bash
 sudo -u postgres psql
+
+# configuration route
+/etc/postgresql/14/main/pg_hba.conf
+
+#test
+psql -U postgres -d inventorydb -W
+psql -h localhost -U postgres -d inventorydb -W # tcp
 ```
 
 Simple database
 ```sql
 CREATE DATABASE inventorydb
-CREATE USER xxxuser WITH PASSWORD 'xxxpass'
-GRANT ALL PRIVILEGES ON DATABASE inventorydb TO xxxuser
+CREATE USER inventoryuser WITH PASSWORD 'pass'
+GRANT ALL PRIVILEGES ON DATABASE inventorydb TO inventoryuser
+
+\l -- List databases
+\q
 ```
 
-To get the maven project command
+To get the maven project
 ```js
 https://start.spring.io/
+
+
+// init server
+cd InventoryBackend
+./mvnw clean spring-boot:run
 ```
