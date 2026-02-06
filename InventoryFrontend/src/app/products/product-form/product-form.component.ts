@@ -1,6 +1,6 @@
-import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, } from '@angular/core';
 
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location  } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -17,18 +17,30 @@ import { Product } from '../product.model';
 export class ProductFormComponent implements OnChanges{
   @Input() product: Product | null = null;
   @Output() productSaved = new EventEmitter<void>();
+  isEdit = false;
+  productId: number | null = null;
 
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private location: Location
+  ) {}
 
   formProduct: Product = { name: '', description: '', quantity: 0, price: 0 };
 
   ngOnChanges(): void {
     if (this.product) {
       this.formProduct = { ...this.product };
+      this.isEdit = !!this.product.id;  // true if editing an existing product
     } else {
       this.resetForm();
+      this.isEdit = false;
     }
   }
+
+  goBack(): void {
+    this.location.back();
+  }
+
 
   resetForm(): void {
     this.formProduct = { name: '', description: '', quantity: 0, price: 0 };
