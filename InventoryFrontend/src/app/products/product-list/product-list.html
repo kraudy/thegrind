@@ -1,1 +1,51 @@
-<p>product-list works!</p>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-4xl font-bold text-gray-900">Inventario de Productos</h1>
+    <a routerLink="/products/new"
+       class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition transform hover:scale-105">
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+      </svg>
+      Agregar Producto
+    </a>
+  </div>
+
+  <div class="bg-white shadow-xl rounded-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let product of products" class="hover:bg-gray-50 transition">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ product.id }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ product.name }}</td>
+            <td class="px-6 py-4 text-sm text-gray-600">{{ product.description || '-' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ product.quantity }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ product.price | number:'1.2-2' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-4">
+              <a [routerLink]="['/products', product.id, 'edit']"
+                 class="text-indigo-600 hover:text-indigo-900 font-medium">Editar</a>
+              <button (click)="deleteProduct(product.id)"
+                      class="text-red-600 hover:text-red-900 font-medium">
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Mensaje si no hay productos -->
+      <div *ngIf="products.length === 0" class="text-center py-12">
+        <p class="text-gray-500 text-lg">No hay productos en el inventario aún.</p>
+      </div>
+    </div>
+  </div>
+</div>

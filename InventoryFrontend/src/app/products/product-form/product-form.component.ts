@@ -1,11 +1,16 @@
 import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+
 import { ProductService } from '../product.service';
 import { Product } from '../product.model';
 
 @Component({
   selector: 'app-product-form',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './product-form.html',
   styleUrl: './product-form.css',
 })

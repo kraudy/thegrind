@@ -79,22 +79,21 @@ ng generate service product
 ng generate component products/product-list
 ng generate component products/product-form
 ng generate service products/product
+# After creating these add rename product.ts => to product.service.ts
+# and product-list.ts => product-list.component.ts
+# and create product.model.ts for the interfaces
 ```
 
+Install Tailwind
 ```bash
-kraudy@Ubuntu:~/grind/thegrind/InventoryFrontend$ ng generate component products/product-list
-CREATE src/app/products/product-list/product-list.css (0 bytes)
-CREATE src/app/products/product-list/product-list.spec.ts (567 bytes)
-CREATE src/app/products/product-list/product-list.ts (209 bytes)
-CREATE src/app/products/product-list/product-list.html (27 bytes)
-kraudy@Ubuntu:~/grind/thegrind/InventoryFrontend$ ng generate component products/product-form
-CREATE src/app/products/product-form/product-form.css (0 bytes)
-CREATE src/app/products/product-form/product-form.spec.ts (567 bytes)
-CREATE src/app/products/product-form/product-form.ts (209 bytes)
-CREATE src/app/products/product-form/product-form.html (27 bytes)
-kraudy@Ubuntu:~/grind/thegrind/InventoryFrontend$ ng generate service products/product
-CREATE src/app/products/product.spec.ts (326 bytes)
-CREATE src/app/products/product.ts (112 bytes)
+# Instala Tailwind y dependencias
+#npm install -D tailwindcss postcss autoprefixer
+npm install tailwindcss @tailwindcss/postcss postcss
+# Genera los archivos de configuración
+npx tailwindcss init -p
+
+Create postcss.config.js file
+Update InventoryFrontend/src/styles.css
 ```
 
 Start both
