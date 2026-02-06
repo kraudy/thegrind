@@ -75,17 +75,26 @@ npm install
 ```bash
 ng generate component products
 ng generate service product
+
+ng generate component products/product-list
+ng generate component products/product-form
+ng generate service products/product
 ```
 
 ```bash
-kraudy@Ubuntu:~/grind/thegrind/InventoryFrontend$ ng generate component products
-CREATE src/app/products/products.css (0 bytes)
-CREATE src/app/products/products.spec.ts (545 bytes)
-CREATE src/app/products/products.ts (194 bytes)
-CREATE src/app/products/products.html (23 bytes)
-kraudy@Ubuntu:~/grind/thegrind/InventoryFrontend$ ng generate service product
-CREATE src/app/product.spec.ts (326 bytes)
-CREATE src/app/product.ts (112 bytes)
+kraudy@Ubuntu:~/grind/thegrind/InventoryFrontend$ ng generate component products/product-list
+CREATE src/app/products/product-list/product-list.css (0 bytes)
+CREATE src/app/products/product-list/product-list.spec.ts (567 bytes)
+CREATE src/app/products/product-list/product-list.ts (209 bytes)
+CREATE src/app/products/product-list/product-list.html (27 bytes)
+kraudy@Ubuntu:~/grind/thegrind/InventoryFrontend$ ng generate component products/product-form
+CREATE src/app/products/product-form/product-form.css (0 bytes)
+CREATE src/app/products/product-form/product-form.spec.ts (567 bytes)
+CREATE src/app/products/product-form/product-form.ts (209 bytes)
+CREATE src/app/products/product-form/product-form.html (27 bytes)
+kraudy@Ubuntu:~/grind/thegrind/InventoryFrontend$ ng generate service products/product
+CREATE src/app/products/product.spec.ts (326 bytes)
+CREATE src/app/products/product.ts (112 bytes)
 ```
 
 Start both

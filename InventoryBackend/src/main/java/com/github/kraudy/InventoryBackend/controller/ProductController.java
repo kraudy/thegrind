@@ -10,7 +10,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin(origins = "http://localhost:4200")  // Allow Angular dev server
+@CrossOrigin(origins = "http://localhost:4200")  // Prevents Cors error. Allow Angular dev server
+// For the CORS, a stand alone class could be set
 public class ProductController {
 
     @Autowired
