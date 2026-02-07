@@ -37,8 +37,11 @@ sudo -u postgres psql
 /etc/postgresql/14/main/pg_hba.conf
 
 #test
-psql -U postgres -d inventorydb -W
+psql -U postgres -d inventorydb -W        # Estos dan error, revisar la codificacion
 psql -h localhost -U postgres -d inventorydb -W # tcp
+
+psql -U inventoryuser -d inventorydb -W   # Estos dan error, revisar la codificacion
+psql -h localhost -U inventoryuser -d inventorydb -W # tcp
 ```
 
 Simple database
@@ -47,8 +50,22 @@ CREATE DATABASE inventorydb
 CREATE USER inventoryuser WITH PASSWORD 'pass'
 GRANT ALL PRIVILEGES ON DATABASE inventorydb TO inventoryuser
 
-\l -- List databases
+\l  -- List databases
 \q
+\du -- show users
+\c  -- Change database
+\dt -- show tables inside database
+```
+
+Creat db user
+```sql
+DROP OWNED BY inventoryuser;
+DROP ROLE inventoryuser;
+CREATE USER inventoryuser WITH PASSWORD 'pass';
+ALTER ROLE inventoryuser SET client_encoding TO 'utf8';
+--ALTER ROLE inventoryuser SET default_transaction_isolation TO 'read committed';
+ALTER ROLE inventoryuser SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE inventorydb TO inventoryuser;
 ```
 
 To get the maven project
@@ -87,7 +104,6 @@ ng generate service products/product
 Install Tailwind
 ```bash
 # Instala Tailwind y dependencias
-#npm install -D tailwindcss postcss autoprefixer
 npm install tailwindcss @tailwindcss/postcss postcss
 # Genera los archivos de configuración
 npx tailwindcss init -p
