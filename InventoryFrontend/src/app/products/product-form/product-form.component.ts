@@ -25,7 +25,7 @@ export class ProductFormComponent implements OnChanges{
     private location: Location
   ) {}
 
-  formProduct: Product = { name: '', description: '', quantity: 0, price: 0 };
+  formProduct: Product = { name: '', description: '', quantity: 0};
 
   ngOnChanges(): void {
     if (this.product) {
@@ -41,19 +41,20 @@ export class ProductFormComponent implements OnChanges{
     this.location.back();
   }
 
-
   resetForm(): void {
-    this.formProduct = { name: '', description: '', quantity: 0, price: 0 };
+    this.formProduct = { name: '', description: '', quantity: 0};
   }
 
   onSubmit(): void {
     if (this.formProduct.id) {
-      this.productService.updateProduct(this.formProduct.id, this.formProduct).subscribe(() => {
+      console.log('Updating product: ' + this.formProduct.id);
+      this.productService.update(this.formProduct.id, this.formProduct).subscribe(() => {
         this.productSaved.emit();
         this.resetForm();
       });
     } else {
-      this.productService.createProduct(this.formProduct).subscribe(() => {
+      console.log('Creating product: ');
+      this.productService.create(this.formProduct).subscribe(() => {
         this.productSaved.emit();
         this.resetForm();
       });

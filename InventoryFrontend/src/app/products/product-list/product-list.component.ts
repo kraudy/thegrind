@@ -22,9 +22,11 @@ export class ProductListComponent {
   ngOnInit(): void {
     this.loadProducts();
   }
-
+ 
+  // Load list
   loadProducts(): void {
-    this.productService.getProducts().subscribe(data => this.products = data);
+    this.productService.getAll().subscribe(data => this.products = data);
+    console.log('Loading products: ' + this.products.length);
   }
 
   selectProduct(product: Product): void {
@@ -33,7 +35,7 @@ export class ProductListComponent {
 
   deleteProduct(id?: number): void {
     if (id && confirm('¿Seguro desea eliminar?')){
-      this.productService.deleteProduct(id).subscribe(() => this.loadProducts());
+      this.productService.delete(id).subscribe(() => this.loadProducts());
     }
   }
 
