@@ -12,7 +12,7 @@ import { Product } from '../product.model';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './product-form.html',
-  styleUrl: './product-form.css',
+  styleUrls: ['./product-form.css'],
 })
 export class ProductFormComponent implements OnChanges{
   @Input() product: Product | null = null;

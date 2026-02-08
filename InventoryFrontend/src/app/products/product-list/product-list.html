@@ -39,6 +39,12 @@
         </tbody>
       </table>
 
+      <!-- Debug: show the raw products JSON so we can confirm template sees the data -->
+      <div class="p-4 bg-gray-100 text-sm text-gray-800 mt-4">
+        <strong>Debug products:</strong>
+        <pre class="whitespace-pre-wrap">{{ products | json }}</pre>
+      </div>
+
       <!-- Mensaje si no hay productos -->
       <div *ngIf="products.length === 0" class="text-center py-12">
         <p class="text-gray-500 text-lg">No hay productos en el inventario aún.</p>
