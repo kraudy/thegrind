@@ -3,7 +3,6 @@ package com.github.kraudy.InventoryBackend.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.sql.Timestamp;
 
 @Entity
 @Data
