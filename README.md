@@ -118,4 +118,8 @@ Start both
 ./mvnw clean spring-boot:run
 # Frontend
 ng serve --proxy-config proxy.conf.json
+
+# show process listeingn
+sudo lsof -i :4200
+sudo kill -9 xxxx
 ```

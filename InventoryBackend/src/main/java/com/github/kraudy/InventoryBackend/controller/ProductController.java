@@ -15,32 +15,32 @@ import java.util.List;
 public class ProductController {
 
     @Autowired
-    private ProductRepository repository;
+    private ProductRepository productRepository;
 
     @GetMapping
     public List<Product> getAll() {
-        return repository.findAll();
+        return productRepository.findAll();
     }
 
     @GetMapping("/{id}")
     public Product getById(@PathVariable Long id) {
-        return repository.findById(id).orElseThrow();
+        return productRepository.findById(id).orElseThrow();
     }
 
     @PostMapping
     public Product create(@RequestBody Product product) {
-        return repository.save(product);
+        return productRepository.save(product);
     }
 
     @PutMapping("/{id}")
     public Product update(@PathVariable Long id, @RequestBody Product product) {
-        product.setId(id);
-        return repository.save(product);
+      product.setId(id);
+      return productRepository.save(product);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        repository.deleteById(id);
+        productRepository.deleteById(id);
     }
 }
 
