@@ -9,7 +9,9 @@ import { Product } from './product.model';
 export class ProductService {
   private apiUrl = '/api/products';  // Gracias al proxy, va al backend
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient
+  ) {}
 
   getAll(): Observable<Product[]> {
     return this.http.get<Product[]>(this.apiUrl);

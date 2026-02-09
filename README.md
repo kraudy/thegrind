@@ -99,6 +99,10 @@ ng generate service products/product
 # After creating these add rename product.ts => to product.service.ts
 # and product-list.ts => product-list.component.ts
 # and create product.model.ts for the interfaces
+
+ng generate component ordenes/orden-list
+ng generate component ordenes/orden-form
+ng generate service ordenes/orden
 ```
 
 Install Tailwind
