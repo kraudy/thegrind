@@ -2,6 +2,8 @@ package com.github.kraudy.InventoryBackend.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -11,28 +13,24 @@ import lombok.Data;
 
 @Entity
 @Data
+@Table(name = "Orden", uniqueConstraints = {}) // si necesitas constraints adicionales aquí
 public class Orden {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   // Add foreign key relationship
-  //@ManyToOne
-  //@JoinColumn(name = "Id_Cliente", referencedColumnName = "Id_Cliente")
-  //private Cliente Id_Cliente;
+  @ManyToOne
+  @JoinColumn(name = "id_cliente", nullable = false)
+  private Cliente cliente;
+
+  @Transient
   private Long idCliente;
 
   @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
-  private String recibidaPor; //TODO: Change to creadaPor
+  private String creadaPor;
 
-  //private String recibidaPor; //TODO: Move this to order detail
-
-  @Column(nullable = true, columnDefinition = "VARCHAR(100)")
-  private String preparadaPor; //TODO: Move this to order detail
-  @Column(nullable = true, columnDefinition = "VARCHAR(100)")
-  private String despachadaPor; //TODO: Move this to order detail
-
-  @Column(nullable = false, columnDefinition = "NUMERIC(12,2)")
+  @Column(nullable = false, columnDefinition = "NUMERIC(12,4)")
   private BigDecimal totalMonto = BigDecimal.ZERO;
 
   @Column(nullable = false, columnDefinition = "INTEGER")
@@ -63,4 +61,8 @@ public class Orden {
 
   @Column(nullable = false, columnDefinition = "VARCHAR(12)")
   private String estado = "Pendiente"; // Valor por default al ser creada la orden
+
+  // Relación OneToMany con OrdenDetalle
+  @OneToMany(mappedBy = "orden", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<OrdenDetalle> detalles = new ArrayList<>();
 }

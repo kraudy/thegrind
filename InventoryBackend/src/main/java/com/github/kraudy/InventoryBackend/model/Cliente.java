@@ -10,13 +10,13 @@ import lombok.Data;
 public class Cliente {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long Id_Cliente;
+  private Long id;
 
-  private String Nombre;
-  private String Apellido;
-  private String Telefono;
-  private String Correo;
-  private String Direccion;
-  private Timestamp Fecha_Creacion;
-  private Timestamp Fecha_Modificacion;
+  private String nombre;
+  private String apellido;
+  private String telefono;
+  private String correo;
+  private String direccion;
+  private Timestamp fechaCreacion;
+  private Timestamp fechaModificacion;
 }
