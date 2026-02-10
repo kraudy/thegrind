@@ -17,7 +17,6 @@ import lombok.Data;
 @IdClass(OrdenDetallePK.class)
 @Table(name = "OrdenDetalle")
 public class OrdenDetalle {
-  // === NEW: simple ID fields that match the IdClass ===
   @Id
   @Column(name = "id_orden", insertable = false, updatable = false)
   private Long idOrden;
@@ -30,20 +29,25 @@ public class OrdenDetalle {
   @Column(name = "id_orden_detalle", nullable = false)
   private Long idOrdenDetalle;
 
-  // === Associations with @MapsId (derive the ID values from them) ===
+  // ================== Relaciones con MapsId ==================
   @ManyToOne(fetch = FetchType.LAZY)
-  @MapsId("idOrden")                     // <-- ADD THIS
+  @MapsId("idOrden")
   @JoinColumn(name = "id_orden", nullable = false)
   private Orden orden;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @MapsId("idProducto")                  // <-- ADD THIS
+  @MapsId("idProducto")
   @JoinColumn(name = "id_producto", nullable = false)
   private Producto producto;
-  
-  // === Rest of your fields (cantidad, precioUnitario, etc.) ===
+  // ================== Relaciones con MapsId ==================
+
+  @Column(nullable = false, columnDefinition = "INTEGER")
   private int cantidad;
+
+  @Column(nullable = false, columnDefinition = "DECIMAL(12,4)")
   private BigDecimal precioUnitario;
+
+  @Column(nullable = false, columnDefinition = "DECIMAL(12,4)")
   private BigDecimal subtotal;
 
   @CreationTimestamp
@@ -51,6 +55,7 @@ public class OrdenDetalle {
   private LocalDateTime fechaCreacion;
 
   @UpdateTimestamp
+  @Column(nullable = false)
   private LocalDateTime fechaModificacion;
 
   @OneToMany(mappedBy = "ordenDetalle", cascade = CascadeType.ALL, orphanRemoval = true)

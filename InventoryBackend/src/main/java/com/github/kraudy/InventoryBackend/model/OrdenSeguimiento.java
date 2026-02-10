@@ -38,5 +38,13 @@ public class OrdenSeguimiento {
   })
   private OrdenDetalle ordenDetalle;
 
-  // other fields...
+  // Track who created the tracking record, required and not updatable
+  @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
+  private String seguimientoPor;
+
+  // Automatically set the creation timestamp when a new tracking record is created
+  @CreationTimestamp
+  @Column(nullable = false, columnDefinition = "TIMESTAMP")
+  private LocalDateTime fechaCreacion;
+
 }

@@ -19,7 +19,6 @@ public class Orden {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  // Add foreign key relationship
   @ManyToOne
   @JoinColumn(name = "id_cliente", nullable = false)
   private Cliente cliente;
