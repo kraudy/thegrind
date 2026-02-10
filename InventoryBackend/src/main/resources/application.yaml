@@ -10,7 +10,8 @@ spring:
     
   jpa:
     hibernate:
-      ddl-auto: update   # Creates/updates tables automatically
+      ddl-auto: update # Creates/updates tables automatically
+      #ddl-auto: create-drop # Drops and rebuild the database schema on startup and shutdown (useful for testing)
     show-sql: true
     properties:
       hibernate:

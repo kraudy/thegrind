@@ -32,13 +32,15 @@ public class OrdenDetalle {
 
   // === Associations with @MapsId (derive the ID values from them) ===
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id_orden", nullable = false)  // remove insertable=false, updatable=false
+  @MapsId("idOrden")                     // <-- ADD THIS
+  @JoinColumn(name = "id_orden", nullable = false)
   private Orden orden;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id_producto", nullable = false)  // remove insertable=false, updatable=false
+  @MapsId("idProducto")                  // <-- ADD THIS
+  @JoinColumn(name = "id_producto", nullable = false)
   private Producto producto;
-
+  
   // === Rest of your fields (cantidad, precioUnitario, etc.) ===
   private int cantidad;
   private BigDecimal precioUnitario;
