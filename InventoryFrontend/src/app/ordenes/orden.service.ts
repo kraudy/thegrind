@@ -21,11 +21,11 @@ export class OrdenService {
     return this.http.get<Orden>(`${this.apiUrl}/${id}`);
   }
 
-  create(orden: Orden): Observable<Orden> {
+  create(orden: Partial<Orden>): Observable<Orden> {
     return this.http.post<Orden>(this.apiUrl, orden);
   }
 
-  update(id: number, orden: Orden): Observable<Orden> {
+  update(id: number, orden: Partial<Orden>): Observable<Orden> {
     return this.http.put<Orden>(`${this.apiUrl}/${id}`, orden);
   }
 

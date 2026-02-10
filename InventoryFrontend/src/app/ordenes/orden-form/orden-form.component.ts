@@ -28,18 +28,16 @@ export class OrdenFormComponent implements OnChanges, OnInit{
     private cd: ChangeDetectorRef
   ) {}
 
-  formOrden: Orden = { 
+  formOrden: Partial<Orden> = { 
     idCliente: 0,
     recibidaPor: '',
     preparadaPor: '',
     despachadaPor: '',
     totalMonto: 0,
     totalProductos: 0,
-    fechaCreacion: null,
     fechaEntrega: null,
     fechaPreparada: null,
     fechaDespachada: null,
-    fechaModificacion: null,
     estado: 'Recibida',
   };
 
@@ -83,21 +81,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
   }
 
   private loadForm(data: Orden): void {
-    this.formOrden = {
-      id: data.id,
-      idCliente: data.idCliente || 0,
-      recibidaPor: data.recibidaPor || '',
-      preparadaPor: data.preparadaPor || '',
-      despachadaPor: data.despachadaPor || '',
-      totalMonto: data.totalMonto || 0,
-      totalProductos: data.totalProductos || 0,
-      fechaCreacion: data.fechaCreacion || null,
-      fechaEntrega: data.fechaEntrega || null,
-      fechaPreparada: data.fechaPreparada || null,
-      fechaDespachada: data.fechaDespachada || null,
-      fechaModificacion: data.fechaModificacion || null,
-      estado: data.estado || 'Recibida',
-    };
+    this.formOrden = { ...data }; // Spread the full Orden — includes real dates on edit
   }
 
   goBack(): void {
@@ -112,51 +96,60 @@ export class OrdenFormComponent implements OnChanges, OnInit{
       despachadaPor: '',
       totalMonto: 0,
       totalProductos: 0,
-      fechaCreacion: null,
       fechaEntrega: null,
       fechaPreparada: null,
       fechaDespachada: null,
-      fechaModificacion: null,
       estado: 'Recibida',
     };
   }
 
   onSubmit(): void {
-    const ordenToSave: Orden = {
-      id: this.formOrden.id,
+    const payload: Partial<Orden> = {
       idCliente: this.formOrden.idCliente,
-      recibidaPor: this.formOrden.recibidaPor,
-      preparadaPor: this.formOrden.preparadaPor,
-      despachadaPor: this.formOrden.despachadaPor,
-      totalMonto: this.formOrden.totalMonto,
-      totalProductos: this.formOrden.totalProductos,
-      estado: this.formOrden.estado,
-      fechaCreacion: this.formOrden.fechaCreacion,
+      recibidaPor: this.formOrden.recibidaPor ?? '',
+      preparadaPor: this.formOrden.preparadaPor ?? '',
+      despachadaPor: this.formOrden.despachadaPor ?? '',
+      totalMonto: this.formOrden.totalMonto ?? 0,
+      totalProductos: this.formOrden.totalProductos ?? 0,
       fechaEntrega: this.formOrden.fechaEntrega,
-      fechaPreparada: this.formOrden.fechaPreparada,
-      fechaDespachada: this.formOrden.fechaDespachada,
-      fechaModificacion: this.formOrden.fechaModificacion,
+      fechaPreparada: this.formOrden.fechaPreparada ?? null,
+      fechaDespachada: this.formOrden.fechaDespachada ?? null,
+      estado: this.formOrden.estado ?? 'Recibida',
+      // ← Explicitly omit fechaCreacion, fechaModificacion (and id for now)
     };
 
-    // Valores automáticos
-    //if (!this.isEdit) {
-    //  ordenToSave.fechaCreacion = new Date();
-    //} else {
-    //  ordenToSave.fechaModificacion = new Date();
-    //}
+    if (this.isEdit && this.formOrden.id) {
+      // Update Orden
+      (payload).id = this.formOrden.id;
 
-    if (this.formOrden.id) {
-      console.log('Updating orden:', this.formOrden.id);
-      this.ordenService.update(this.formOrden.id, ordenToSave).subscribe(() => {
-        this.ordenSaved.emit();
-        this.goBack();
+      this.ordenService.update(this.formOrden.id, payload).subscribe({
+        next: () => {
+          this.ordenSaved.emit();
+          this.goBack();
+        },
+        complete: () => {
+          console.log('Orden payload send sucessfully for update:', payload);
+        },
+        error: (err) => {
+          console.error('Failed to update orden', err);
+          alert('Error updating orden: ' + (err?.message || 'Unknown error'));
+        }
       });
     } else {
-      console.log('Creating orden');
-      this.ordenService.create(ordenToSave).subscribe(() => {
-        this.ordenSaved.emit();
-        this.resetForm();
-        this.goBack();
+      // Create new Orden
+      this.ordenService.create(payload).subscribe({
+        next: () => {
+          this.ordenSaved.emit();
+          this.resetForm();
+          this.goBack();
+        },
+        complete: () => {
+          console.log('Orden payload send sucessfully for create:', payload);
+        },
+        error: (err) => {
+          console.error('Failed to create orden', err);
+          alert('Error creating orden: ' + (err?.message || 'Unknown error'));
+        }
       });
     }
   }
