@@ -23,12 +23,14 @@ public class Orden {
   private Long idCliente;
 
   @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
-  private String recibidaPor;
+  private String recibidaPor; //TODO: Change to creadaPor
+
+  //private String recibidaPor; //TODO: Move this to order detail
 
   @Column(nullable = true, columnDefinition = "VARCHAR(100)")
-  private String preparadaPor;
+  private String preparadaPor; //TODO: Move this to order detail
   @Column(nullable = true, columnDefinition = "VARCHAR(100)")
-  private String despachadaPor;
+  private String despachadaPor; //TODO: Move this to order detail
 
   @Column(nullable = false, columnDefinition = "NUMERIC(12,2)")
   private BigDecimal totalMonto = BigDecimal.ZERO;

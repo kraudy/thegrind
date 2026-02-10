@@ -111,7 +111,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
       preparadaPor: '',
       despachadaPor: '',
       totalMonto: 0,
-      totalProductos: 1,
+      totalProductos: 0,
       fechaCreacion: null,
       fechaEntrega: null,
       fechaPreparada: null,
@@ -139,11 +139,11 @@ export class OrdenFormComponent implements OnChanges, OnInit{
     };
 
     // Valores automáticos
-    if (!this.isEdit) {
-      ordenToSave.fechaCreacion = new Date();
-    } else {
-      ordenToSave.fechaModificacion = new Date();
-    }
+    //if (!this.isEdit) {
+    //  ordenToSave.fechaCreacion = new Date();
+    //} else {
+    //  ordenToSave.fechaModificacion = new Date();
+    //}
 
     if (this.formOrden.id) {
       console.log('Updating orden:', this.formOrden.id);
