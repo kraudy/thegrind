@@ -30,9 +30,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
 
   formOrden: Partial<Orden> = { 
     idCliente: 0,
-    recibidaPor: '',
-    preparadaPor: '',
-    despachadaPor: '',
+    creadaPor: '',
     totalMonto: 0,
     totalProductos: 0,
     fechaEntrega: null,
@@ -91,9 +89,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
   resetForm(): void {
     this.formOrden = {
       idCliente: 0,
-      recibidaPor: '',
-      preparadaPor: '',
-      despachadaPor: '',
+      creadaPor: '',
       totalMonto: 0,
       totalProductos: 0,
       fechaEntrega: null,
@@ -106,9 +102,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
   onSubmit(): void {
     const payload: Partial<Orden> = {
       idCliente: this.formOrden.idCliente,
-      recibidaPor: this.formOrden.recibidaPor ?? '',
-      preparadaPor: this.formOrden.preparadaPor ?? '',
-      despachadaPor: this.formOrden.despachadaPor ?? '',
+      creadaPor: this.formOrden.creadaPor ?? '',
       totalMonto: this.formOrden.totalMonto ?? 0,
       totalProductos: this.formOrden.totalProductos ?? 0,
       fechaEntrega: this.formOrden.fechaEntrega,

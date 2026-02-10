@@ -1,9 +1,7 @@
 export interface Orden {
   id?: number;
   idCliente: number;
-  recibidaPor: string;
-  preparadaPor: string;
-  despachadaPor: string;
+  creadaPor: string;
   totalMonto: number;
   totalProductos: number;
   fechaCreacion: Date; // Fecha de creacion de la orden
