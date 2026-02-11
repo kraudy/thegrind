@@ -66,7 +66,7 @@ public class Orden {
   private String estado = "Pendiente"; // Valor por default al ser creada la orden
 
   // Relación OneToMany con OrdenDetalle
-  @JsonIgnore // For now we don't need to return detalle, this can also be handled with a separate endpoint if needed
+  @JsonIgnore // For now we don't need to return detalle, TODO: this can also be adde to the repository and used it by the controller
   @OneToMany(mappedBy = "orden", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<OrdenDetalle> detalles = new ArrayList<>();
 

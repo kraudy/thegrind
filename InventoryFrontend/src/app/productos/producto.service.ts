@@ -7,7 +7,7 @@ import { Producto } from './producto.model';
   providedIn: 'root'
 })
 export class ProductoService {
-  private apiUrl = '/api/products';  // Gracias al proxy, va al backend
+  private apiUrl = '/api/productos';  // Proxy route to backend
 
   constructor(
     private http: HttpClient

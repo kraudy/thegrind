@@ -11,6 +11,7 @@ import lombok.Data;
 
 @Entity
 @Data
+@IdClass(ProductoPrecioPK.class) // Required for relational mapping with composite key
 @Table(name = "ProductoPrecio")
 public class ProductoPrecio {
   @Id
@@ -38,6 +39,7 @@ public class ProductoPrecio {
   private boolean activo;
 
   // === NEW: Many-to-one relationship back to Producto ===
+  //TODO: Move this to producto precion repository and call it in the controller to get all the prices of a product
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "productoId", referencedColumnName = "id", insertable = false, updatable = false)
   private Producto producto;

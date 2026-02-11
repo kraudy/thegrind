@@ -58,6 +58,7 @@ public class OrdenController {
     }
     Cliente cliente = clienteRepository.findById(orden.getIdCliente())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente with id " + orden.getIdCliente() + " not found"));
+        
     orden.setCliente(cliente);
   }
 
