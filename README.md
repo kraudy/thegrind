@@ -103,6 +103,10 @@ ng generate service products/product
 ng generate component ordenes/orden-list
 ng generate component ordenes/orden-form
 ng generate service ordenes/orden
+
+ng generate component clientes/cliente-list
+ng generate component clientes/cliente-form
+ng generate service clientes/cliente
 ```
 
 Install Tailwind

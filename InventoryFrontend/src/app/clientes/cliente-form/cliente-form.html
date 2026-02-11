@@ -1,0 +1,101 @@
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="bg-white shadow-2xl rounded-2xl p-8 md:p-12">
+    <h2 class="text-3xl font-bold text-gray-900 mb-10 text-center">
+      {{ isEdit ? 'Editar Cliente' : 'Crear Nuevo Cliente' }}
+    </h2>
+
+    <!-- Mostrar fecha de creación si es edición -->
+    <div *ngIf="isEdit && formCliente.fechaCreacion" class="mb-10 p-5 bg-gray-50 rounded-lg text-center">
+      <p class="text-sm text-gray-600">
+        <strong>Fecha de Creación:</strong> {{ formCliente.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
+      </p>
+    </div>
+
+    <!-- Opcional: Mostrar fecha de modificación si existe diferencia -->
+    <div *ngIf="isEdit && formCliente.fechaModificacion && formCliente.fechaModificacion !== formCliente.fechaCreacion"
+         class="mb-10 p-5 bg-gray-50 rounded-lg text-center">
+      <p class="text-sm text-gray-600">
+        <strong>Última Modificación:</strong> {{ formCliente.fechaModificacion | date:'dd/MM/yyyy HH:mm' }}
+      </p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="space-y-12">
+      <!-- Información Personal -->
+      <div class="bg-gray-50 rounded-xl p-6">
+        <h3 class="text-xl font-semibold text-gray-800 mb-6">Información Personal</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nombre *</label>
+            <input type="text"
+                   [(ngModel)]="formCliente.nombre"
+                   name="nombre"
+                   required
+                   placeholder="Ej: Juan"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Apellido *</label>
+            <input type="text"
+                   [(ngModel)]="formCliente.apellido"
+                   name="apellido"
+                   required
+                   placeholder="Ej: Pérez"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm">
+          </div>
+        </div>
+      </div>
+
+      <!-- Contacto -->
+      <div class="bg-gray-50 rounded-xl p-6">
+        <h3 class="text-xl font-semibold text-gray-800 mb-6">Contacto</h3>
+        <div class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
+            <input type="tel"
+                   [(ngModel)]="formCliente.telefono"
+                   name="telefono"
+                   required
+                   placeholder="Ej: +505 8888 8888"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico *</label>
+            <input type="email"
+                   [(ngModel)]="formCliente.correo"
+                   name="correo"
+                   required
+                   placeholder="Ej: juan.perez@example.com"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm">
+          </div>
+        </div>
+      </div>
+
+      <!-- Dirección -->
+      <div class="bg-gray-50 rounded-xl p-6">
+        <h3 class="text-xl font-semibold text-gray-800 mb-6">Dirección</h3>
+        <div class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Dirección Completa</label>
+            <textarea [(ngModel)]="formCliente.direccion"
+                      name="direccion"
+                      rows="4"
+                      placeholder="Ej: Barrio X, de la iglesia 2c al este, Managua"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm resize-none"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-center space-x-6 pt-8">
+        <button type="submit"
+                class="px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
+          {{ isEdit ? 'Actualizar' : 'Crear' }}
+        </button>
+        <button type="button"
+                (click)="goBack()"
+                class="px-10 py-4 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

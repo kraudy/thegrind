@@ -1,6 +1,7 @@
 export interface Orden {
   id?: number;
   idCliente: number;
+  clienteNombre: string; 
   creadaPor: string;
   totalMonto: number;
   totalProductos: number;

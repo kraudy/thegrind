@@ -35,8 +35,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
     totalProductos: 0,
     fechaEntrega: null,
     fechaPreparada: null,
-    fechaDespachada: null,
-    estado: 'Recibida',
+    fechaDespachada: null
   };
 
   ngOnInit(): void {
@@ -94,8 +93,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
       totalProductos: 0,
       fechaEntrega: null,
       fechaPreparada: null,
-      fechaDespachada: null,
-      estado: 'Recibida',
+      fechaDespachada: null
     };
   }
 
@@ -107,13 +105,11 @@ export class OrdenFormComponent implements OnChanges, OnInit{
       totalProductos: this.formOrden.totalProductos ?? 0,
       fechaEntrega: this.formOrden.fechaEntrega,
       fechaPreparada: this.formOrden.fechaPreparada ?? null,
-      fechaDespachada: this.formOrden.fechaDespachada ?? null,
-      estado: this.formOrden.estado ?? 'Recibida',
-      // ← Explicitly omit fechaCreacion, fechaModificacion (and id for now)
+      fechaDespachada: this.formOrden.fechaDespachada ?? null
     };
 
     if (this.isEdit && this.formOrden.id) {
-      // Update Orden
+      // Update Orden and add id
       (payload).id = this.formOrden.id;
 
       this.ordenService.update(this.formOrden.id, payload).subscribe({
