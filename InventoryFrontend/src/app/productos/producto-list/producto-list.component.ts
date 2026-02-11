@@ -4,22 +4,22 @@ import { ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
-import { ProductService } from '../product.service';
-import { Product } from '../product.model';
+import { ProductoService } from '../producto.service';
+import { Producto } from '../producto.model';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  templateUrl: './product-list.html',
-  styleUrls: ['./product-list.css'],
+  templateUrl: './producto-list.html',
+  styleUrls: ['./producto-list.css'],
 })
-export class ProductListComponent implements OnInit {
-  products: Product[] = [];
-  selectedProduct: Product | null = null;
+export class ProductoListComponent implements OnInit {
+  productos: Producto[] = [];
+  selectedProduct: Producto | null = null;
 
   constructor(
-    private productService: ProductService,
+    private productoService: ProductoService,
     private cd: ChangeDetectorRef 
   ) {}
 
@@ -29,16 +29,16 @@ export class ProductListComponent implements OnInit {
  
   // Load list
   loadProducts(): void {
-    this.productService.getAll().subscribe({
+    this.productoService.getAll().subscribe({
       next: (data) => {
-        this.products = data || [];
-        console.log('[ProductList] loaded products:', this.products.length, this.products);
+        this.productos = data || [];
+        console.log('[ProductList] loaded products:', this.productos.length, this.productos);
         this.cd.detectChanges(); // force view update if zone isn't triggering it
       },
       error: (err) => {
         // log full error so you can inspect status/code in the console
         console.error('[ProductList] failed to load products', err);
-        this.products = [];
+        this.productos = [];
         if (err?.status === 0) {
           console.log('Cannot reach backend (network error). Is the Spring server running?');
         } else if (err?.status) {
@@ -50,13 +50,13 @@ export class ProductListComponent implements OnInit {
     });
   }
 
-  selectProduct(product: Product): void {
+  selectProduct(product: Producto): void {
     this.selectedProduct = {...product};
   }
 
   deleteProduct(id?: number): void {
     if (id && confirm('¿Seguro desea eliminar?')){
-      this.productService.delete(id).subscribe(() => this.loadProducts());
+      this.productoService.delete(id).subscribe(() => this.loadProducts());
     }
   }
 
