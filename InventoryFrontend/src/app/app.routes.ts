@@ -9,12 +9,19 @@ import { OrdenFormComponent } from './ordenes/orden-form/orden-form.component';
 import { ClienteListComponent } from './clientes/cliente-list/cliente-list.component';
 import { ClienteFormComponent } from './clientes/cliente-form/cliente-form.component';
 
+import { ProductoTipoListComponent } from './productos-tipos/producto-tipo-list/producto-tipo-list.component';
+import { ProductoTipoFormComponent } from './productos-tipos/producto-tipo-form/producto-tipo-form.component';
+
 export const routes: Routes = [
   { path: '', redirectTo: '/ordenes', pathMatch: 'full' }, // Change this for landing page
 
   { path: 'productos', component: ProductoListComponent },
   { path: 'productos/new', component: ProductoFormComponent },
   { path: 'productos/:id/edit', component: ProductoFormComponent },
+
+  { path: 'productos-tipos', component: ProductoTipoListComponent },
+  { path: 'productos-tipos/new', component: ProductoTipoFormComponent },
+  { path: 'productos-tipos/:tipo/edit', component: ProductoTipoFormComponent },
 
   { path: 'ordenes', component: OrdenListComponent },
   { path: 'ordenes/new', component: OrdenFormComponent },

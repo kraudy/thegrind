@@ -9,7 +9,7 @@ import com.github.kraudy.InventoryBackend.repository.ProductoTipoRepository;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/productos-tipo")
+@RequestMapping("/api/productos-tipos")
 @CrossOrigin(origins = "http://localhost:4200")
 public class ProductoTipoController {
   @Autowired

@@ -7,6 +7,8 @@ import java.util.Set;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -33,6 +35,7 @@ public class ProductoTipo {
   private LocalDateTime fechaModificacion;
 
   // Bi-directional relationship to Producto, get all products of this type
+  @JsonIgnore
   @OneToMany(mappedBy = "productoTipo")
   private Set<Producto> productos = new HashSet<>();
 }

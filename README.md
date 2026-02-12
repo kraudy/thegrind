@@ -90,15 +90,13 @@ npm install
 ```
 
 ```bash
-ng generate component products
-ng generate service product
+ng generate component productos
+ng generate service producto
 
-ng generate component products/product-list
-ng generate component products/product-form
-ng generate service products/product
-# After creating these add rename product.ts => to product.service.ts
-# and product-list.ts => product-list.component.ts
-# and create product.model.ts for the interfaces
+ng generate component productos/producto-list
+ng generate component productos/producto-form
+ng generate service productos/producto
+
 
 ng generate component ordenes/orden-list
 ng generate component ordenes/orden-form
@@ -107,6 +105,14 @@ ng generate service ordenes/orden
 ng generate component clientes/cliente-list
 ng generate component clientes/cliente-form
 ng generate service clientes/cliente
+
+ng generate component productos-tipos/producto-tipo-list
+ng generate component productos-tipos/producto-tipo-form
+ng generate service productos-tipos/producto-tipo
+
+ng generate component productos-precios/producto-precio-list
+ng generate component productos-precios/producto-precio-form
+ng generate service productos-precios/producto-precio
 ```
 
 Install Tailwind
