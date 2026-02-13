@@ -4,6 +4,9 @@ import { CommonModule, Location  } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { ProductoTipo } from '../../productos-tipos/producto-tipo.model';
+import { ProductoTipoService } from '../../productos-tipos/producto-tipo.service';
+
 import { ProductoService } from '../producto.service';
 import { Producto } from '../producto.model';
 
@@ -14,14 +17,16 @@ import { Producto } from '../producto.model';
   templateUrl: './producto-form.html',
   styleUrls: ['./producto-form.css'],
 })
-export class ProductoFormComponent implements OnChanges, OnInit{
+export class ProductoFormComponent implements OnChanges, OnInit {
   @Input() producto: Producto | null = null;
   @Output() productoSaved = new EventEmitter<void>();
   isEdit = false;
   productoId: number | null = null;
+  tipos: ProductoTipo[] = [];
 
   constructor(
     private productoService: ProductoService,
+    private productoTipoService: ProductoTipoService,
     private location: Location,
     private route: ActivatedRoute,
     private cd: ChangeDetectorRef
@@ -34,10 +39,25 @@ export class ProductoFormComponent implements OnChanges, OnInit{
       this.resetForm();
       this.isEdit = false;
     }
+
+    // Cargar tipos de producto siempre
+    this.productoTipoService.getAll().subscribe({
+      next: (data) => {
+        this.tipos = data || [];
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        console.error('[ProductoForm] failed to load tipos de producto', err);
+        this.tipos = [];
+        this.cd.detectChanges();
+      }
+    });
+
     const idParam = this.route.snapshot.paramMap.get('id');
     if (!idParam) {return;}
     const id = Number(idParam);
     if (isNaN(id)) {return;}
+
     this.productoId = id;
     this.productoService.getById(id).subscribe({
       next: (data) => {
@@ -60,6 +80,7 @@ export class ProductoFormComponent implements OnChanges, OnInit{
     if (this.producto) {
       this.formProducto = { ...this.producto };
       this.isEdit = !!this.producto.id;  // true if editing an existing producto
+      this.cd.detectChanges();
     } else {
       this.resetForm();
       this.isEdit = false;

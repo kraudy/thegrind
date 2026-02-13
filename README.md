@@ -25,6 +25,11 @@ ng version
 sudo apt install postgresql postgresql-contrib
 sudo systemctl start postgresql
 sudo systemctl enable postgresql
+
+# this is supposed to give a better cli than psql
+sudo apt install pgcli
+
+
 ```
 
 ## Backend
@@ -55,6 +60,7 @@ GRANT ALL PRIVILEGES ON DATABASE inventorydb TO inventoryuser
 \du -- show users
 \c  -- Change database
 \dt -- show tables inside database
+\e  -- Select editor
 ```
 
 Creat db user

@@ -6,8 +6,9 @@
 
     <form (ngSubmit)="onSubmit()" class="space-y-8">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Nombre -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Nombre *</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Nombre <span class="text-red-600">*</span></label>
           <input type="text"
                  [(ngModel)]="formProducto.nombre"
                  name="nombre"
@@ -15,29 +16,35 @@
                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm">
         </div>
 
+        <!-- Tipo de Producto (dropdown) -->
         <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Producto <span class="text-red-600">*</span></label>
+          <select [(ngModel)]="formProducto.tipoProducto"
+                  name="tipoProducto"
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm">
+            <option value="" disabled>-- Seleccione un tipo --</option>
+            <option *ngFor="let tipo of tipos" [value]="tipo.tipo">
+              {{ tipo.tipo }} - {{ tipo.descripcion || 'Sin descripción' }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Descripción (textarea para mayor espacio, consistente con el form de precios) -->
+        <div class="md:col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
-          <input type="text"
-                 [(ngModel)]="formProducto.descripcion"
-                 name="descripcion"
-                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm">
+          <textarea [(ngModel)]="formProducto.descripcion"
+                    name="descripcion"
+                    rows="4"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm resize-none">
+          </textarea>
         </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Tipo Producto *</label>
-          <input type="number"
-                 [(ngModel)]="formProducto.tipoProducto"
-                 name="tipoProducto"
-                 min="0"
-                 required
-                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm">
-        </div>
-
       </div>
 
       <div class="flex justify-center space-x-6 pt-6">
         <button type="submit"
-                class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
+                [disabled]="!formProducto.nombre?.trim() || !formProducto.tipoProducto"
+                class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
           {{ isEdit ? 'Actualizar' : 'Crear' }}
         </button>
         <button type="button"
