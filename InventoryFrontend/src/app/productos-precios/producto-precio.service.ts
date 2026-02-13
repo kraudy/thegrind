@@ -32,4 +32,17 @@ export class ProductoPrecioService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  getByComposite(productoId: number, precio: number): Observable<ProductoPrecio> {
+    return this.http.get<ProductoPrecio>(`${this.apiUrl}/${productoId}/${precio}`);
+  }
+
+  updateComposite(productoId: number, precio: number, productoPrecio: Partial<ProductoPrecio>): Observable<ProductoPrecio> {
+    return this.http.put<ProductoPrecio>(`${this.apiUrl}/${productoId}/${precio}`, productoPrecio);
+  }
+
+  deleteComposite(productoId: number, precio: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${productoId}/${precio}`);
+  }
+  
 }

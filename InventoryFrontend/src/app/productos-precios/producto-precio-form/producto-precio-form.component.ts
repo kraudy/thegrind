@@ -58,13 +58,23 @@ export class ProductoPrecioFormComponent  implements OnChanges, OnInit {
       this.resetForm();
       this.isEdit = false;
     }
-    const idParam = this.route.snapshot.paramMap.get('id');
-    if (!idParam) {return;}
-    const id = Number(idParam);
-    if (isNaN(id)) {return;}
 
-    this.productoPrecioId = id;
-    this.productoPrecioService.getById(id).subscribe({
+    const productoIdParam = this.route.snapshot.paramMap.get('productoId');
+    const precioParam = this.route.snapshot.paramMap.get('precio');
+
+    if (!productoIdParam || !precioParam) return;
+    const productoId = Number(productoIdParam);
+    const precio = parseFloat(precioParam); // BigDecimal → number
+    if (isNaN(productoId) || isNaN(precio)) return;
+
+
+    //const idParam = this.route.snapshot.paramMap.get('id');
+    //if (!idParam) {return;}
+    //const id = Number(idParam);
+    //if (isNaN(id)) {return;}
+    //this.productoPrecioId = id;
+
+    this.productoPrecioService.getByComposite(productoId, precio).subscribe({
       next: (data) => {
         this.formProductoPrecio = { ...data };
         this.isEdit = true;
@@ -142,16 +152,17 @@ export class ProductoPrecioFormComponent  implements OnChanges, OnInit {
   }
 
   onSubmit(): void {
-    if (this.formProductoPrecio.productoId) {
+    if (this.isEdit) {
       console.log('Updating producto precio: ' + this.formProductoPrecio.productoId);
-      this.productoPrecioService.update(this.formProductoPrecio.productoId, this.formProductoPrecio).subscribe(() => {
+      const originalPrecio = this.formProductoPrecio.precio!;
+      this.productoPrecioService.updateComposite(this.formProductoPrecio.productoId!, originalPrecio, this.formProductoPrecio).subscribe(() => {
         this.productoPrecioSaved.emit();
         this.resetForm();
         this.location.back();
       });
     } else {
       console.log('Creating producto precio: ');
-      this.productoPrecioService.create(this.formProductoPrecio).subscribe(() => {
+      this.productoPrecioService.create(this.formProductoPrecio as ProductoPrecio).subscribe(() => {
         this.productoPrecioSaved.emit();
         this.resetForm();
         this.location.back();

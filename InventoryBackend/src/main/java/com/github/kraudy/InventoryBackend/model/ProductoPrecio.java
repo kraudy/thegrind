@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -36,10 +38,11 @@ public class ProductoPrecio {
   private LocalDateTime fechaModificacion;
 
   @Column(nullable = false)
-  private boolean activo;
+  private boolean activo = true;
 
   // === NEW: Many-to-one relationship back to Producto ===
   //TODO: Move this to producto precion repository and call it in the controller to get all the prices of a product
+  @JsonIgnore
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "productoId", referencedColumnName = "id", insertable = false, updatable = false)
   private Producto producto;
