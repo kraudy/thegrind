@@ -1,6 +1,7 @@
 package com.github.kraudy.InventoryBackend.controller;
 
 import com.github.kraudy.InventoryBackend.model.ProductoPrecio;
+import com.github.kraudy.InventoryBackend.model.ProductoPrecioDTO;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecioPK;
 import com.github.kraudy.InventoryBackend.repository.ProductoPrecioRepository;
 
@@ -20,8 +21,8 @@ public class ProductoPrecioController {
   private ProductoPrecioRepository productoPrecioRepository;
 
   @GetMapping
-  public List<ProductoPrecio> getAll() {
-      return productoPrecioRepository.findAll();
+  public List<ProductoPrecioDTO> getAll() {
+    return productoPrecioRepository.getAll();
   }
 
   @GetMapping("/{productoId}/{precio}")

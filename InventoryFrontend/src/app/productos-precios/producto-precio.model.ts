@@ -6,4 +6,6 @@ export interface ProductoPrecio {
   fechaCreacion: Date;
   fechaModificacion: Date;
   activo: boolean;
+  productoNombre: string;
+  productoTipo: string;
 }
