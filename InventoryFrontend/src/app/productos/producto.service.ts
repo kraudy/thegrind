@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Producto } from './producto.model';
 
@@ -32,4 +32,9 @@ export class ProductoService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  search(q: string): Observable<Producto[]> {
+  const params = new HttpParams().set('q', q.trim());
+  return this.http.get<Producto[]>(`${this.apiUrl}/search`, { params });
+}
 }

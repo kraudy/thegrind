@@ -58,5 +58,17 @@ public class ProductoController {
       }
       return productoPrecioRepository.findByProductoIdOrderByFechaCreacionDesc(id);
     }
+
+    @GetMapping("/search")
+    public List<Producto> search(@RequestParam("q") String q, // @PathVariable("q") String q,
+                                 @RequestParam(value = "limit", defaultValue = "20") int limit) {
+        if (q == null || q.trim().isEmpty()) {
+          return List.of();
+      }
+      String term = q.trim();
+      List<Producto> results = productoRepository.searchByTerm(term.toLowerCase());
+      return results.stream().limit(limit).toList();
+    }
+
 }
 
