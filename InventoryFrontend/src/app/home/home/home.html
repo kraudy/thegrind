@@ -1,0 +1,135 @@
+<!-- home.component.html -->
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Título principal -->
+    <div class="text-center mb-16">
+      <h1 class="text-5xl font-bold text-gray-900 mb-4">
+        Sistema de Gestión
+      </h1>
+      <p class="text-xl text-gray-600">
+        Panel de administración
+      </p>
+    </div>
+
+    <!-- Grid de tarjetas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+
+      <!-- Clientes -->
+      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+        <div class="mb-8">
+          <div class="w-20 h-20 mx-auto bg-indigo-100 rounded-full flex items-center justify-center">
+            <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0A5.002 5.002 0 019 5c0-1.657-.794-3-2-3s-2 1.343-2 3c0 1.657 1.343 3 3 3z"></path>
+            </svg>
+          </div>
+        </div>
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Clientes</h2>
+        <p class="text-gray-600 mb-8">Crear y gestionar información de los clientes</p>
+        <div class="space-y-4">
+          <a routerLink="clientes/new"
+             class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
+            Crear Nuevo Cliente
+          </a>
+          <a routerLink="clientes"
+             class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">
+            Ver Lista de Clientes
+          </a>
+        </div>
+      </div>
+
+      <!-- Órdenes -->
+      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+        <div class="mb-8">
+          <div class="w-20 h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center">
+            <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+          </div>
+        </div>
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Órdenes</h2>
+        <p class="text-gray-600 mb-8">Registra y administra órdenes de los clientes</p>
+        <div class="space-y-4">
+          <a routerLink="/ordenes/new"
+             class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
+            Crear Nueva Orden
+          </a>
+          <a routerLink="/ordenes"
+             class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">
+            Ver Lista de Órdenes
+          </a>
+        </div>
+      </div>
+
+      <!-- Productos -->
+      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+        <div class="mb-8">
+          <div class="w-20 h-20 mx-auto bg-purple-100 rounded-full flex items-center justify-center">
+            <svg class="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+          </div>
+        </div>
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Productos</h2>
+        <p class="text-gray-600 mb-8">Administra catálogo de productos</p>
+        <div class="space-y-4">
+          <a routerLink="/productos/new"
+             class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
+            Crear Nuevo Producto
+          </a>
+          <a routerLink="/productos"
+             class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">
+            Ver Catálogo de Productos
+          </a>
+        </div>
+      </div>
+
+      <!-- Tipos de Productos -->
+      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+        <div class="mb-8">
+          <div class="w-20 h-20 mx-auto bg-blue-100 rounded-full flex items-center justify-center">
+            <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 21a4 4 0 004-4V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4z"></path>
+            </svg>
+          </div>
+        </div>
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Tipos de Productos</h2>
+        <p class="text-gray-600 mb-8">Administrar tipos de productos</p>
+        <div class="space-y-4">
+          <a routerLink="/productos-tipos/new"
+             class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
+            Crear Nuevo Tipo
+          </a>
+          <a routerLink="/productos-tipos"
+             class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">
+            Ver Tipos de Productos
+          </a>
+        </div>
+      </div>
+
+      <!-- Precios de Productos -->
+      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+        <div class="mb-8">
+          <div class="w-20 h-20 mx-auto bg-orange-100 rounded-full flex items-center justify-center">
+            <svg class="w-10 h-10 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+            </svg>
+          </div>
+        </div>
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Precios de Productos</h2>
+        <p class="text-gray-600 mb-8">Gestionar precios de productos</p>
+        <div class="space-y-4">
+          <a routerLink="/productos-precios/new"
+             class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
+            Crear Nuevo Precio
+          </a>
+          <a routerLink="/productos-precios"
+             class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">
+            Ver Lista de Precios
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

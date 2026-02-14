@@ -119,6 +119,9 @@ ng generate service productos-tipos/producto-tipo
 ng generate component productos-precios/producto-precio-list
 ng generate component productos-precios/producto-precio-form
 ng generate service productos-precios/producto-precio
+
+ng generate component home/home
+ng generate service home/home
 ```
 
 Install Tailwind

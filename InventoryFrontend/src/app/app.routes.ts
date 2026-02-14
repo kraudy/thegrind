@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 
+import { HomeComponent } from './home/home/home.component';
+
 import { ProductoListComponent } from './productos/producto-list/producto-list.component';
 import { ProductoFormComponent } from './productos/producto-form/producto-form.component';
 
@@ -16,7 +18,7 @@ import { ProductoPrecioListComponent } from './productos-precios/producto-precio
 import { ProductoPrecioFormComponent } from './productos-precios/producto-precio-form/producto-precio-form.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/ordenes', pathMatch: 'full' }, // Change this for landing page
+  { path: '', component: HomeComponent }, 
 
   { path: 'productos', component: ProductoListComponent },
   { path: 'productos/new', component: ProductoFormComponent },
