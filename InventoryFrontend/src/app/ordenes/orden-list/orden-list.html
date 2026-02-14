@@ -27,25 +27,30 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr *ngFor="let orden of ordenes" class="hover:bg-gray-50 transition">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ orden.id }}</td>
+          <tr *ngFor="let orden of ordenes" class="hover:bg-gray-50 transition cursor-pointer">
+            <!-- Hacer el ID clickable para ir a detalles -->
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <a [routerLink]="['/ordenes-detalle', orden.id]"
+                class="text-indigo-600 hover:text-indigo-900 hover:underline">
+                {{ orden.id }}
+              </a>
+            </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ orden.clienteNombre }}</td>
             <td class="px-6 py-4 whitespace-nowrap">
               <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                  [ngClass]="{
-                    'bg-blue-100 text-blue-800': orden.estado.toLowerCase() === 'recibida',
-                    'bg-yellow-100 text-yellow-800': orden.estado.toLowerCase() === 'preparada',
-                    'bg-green-100 text-green-800': orden.estado.toLowerCase() === 'despachada',
-                    'bg-red-100 text-red-800': orden.estado.toLowerCase() === 'cancelada',
-                    'bg-gray-100 text-gray-800': orden.estado.toLowerCase() === 'pendiente'
-                  }">
-              {{ orden.estado | uppercase }}
-            </span>
+                    [ngClass]="{
+                      'bg-blue-100 text-blue-800': orden.estado.toLowerCase() === 'recibida',
+                      'bg-yellow-100 text-yellow-800': orden.estado.toLowerCase() === 'preparada',
+                      'bg-green-100 text-green-800': orden.estado.toLowerCase() === 'despachada',
+                      'bg-red-100 text-red-800': orden.estado.toLowerCase() === 'cancelada',
+                      'bg-gray-100 text-gray-800': orden.estado.toLowerCase() === 'pendiente'
+                    }">
+                {{ orden.estado | uppercase }}
+              </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ orden.totalProductos }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ orden.totalMonto | number:'1.2-2' }}</td>
             
-            <!-- Fechas con hora -->
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
               {{ orden.fechaCreacion ? (orden.fechaCreacion | date:'dd/MM/yyyy HH:mm') : '-' }}
             </td>
@@ -56,11 +61,16 @@
               {{ orden.fechaPreparada ? (orden.fechaPreparada | date:'dd/MM/yyyy HH:mm') : '-' }}
             </td>
 
-
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-4">
+              <a [routerLink]="['/ordenes-detalle', orden.id]"
+                class="text-green-600 hover:text-green-900 font-medium">
+                Detalles
+              </a>
               <a [routerLink]="['/ordenes', orden.id, 'edit']"
-                 class="text-indigo-600 hover:text-indigo-900 font-medium">Editar</a>
-              <button (click)="deleteOrden(orden.id)"
+                class="text-indigo-600 hover:text-indigo-900 font-medium">
+                Editar
+              </a>
+              <button (click)="$event.stopPropagation(); deleteOrden(orden.id)"
                       class="text-red-600 hover:text-red-900 font-medium">
                 Eliminar
               </button>

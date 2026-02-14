@@ -9,6 +9,8 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -30,11 +32,13 @@ public class OrdenDetalle {
   private Long idOrdenDetalle;
 
   // ================== Relaciones con MapsId ==================
+  @JsonIgnore
   @ManyToOne(fetch = FetchType.LAZY)
   @MapsId("idOrden")
   @JoinColumn(name = "id_orden", nullable = false)
   private Orden orden;
 
+  @JsonIgnore
   @ManyToOne(fetch = FetchType.LAZY)
   @MapsId("idProducto")
   @JoinColumn(name = "id_producto", nullable = false)

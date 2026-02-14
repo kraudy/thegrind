@@ -8,6 +8,9 @@ import { ProductoFormComponent } from './productos/producto-form/producto-form.c
 import { OrdenListComponent } from './ordenes/orden-list/orden-list.component';
 import { OrdenFormComponent } from './ordenes/orden-form/orden-form.component';
 
+import { OrdenDetalleListComponent } from './ordenes-detalle/orden-detalle-list/orden-detalle-list.component';
+import { OrdenDetalleFormComponent } from './ordenes-detalle/orden-detalle-form/orden-detalle-form.component';
+
 import { ClienteListComponent } from './clientes/cliente-list/cliente-list.component';
 import { ClienteFormComponent } from './clientes/cliente-form/cliente-form.component';
 
@@ -35,6 +38,10 @@ export const routes: Routes = [
   { path: 'ordenes', component: OrdenListComponent },
   { path: 'ordenes/new', component: OrdenFormComponent },
   { path: 'ordenes/:id/edit', component: OrdenFormComponent },
+
+  { path: 'ordenes-detalle/:ordenId', component: OrdenDetalleListComponent },
+  { path: 'ordenes-detalle/:ordenId/new', component: OrdenDetalleFormComponent },
+  { path: 'ordenes-detalle/:ordenId/:idOrdenDetalle/:idProducto/edit', component: OrdenDetalleFormComponent },
 
   { path: 'clientes', component: ClienteListComponent },
   { path: 'clientes/new', component: ClienteFormComponent },
