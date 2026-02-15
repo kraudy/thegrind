@@ -31,8 +31,8 @@ public class OrdenController {
   }
 
   @GetMapping("/{id}")
-  public Orden getById(@PathVariable Long id) {
-    return ordenRepository.findById(id).orElse(null);
+  public OrdenDTO getById(@PathVariable Long id) {
+    return ordenRepository.getOrdenById(id);
   }
 
   @PostMapping

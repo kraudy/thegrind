@@ -47,12 +47,14 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
     this.route.paramMap.subscribe(params => {
       const ordenIdStr = params.get('ordenId');
       if (!ordenIdStr) {
+        console.log('[OrdenDetalleList] No ordenId in route params');
         this.orden = undefined;
         this.ordenDetalles = [];
         return;
       }
 
       const ordenId = Number(ordenIdStr);
+      console.log('[OrdenDetalleList] Loading orden with id from route:', ordenId);
 
       this.ordenService.getById(ordenId).subscribe({
         next: (orden) => {
