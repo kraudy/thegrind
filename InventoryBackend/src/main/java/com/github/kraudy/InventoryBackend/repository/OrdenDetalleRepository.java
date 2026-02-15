@@ -40,16 +40,16 @@ public interface OrdenDetalleRepository extends JpaRepository<OrdenDetalle, Orde
   @Modifying
   @Transactional  // Required for DML operations
   @Query(value = """
-      INSERT INTO orden_detalle (
-          id_orden, id_producto, id_orden_detalle,
-          cantidad, precio_unitario, subtotal,
-          fecha_creacion, fecha_modificacion
-      ) VALUES (
-          :idOrden, :idProducto, (SELECT COALESCE(MAX(id_orden_detalle),0) + 1 FROM orden_detalle WHERE id_orden = :idOrden),
-          :cantidad, :precioUnitario, :subtotal,
-          CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-      )
-      """, nativeQuery = true)
+    INSERT INTO orden_detalle (
+        id_orden, id_producto, id_orden_detalle,
+        cantidad, precio_unitario, subtotal,
+        fecha_creacion, fecha_modificacion
+    ) VALUES (
+        :idOrden, :idProducto, (SELECT COALESCE(MAX(id_orden_detalle),0) + 1 FROM orden_detalle WHERE id_orden = :idOrden),
+        :cantidad, :precioUnitario, :subtotal,
+        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+    )
+  """, nativeQuery = true)
   void insertDetalle(
       Long idOrden,
       Long idProducto,
