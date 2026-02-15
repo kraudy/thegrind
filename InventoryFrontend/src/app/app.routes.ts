@@ -45,5 +45,5 @@ export const routes: Routes = [
 
   { path: 'clientes', component: ClienteListComponent },
   { path: 'clientes/new', component: ClienteFormComponent },
-  { path: 'clientes/:productoId/:precio/edit', component: ClienteFormComponent }
+  { path: 'clientes/:id/edit', component: ClienteFormComponent }
 ];

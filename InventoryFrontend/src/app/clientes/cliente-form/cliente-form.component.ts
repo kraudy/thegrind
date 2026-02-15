@@ -38,6 +38,7 @@ export class ClienteFormComponent implements OnChanges, OnInit{
 
   ngOnInit(): void {
     if (!this.cliente) {
+      console.log('[ClienteForm] no cliente provided', this.cliente);
       this.resetForm();
       this.isEdit = false;
     }

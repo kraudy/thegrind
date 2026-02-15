@@ -26,7 +26,7 @@
                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-50">
           </div>
 
-          <!-- Número de línea (solo visible en edición, solo lectura) -->
+          <!-- Número de línea (solo visible en edición) -->
           <div *ngIf="isEdit">
             <label for="idOrdenDetalle" class="block text-sm font-medium text-gray-700 mb-2">
               Número de Línea
@@ -39,18 +39,46 @@
                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-50">
           </div>
 
-          <!-- ID Producto -->
+          <!-- PRODUCTO (ahora con búsqueda backend como en ProductoPrecioForm) -->
           <div class="md:col-span-2">
-            <label for="idProducto" class="block text-sm font-medium text-gray-700 mb-2">
-              ID Producto <span class="text-red-600">*</span>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Producto <span class="text-red-600">*</span>
             </label>
-            <input id="idProducto"
-                   type="number"
-                   [(ngModel)]="formOrdenDetalle.idProducto"
-                   name="idProducto"
-                   required
-                   min="1"
-                   class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+
+            <!-- Modo creación: búsqueda con autocomplete -->
+            <div *ngIf="!isEdit; else editModeProducto">
+              <input type="text"
+                     [(ngModel)]="searchProducto"
+                     (ngModelChange)="onSearchChange($event)"
+                     name="searchProducto"
+                     placeholder="Escribe nombre o ID del producto..."
+                     class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+
+              <!-- Lista de sugerencias -->
+              <div *ngIf="productosFiltrados.length > 0" 
+                   class="mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+                <div *ngFor="let p of productosFiltrados" 
+                     (click)="seleccionarProducto(p)"
+                     class="px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b border-gray-100 last:border-0 flex justify-between items-center">
+                  <div>
+                    <span class="font-semibold text-gray-900">{{ p.id }}</span>
+                    <span class="ml-3 text-gray-700">{{ p.nombre }}</span>
+                  </div>
+                  <span class="text-xs text-gray-500">{{ p.tipoProducto }}</span>
+                </div>
+              </div>
+
+              <!-- Campo oculto para el ID -->
+              <input type="hidden" [(ngModel)]="formOrdenDetalle.idProducto" name="idProducto" required>
+            </div>
+
+            <!-- Modo edición: producto fijo (readonly) -->
+            <ng-template #editModeProducto>
+              <input type="text"
+                     [value]="searchProducto || 'Cargando producto...'"
+                     disabled
+                     class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-50 cursor-not-allowed">
+            </ng-template>
           </div>
 
           <!-- Cantidad -->
@@ -71,21 +99,28 @@
 
           <!-- Precio Unitario -->
           <div>
-            <label for="precioUnitario" class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
               Precio Unitario <span class="text-red-600">*</span>
             </label>
-            <input id="precioUnitario"
-                   type="number"
-                   step="0.01"
-                   [(ngModel)]="formOrdenDetalle.precioUnitario"
-                   name="precioUnitario"
-                   required
-                   min="0"
-                   (ngModelChange)="updateSubtotal()"
-                   class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            <select [(ngModel)]="formOrdenDetalle.precioUnitario"
+                    name="precioUnitario"
+                    required
+                    (ngModelChange)="updateSubtotal()"
+                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+              
+              <option [ngValue]="null">Selecciona precio...</option>
+              
+              <option *ngFor="let precio of preciosDisponibles" 
+                      [ngValue]="precio.precio">
+                {{ precio.precio | number:'1.2-2' }} — {{ precio.descripcion }}
+                <span *ngIf="precio.cantidadRequerida > 0" class="text-xs text-amber-600">
+                  (mín. {{ precio.cantidadRequerida }})
+                </span>
+              </option>
+            </select>
           </div>
 
-          <!-- Subtotal (calculado automáticamente, solo lectura) -->
+          <!-- Subtotal -->
           <div>
             <label for="subtotal" class="block text-sm font-medium text-gray-700 mb-2">
               Subtotal

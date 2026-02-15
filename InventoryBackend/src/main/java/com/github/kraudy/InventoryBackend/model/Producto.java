@@ -44,7 +44,7 @@ public class Producto {
   private LocalDateTime fechaModificacion;
 
   @Column(nullable = false)
-  private boolean activo;
+  private boolean activo = true;
 
   // === One-to-many relationship with ProductoPrecio ===
   // Deleting a product will delete all its prices

@@ -5,9 +5,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -32,13 +34,15 @@ public class OrdenDetalle {
   private Long idOrdenDetalle;
 
   // ================== Relaciones con MapsId ==================
-  @JsonIgnore
+  //@JsonIgnore
+  @JsonProperty(access = Access.WRITE_ONLY)
   @ManyToOne(fetch = FetchType.LAZY)
   @MapsId("idOrden")
   @JoinColumn(name = "id_orden", nullable = false)
   private Orden orden;
 
-  @JsonIgnore
+  //@JsonIgnore
+  @JsonProperty(access = Access.WRITE_ONLY)
   @ManyToOne(fetch = FetchType.LAZY)
   @MapsId("idProducto")
   @JoinColumn(name = "id_producto", nullable = false)

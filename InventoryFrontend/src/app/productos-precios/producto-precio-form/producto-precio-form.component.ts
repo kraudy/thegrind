@@ -67,13 +67,6 @@ export class ProductoPrecioFormComponent  implements OnChanges, OnInit {
     const precio = parseFloat(precioParam); // BigDecimal → number
     if (isNaN(productoId) || isNaN(precio)) return;
 
-
-    //const idParam = this.route.snapshot.paramMap.get('id');
-    //if (!idParam) {return;}
-    //const id = Number(idParam);
-    //if (isNaN(id)) {return;}
-    //this.productoPrecioId = id;
-
     this.productoPrecioService.getByComposite(productoId, precio).subscribe({
       next: (data) => {
         this.formProductoPrecio = { ...data };
