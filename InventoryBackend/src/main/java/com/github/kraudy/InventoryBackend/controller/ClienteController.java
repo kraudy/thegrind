@@ -40,4 +40,11 @@ public class ClienteController {
   public void delete(@PathVariable Long id) {
     clienteRepository.deleteById(id);
   }
+
+  @GetMapping("/buscar")
+  public List<Cliente> search(@RequestParam("termino") String termino) {
+    if (termino == null || termino.trim().isEmpty()) return List.of();
+    String term = termino.trim();
+    return clienteRepository.searchByTerm(term);
+  }
 }

@@ -34,7 +34,7 @@ export class ProductoService {
   }
 
   search(q: string): Observable<Producto[]> {
-  const params = new HttpParams().set('q', q.trim());
-  return this.http.get<Producto[]>(`${this.apiUrl}/search`, { params });
-}
+    const params = new HttpParams().set('q', q.trim());
+    return this.http.get<Producto[]>(`${this.apiUrl}/search`, { params });
+  }
 }

@@ -70,13 +70,4 @@ public class Orden {
   @OneToMany(mappedBy = "orden", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<OrdenDetalle> detalles = new ArrayList<>();
 
-  @JsonProperty("idCliente")
-  public Long getIdCliente() {
-    return cliente.getId();
-  }
-
-  @JsonProperty("clienteNombre")
-  public String getClienteNombre() {
-    return cliente.getNombre() + " " + cliente.getApellido();
-  }
 }

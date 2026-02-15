@@ -2,6 +2,7 @@ package com.github.kraudy.InventoryBackend.controller;
 
 import com.github.kraudy.InventoryBackend.model.Cliente;
 import com.github.kraudy.InventoryBackend.model.Orden;
+import com.github.kraudy.InventoryBackend.model.OrdenDTO;
 
 import com.github.kraudy.InventoryBackend.repository.ClienteRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
@@ -25,8 +26,8 @@ public class OrdenController {
   private ClienteRepository clienteRepository;
 
   @GetMapping
-  public List<Orden> getAll() {
-    return ordenRepository.findAll();
+  public List<OrdenDTO> getAll() {
+    return ordenRepository.getAll();
   }
 
   @GetMapping("/{id}")

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { Cliente } from './cliente.model';
@@ -32,5 +32,10 @@ export class ClienteService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  search(termino: string): Observable<Cliente[]> {
+    const params = new HttpParams().set('termino', termino.trim());
+    return this.http.get<Cliente[]>(`${this.apiUrl}/buscar`, { params });
   }
 }
