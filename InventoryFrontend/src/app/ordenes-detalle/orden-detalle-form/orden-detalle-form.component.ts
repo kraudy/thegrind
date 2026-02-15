@@ -230,14 +230,12 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
 
     } else {
       const createPayload = {
-        orden: { id: this.formOrdenDetalle.idOrden },
-        producto: { id: this.formOrdenDetalle.idProducto },
         cantidad: this.formOrdenDetalle.cantidad,
         precioUnitario: this.formOrdenDetalle.precioUnitario,
         subtotal: this.formOrdenDetalle.subtotal
       };
 
-      this.ordenDetalleService.create(createPayload as any).subscribe({
+      this.ordenDetalleService.create(this.formOrdenDetalle.idOrden!, this.formOrdenDetalle.idProducto!, createPayload).subscribe({
         next: () => {
           this.ordenDetalleSaved.emit();
           this.goBack();

@@ -33,7 +33,7 @@ export const routes: Routes = [
 
   { path: 'productos-precios', component: ProductoPrecioListComponent },
   { path: 'productos-precios/new', component: ProductoPrecioFormComponent },
-  { path: 'productos-precios/:id/edit', component: ProductoPrecioFormComponent },
+  { path: 'productos-precios/:productoId/:precio/edit', component: ProductoPrecioFormComponent },
 
   { path: 'ordenes', component: OrdenListComponent },
   { path: 'ordenes/new', component: OrdenFormComponent },

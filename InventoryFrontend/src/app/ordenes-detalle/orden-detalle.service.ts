@@ -32,8 +32,9 @@ export class OrdenDetalleService {
     return this.http.get<OrdenDetalle>(`${this.apiUrl}/${id}`);
   }
 
-  create(ordenDetalle: Partial<OrdenDetalle>): Observable<OrdenDetalle> {
-    return this.http.post<OrdenDetalle>(this.apiUrl, ordenDetalle);
+  //create(ordenDetalle: Partial<OrdenDetalle>): Observable<OrdenDetalle> {
+  create(idOrden: number, idProducto: number, ordenDetalle: Partial<OrdenDetalle>): Observable<OrdenDetalle> {
+    return this.http.post<OrdenDetalle>(`${this.apiUrl}/${idOrden}/${idProducto}`, ordenDetalle);
   }
 
   // Actualizar un detalle existente (por clave compuesta)

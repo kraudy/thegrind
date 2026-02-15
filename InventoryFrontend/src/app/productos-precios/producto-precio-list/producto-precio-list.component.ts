@@ -54,9 +54,10 @@ export class ProductoPrecioListComponent {
       this.selectedProductoPrecio = {...product};
     }
   
-    deleteProduct(id?: number): void {
-      if (id && confirm('¿Seguro desea eliminar?')){
-        this.productoPrecioService.delete(id).subscribe(() => this.loadProducts());
+    deleteProduct(producto: ProductoPrecio): void {
+      if (confirm('¿Seguro desea eliminar?')) {
+        this.productoPrecioService.deleteComposite(producto.productoId, producto.precio)
+          .subscribe(() => this.loadProducts());
       }
     }
 }

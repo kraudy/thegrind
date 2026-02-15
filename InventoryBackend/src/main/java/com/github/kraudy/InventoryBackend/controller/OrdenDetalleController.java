@@ -1,9 +1,15 @@
 package com.github.kraudy.InventoryBackend.controller;
 
+import java.math.BigDecimal;
+
 import com.github.kraudy.InventoryBackend.model.OrdenDetalle;
 import com.github.kraudy.InventoryBackend.model.OrdenDetalleDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenDetallePK;
+import com.github.kraudy.InventoryBackend.model.ProductoPrecio;
+import com.github.kraudy.InventoryBackend.model.ProductoPrecioPK;
+
 import com.github.kraudy.InventoryBackend.repository.OrdenDetalleRepository;
+import com.github.kraudy.InventoryBackend.repository.ProductoPrecioRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,14 +20,12 @@ import java.util.List;
 @RequestMapping("/api/ordenes-detalle")
 @CrossOrigin(origins = "http://localhost:4200")
 public class OrdenDetalleController {
+
   @Autowired
   private OrdenDetalleRepository ordenDetalleRepository;
 
-  // Obtener todos los detalles (de todas las órdenes)
-  @GetMapping
-  public List<OrdenDetalle> getAll() {
-    return ordenDetalleRepository.findAll();
-  }
+  @Autowired
+  private ProductoPrecioRepository productoPrecioRepository;
 
   // Obtener todos los detalles de una orden específica (recomendado para uso frecuente)
   @GetMapping("/por-orden/{idOrden}")
@@ -41,16 +45,20 @@ public class OrdenDetalleController {
   }
 
   // Crear un nuevo detalle
-  @PostMapping
-  public void create(@RequestBody OrdenDetalle ordenDetalle) {
-    if (ordenDetalle.getOrden() == null || ordenDetalle.getOrden().getId() == null) {
+  @PostMapping("/{idOrden}/{idProducto}")
+  public void create(
+      @PathVariable Long idOrden,
+      @PathVariable Long idProducto,
+      @RequestBody OrdenDetalle ordenDetalle) {
+
+    if (idOrden == null) {
         throw new IllegalArgumentException("El ID de la orden es obligatorio");
     }
-    if (ordenDetalle.getProducto() == null || ordenDetalle.getProducto().getId() == null) {
+    if (idProducto == null) {
         throw new IllegalArgumentException("El ID del producto es obligatorio");
     }
 
-    ordenDetalleRepository.insertDetalle(ordenDetalle.getOrden().getId(), ordenDetalle.getProducto().getId(), ordenDetalle.getCantidad(), ordenDetalle.getPrecioUnitario(), ordenDetalle.getSubtotal());
+    ordenDetalleRepository.insertDetalle(idOrden, idProducto, ordenDetalle.getCantidad(), ordenDetalle.getPrecioUnitario(), ordenDetalle.getSubtotal());
 
     return;
   }
@@ -69,15 +77,23 @@ public class OrdenDetalleController {
     OrdenDetalle existing = ordenDetalleRepository.findById(pk)
             .orElseThrow(() -> new RuntimeException("Detalle de orden no encontrado"));
 
-    // Solo actualizamos los campos mutables (cantidad, precio, subtotal)
-    // Ignoramos cualquier intento de cambiar la PK (orden, producto o número de línea)
+    // PK de precio del producto para validar que exista el precio antes de actualizar el detalle
+    ProductoPrecioPK pkPrecio = new ProductoPrecioPK(idProducto, ordenDetalleActualizado.getPrecioUnitario());
+
+    ProductoPrecio existingPrecio = productoPrecioRepository.findById(pkPrecio)
+            .orElseThrow(() -> new RuntimeException("Precio de producto no encontrado"));
+
+    // De existir, validamos que la cantidad del detalle cumpla con el requisito mínimo del precio
+    if (existingPrecio.getCantidadRequerida() > 0){
+      if (ordenDetalleActualizado.getCantidad() <= existingPrecio.getCantidadRequerida()) {
+        throw new RuntimeException("Para este precio, se necesita un minimo de " + existingPrecio.getCantidadRequerida() + " unidades del producto");
+      }
+    }
+    
     existing.setCantidad(ordenDetalleActualizado.getCantidad());
-    existing.setPrecioUnitario(ordenDetalleActualizado.getPrecioUnitario());
-    existing.setSubtotal(ordenDetalleActualizado.getSubtotal());
+    existing.setPrecioUnitario(existingPrecio.getPrecio());
+    existing.setSubtotal(existingPrecio.getPrecio().multiply(new BigDecimal(ordenDetalleActualizado.getCantidad())));
 
-    // Opcional: si quieres validar que el subtotal coincida con cálculo, puedes hacerlo aquí
-
-    // Guardamos la entidad existente (Hibernate actualizará solo los campos permitidos)
     return ordenDetalleRepository.save(existing);
   }
 

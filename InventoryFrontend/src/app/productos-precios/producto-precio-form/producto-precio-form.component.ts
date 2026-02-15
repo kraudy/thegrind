@@ -57,6 +57,7 @@ export class ProductoPrecioFormComponent  implements OnChanges, OnInit {
     if (!this.productoPrecio) { // If no id in route — ensure fresh form
       this.resetForm();
       this.isEdit = false;
+      console.log('[ProductoPrecioForm] no productoPrecio provided', this.productoPrecio);
     }
 
     const productoIdParam = this.route.snapshot.paramMap.get('productoId');
