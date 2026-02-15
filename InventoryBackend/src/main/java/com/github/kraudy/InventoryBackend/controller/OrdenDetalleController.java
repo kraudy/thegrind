@@ -1,6 +1,7 @@
 package com.github.kraudy.InventoryBackend.controller;
 
 import com.github.kraudy.InventoryBackend.model.OrdenDetalle;
+import com.github.kraudy.InventoryBackend.model.OrdenDetalleDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenDetallePK;
 import com.github.kraudy.InventoryBackend.repository.OrdenDetalleRepository;
 
@@ -24,8 +25,8 @@ public class OrdenDetalleController {
 
   // Obtener todos los detalles de una orden específica (recomendado para uso frecuente)
   @GetMapping("/por-orden/{idOrden}")
-  public List<OrdenDetalle> getByOrden(@PathVariable Long idOrden) {
-    return ordenDetalleRepository.findByIdOrden(idOrden);
+  public List<OrdenDetalleDTO> getByOrden(@PathVariable Long idOrden) {
+    return ordenDetalleRepository.getAllOrdenDetalle(idOrden);
   }
 
   // Obtener un detalle específico por clave compuesta
