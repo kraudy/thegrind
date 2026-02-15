@@ -42,7 +42,7 @@ public class OrdenDetalleController {
 
   // Crear un nuevo detalle
   @PostMapping
-  public OrdenDetalle create(@RequestBody OrdenDetalle ordenDetalle) {
+  public void create(@RequestBody OrdenDetalle ordenDetalle) {
     if (ordenDetalle.getOrden() == null || ordenDetalle.getOrden().getId() == null) {
         throw new IllegalArgumentException("El ID de la orden es obligatorio");
     }
@@ -50,21 +50,9 @@ public class OrdenDetalleController {
         throw new IllegalArgumentException("El ID del producto es obligatorio");
     }
 
-    Long idOrden = ordenDetalle.getOrden().getId();
+    ordenDetalleRepository.insertDetalle(ordenDetalle.getOrden().getId(), ordenDetalle.getProducto().getId(), ordenDetalle.getCantidad(), ordenDetalle.getPrecioUnitario(), ordenDetalle.getSubtotal());
 
-    List<OrdenDetalle> detallesExistentes = ordenDetalleRepository.findByIdOrden(idOrden);
-
-    long maxLinea = detallesExistentes.stream()
-        .mapToLong(OrdenDetalle::getIdOrdenDetalle)
-        .max()
-        .orElse(0L);
-
-    long siguienteLinea = maxLinea + 1;
-
-    ordenDetalle.setIdOrdenDetalle(siguienteLinea);
-
-    // JPA rellenará automáticamente los campos idOrden e idProducto vía @MapsId al guardar
-    return ordenDetalleRepository.save(ordenDetalle);
+    return;
   }
 
   // Actualizar un detalle existente
