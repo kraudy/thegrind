@@ -9,6 +9,7 @@ import com.github.kraudy.InventoryBackend.model.ProductoPrecio;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecioPK;
 
 import com.github.kraudy.InventoryBackend.repository.OrdenDetalleRepository;
+import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoPrecioRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ import java.util.List;
 @RequestMapping("/api/ordenes-detalle")
 @CrossOrigin(origins = "http://localhost:4200")
 public class OrdenDetalleController {
+
+  @Autowired
+  private OrdenRepository ordenRepository;
 
   @Autowired
   private OrdenDetalleRepository ordenDetalleRepository;
@@ -60,6 +64,9 @@ public class OrdenDetalleController {
 
     ordenDetalleRepository.insertDetalle(idOrden, idProducto, ordenDetalle.getCantidad(), ordenDetalle.getPrecioUnitario(), ordenDetalle.getSubtotal());
 
+    // Actualizar totales de la orden después de crear detalle
+    ordenRepository.updateOrdenTotales(idOrden, idProducto);
+
     return;
   }
 
@@ -94,7 +101,12 @@ public class OrdenDetalleController {
     existing.setPrecioUnitario(existingPrecio.getPrecio());
     existing.setSubtotal(existingPrecio.getPrecio().multiply(new BigDecimal(ordenDetalleActualizado.getCantidad())));
 
-    return ordenDetalleRepository.save(existing);
+    ordenDetalleRepository.save(existing);
+
+    // Actualizar totales de la orden después de insertar el detalle
+    ordenRepository.updateOrdenTotales(idOrden, idProducto);
+
+    return existing;
   }
 
   // Eliminar un detalle
@@ -106,5 +118,8 @@ public class OrdenDetalleController {
 
     OrdenDetallePK pk = new OrdenDetallePK(idOrden, idOrdenDetalle, idProducto);
     ordenDetalleRepository.deleteById(pk);
+
+    // Actualizar totales de la orden después de eliminar detalle
+    ordenRepository.updateOrdenTotales(idOrden, idProducto);
   }
 }
