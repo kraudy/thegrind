@@ -1,7 +1,7 @@
 package com.github.kraudy.InventoryBackend.repository;
 
+import com.github.kraudy.InventoryBackend.dto.OrdenDTO;
 import com.github.kraudy.InventoryBackend.model.Orden;
-import com.github.kraudy.InventoryBackend.model.OrdenDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface OrdenRepository extends JpaRepository<Orden, Long> {
   @Query("""
-    SELECT new com.github.kraudy.InventoryBackend.model.OrdenDTO(
+    SELECT new com.github.kraudy.InventoryBackend.dto.OrdenDTO(
         ord.id,
         ord.cliente.id,                                       
         CONCAT(cte.nombre, ' ', cte.apellido),                
@@ -34,7 +34,7 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
   List<OrdenDTO> getAll();
 
   @Query("""
-    SELECT new com.github.kraudy.InventoryBackend.model.OrdenDTO(
+    SELECT new com.github.kraudy.InventoryBackend.dto.OrdenDTO(
         ord.id,
         ord.cliente.id,                                       
         CONCAT(cte.nombre, ' ', cte.apellido),                

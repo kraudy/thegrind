@@ -1,6 +1,6 @@
 package com.github.kraudy.InventoryBackend.repository;
 
-import com.github.kraudy.InventoryBackend.model.OrdenDetalleDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenDetalleDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenDetalle;
 import com.github.kraudy.InventoryBackend.model.OrdenDetallePK;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,7 +19,7 @@ public interface OrdenDetalleRepository extends JpaRepository<OrdenDetalle, Orde
   List<OrdenDetalle> findByIdOrden(Long idOrden);
 
   @Query("""
-    SELECT new com.github.kraudy.InventoryBackend.model.OrdenDetalleDTO(
+    SELECT new com.github.kraudy.InventoryBackend.dto.OrdenDetalleDTO(
         odet.idOrden,
         odet.idProducto,
         odet.producto.nombre,

@@ -139,11 +139,37 @@ Create postcss.config.js file
 Update InventoryFrontend/src/styles.css
 ```
 
+Install nginx
+```bash
+sudo apt install nginx
+sudo systemctl start nginx
+sudo systemctl enable nginx
+
+# config file
+sudo nano /etc/nginx/sites-available/thegrind
+
+# activate it
+sudo ln -s /etc/nginx/sites-available/thegrind /etc/nginx/sites-enabled/
+sudo nginx -t  # Test config
+sudo systemctl restart nginx # start nginx proc
+
+# access front-end at http://localhost
+```
+
 Start both
 ```bash
 # Backend
+# for prod
+cd InventoryBackend
+./mvnw clean package
+java -jar target/*.jar 
+# for dev
 ./mvnw clean spring-boot:run
+
 # Frontend
+# prod
+ng build --configuration production
+
 ng serve --proxy-config proxy.conf.json
 
 # show process listeingn

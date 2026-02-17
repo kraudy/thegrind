@@ -1,9 +1,8 @@
 package com.github.kraudy.InventoryBackend.controller;
 
+import com.github.kraudy.InventoryBackend.dto.OrdenDTO;
 import com.github.kraudy.InventoryBackend.model.Cliente;
 import com.github.kraudy.InventoryBackend.model.Orden;
-import com.github.kraudy.InventoryBackend.model.OrdenDTO;
-
 import com.github.kraudy.InventoryBackend.repository.ClienteRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
 

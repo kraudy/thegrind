@@ -1,4 +1,4 @@
-package com.github.kraudy.InventoryBackend.model;
+package com.github.kraudy.InventoryBackend.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

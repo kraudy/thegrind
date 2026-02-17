@@ -2,8 +2,8 @@ package com.github.kraudy.InventoryBackend.controller;
 
 import java.math.BigDecimal;
 
+import com.github.kraudy.InventoryBackend.dto.OrdenDetalleDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenDetalle;
-import com.github.kraudy.InventoryBackend.model.OrdenDetalleDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenDetallePK;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecio;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecioPK;

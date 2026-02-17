@@ -1,7 +1,7 @@
 package com.github.kraudy.InventoryBackend.repository;
 
+import com.github.kraudy.InventoryBackend.dto.ProductoPrecioDTO;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecio;
-import com.github.kraudy.InventoryBackend.model.ProductoPrecioDTO;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecioPK;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,7 +17,7 @@ public interface ProductoPrecioRepository extends JpaRepository<ProductoPrecio, 
     List<ProductoPrecio> getAllProductoPrecios(Long productoId);
 
     @Query("""
-      SELECT new com.github.kraudy.InventoryBackend.model.ProductoPrecioDTO(
+      SELECT new com.github.kraudy.InventoryBackend.dto.ProductoPrecioDTO(
           pp.productoId, pp.precio, pp.descripcion, pp.cantidadRequerida,
           pp.fechaCreacion, pp.fechaModificacion, pp.activo,
           prod.nombre, prod.tipoProducto

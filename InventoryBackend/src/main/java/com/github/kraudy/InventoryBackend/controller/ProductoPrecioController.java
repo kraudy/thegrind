@@ -1,7 +1,7 @@
 package com.github.kraudy.InventoryBackend.controller;
 
+import com.github.kraudy.InventoryBackend.dto.ProductoPrecioDTO;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecio;
-import com.github.kraudy.InventoryBackend.model.ProductoPrecioDTO;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecioPK;
 import com.github.kraudy.InventoryBackend.repository.ProductoPrecioRepository;
 
