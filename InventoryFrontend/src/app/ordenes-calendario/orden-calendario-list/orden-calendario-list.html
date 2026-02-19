@@ -19,39 +19,39 @@
       <span class="text-indigo-600">📅</span> Semana Actual
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
-      <div *ngFor="let day of currentWeek" class="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
+      <div *ngFor="let day of thisWeekDays" class="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
         
         <!-- Cabecera del día -->
         <div class="p-4 text-center border-b bg-gray-50">
-          <div class="text-xs font-medium text-gray-500">{{ formatDayName(day) }}</div>
-          <div class="text-2xl font-bold text-gray-900">{{ formatFullDate(day) }}</div>
+          <div class="text-xs font-medium text-gray-500">{{ formatDayName(day.date) }}</div>
+          <div class="text-2xl font-bold text-gray-900">{{ formatFullDate(day.date) }}</div>
         </div>
 
         <!-- Cantidad de órdenes -->
-        <div [class]="getLoadColor(getOrdersForDay(day).length) + ' p-4 text-center border-b'">
-          <span class="text-4xl font-bold">{{ getOrdersForDay(day).length }}</span>
+        <div [class]="getLoadColor(day.orderCount) + ' p-4 text-center border-b'">
+          <span class="text-4xl font-bold">{{ day.orderCount }}</span>
           <span class="block text-xs mt-1">órdenes</span>
         </div>
 
         <!-- Lista de órdenes programadas -->
         <div class="p-4 min-h-[280px] space-y-3 overflow-auto">
-          <div *ngFor="let orden of getOrdersForDay(day)" 
+          <div *ngFor="let ordenCalendario of day.orders" 
                class="bg-white border border-gray-200 rounded-xl p-3 hover:shadow transition cursor-pointer"
-               [routerLink]="['/ordenes', orden.idOrden]">
+               [routerLink]="['/ordenes-detalle', ordenCalendario.idOrden]">
             <div class="flex justify-between items-start">
               <div>
-                <div class="font-semibold text-indigo-700">#{{ orden.idOrden }}</div>
+                <div class="font-semibold text-indigo-700">#{{ ordenCalendario.idOrden }}</div>
                 <div class="text-xs text-gray-500 mt-1">
-                  {{ formatTime(orden.horaTrabajo, orden.minutoTrabajo) }}
+                  {{ formatTime(ordenCalendario.horaTrabajo, ordenCalendario.minutoTrabajo) }}
                 </div>
               </div>
               <div class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded">
-                {{ orden.usuarioCreacion }}
+                {{ ordenCalendario.usuarioCreacion }}
               </div>
             </div>
           </div>
           
-          <div *ngIf="getOrdersForDay(day).length === 0" 
+          <div *ngIf="day.orders.length === 0" 
                class="text-center text-gray-400 py-10 text-sm">
             Sin órdenes programadas
           </div>
@@ -59,7 +59,7 @@
 
         <!-- BOTÓN QUE ABRE EL FORMULARIO PARA ESTE DÍA -->
         <div class="p-4 border-t bg-gray-50">
-          <button (click)="goToScheduleDay(day)"
+          <button (click)="goToScheduleDay(day.date)"
                   class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -77,39 +77,39 @@
       <span class="text-indigo-600">📅</span> Semana Siguiente
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
-      <div *ngFor="let day of nextWeek" class="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
+      <div *ngFor="let day of nextWeekDays" class="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
         
         <!-- Cabecera del día -->
         <div class="p-4 text-center border-b bg-gray-50">
-          <div class="text-xs font-medium text-gray-500">{{ formatDayName(day) }}</div>
-          <div class="text-2xl font-bold text-gray-900">{{ formatFullDate(day) }}</div>
+          <div class="text-xs font-medium text-gray-500">{{ formatDayName(day.date) }}</div>
+          <div class="text-2xl font-bold text-gray-900">{{ formatFullDate(day.date) }}</div>
         </div>
 
         <!-- Cantidad de órdenes -->
-        <div [class]="getLoadColor(getOrdersForDay(day).length) + ' p-4 text-center border-b'">
-          <span class="text-4xl font-bold">{{ getOrdersForDay(day).length }}</span>
+        <div [class]="getLoadColor(day.orderCount) + ' p-4 text-center border-b'">
+          <span class="text-4xl font-bold">{{ day.orderCount }}</span>
           <span class="block text-xs mt-1">órdenes</span>
         </div>
 
         <!-- Lista de órdenes programadas -->
         <div class="p-4 min-h-[280px] space-y-3 overflow-auto">
-          <div *ngFor="let orden of getOrdersForDay(day)" 
+          <div *ngFor="let ordenCalendario of day.orders" 
                class="bg-white border border-gray-200 rounded-xl p-3 hover:shadow transition cursor-pointer"
-               [routerLink]="['/ordenes', orden.idOrden]">
+               [routerLink]="['/ordenes-detalle', ordenCalendario.idOrden]">
             <div class="flex justify-between items-start">
               <div>
-                <div class="font-semibold text-indigo-700">#{{ orden.idOrden }}</div>
+                <div class="font-semibold text-indigo-700">#{{ ordenCalendario.idOrden }}</div>
                 <div class="text-xs text-gray-500 mt-1">
-                  {{ formatTime(orden.horaTrabajo, orden.minutoTrabajo) }}
+                  {{ formatTime(ordenCalendario.horaTrabajo, ordenCalendario.minutoTrabajo) }}
                 </div>
               </div>
               <div class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded">
-                {{ orden.usuarioCreacion }}
+                {{ ordenCalendario.usuarioCreacion }}
               </div>
             </div>
           </div>
 
-          <div *ngIf="getOrdersForDay(day).length === 0" 
+          <div *ngIf="day.orders.length === 0" 
                class="text-center text-gray-400 py-10 text-sm">
             Sin órdenes programadas
           </div>
@@ -117,7 +117,7 @@
 
         <!-- BOTÓN QUE ABRE EL FORMULARIO PARA ESTE DÍA -->
         <div class="p-4 border-t bg-gray-50">
-          <button (click)="goToScheduleDay(day)"
+          <button (click)="goToScheduleDay(day.date)"
                   class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />

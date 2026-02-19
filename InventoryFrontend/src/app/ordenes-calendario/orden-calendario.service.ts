@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { OrdenCalendario } from './orden-calendario.model';
+import { CalendarioDiaDTO } from './calendario-dia.model';
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +20,10 @@ export class OrdenCalendarioService {
 
   getById(idOrden: number): Observable<OrdenCalendario> {
     return this.http.get<OrdenCalendario>(`${this.apiUrl}/${idOrden}`);
+  }
+
+  getCalendario(): Observable<CalendarioDiaDTO[]> {
+    return this.http.get<CalendarioDiaDTO[]>(`${this.apiUrl}/calendario`);
   }
 
   create(ordenDetalle: Partial<OrdenCalendario>): Observable<OrdenCalendario> {

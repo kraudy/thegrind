@@ -5,13 +5,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.github.kraudy.InventoryBackend.dto.CalendarioDiaDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenCalendarioDTO;
 import com.github.kraudy.InventoryBackend.model.Orden;
 import com.github.kraudy.InventoryBackend.model.OrdenCalendario;
 import com.github.kraudy.InventoryBackend.repository.OrdenCalendarioRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/ordenes-calendario")
@@ -36,6 +40,28 @@ public class OrdenCalendarioController {
   @GetMapping("/por-fecha/{fecha}")
   public List<OrdenCalendarioDTO> getByFecha(@PathVariable String fecha) {
       return ordenCalendarioRepository.getByFecha(fecha);
+  }
+
+  @GetMapping("/calendario")
+  public List<CalendarioDiaDTO> getCalendarioSemanal() {
+    List<Object[]> rawDays = ordenCalendarioRepository.getCalendarDaysWithCountsRaw();
+    List<OrdenCalendarioDTO> allOrders = ordenCalendarioRepository.getOrdersInTwoWeeks();
+
+    // Group orders by date
+    Map<LocalDate, List<OrdenCalendarioDTO>> ordersByDate = allOrders.stream()
+            .collect(Collectors.groupingBy(OrdenCalendarioDTO::fecha));
+
+    return rawDays.stream().map(row -> {
+        LocalDate date = (LocalDate) row[0];
+        return new CalendarioDiaDTO(
+            date,
+            (String) row[1],
+            (String) row[2],
+            (String) row[3],
+            ((Number) row[4]).intValue(),
+            ordersByDate.getOrDefault(date, List.of())
+        );
+    }).toList();
   }
 
   @PostMapping

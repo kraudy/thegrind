@@ -1,6 +1,7 @@
 package com.github.kraudy.InventoryBackend.model;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -19,6 +20,9 @@ public class OrdenCalendario {
 
   @Column(nullable = false, columnDefinition = "TIMESTAMP")
   private LocalDateTime fechaTrabajo;
+
+  //@Column(nullable = false, columnDefinition = "TIMESTAMP")
+  //private LocalDate fecha;
 
   //@Column(nullable = false, columnDefinition = "INTEGER")
   //private int dia = 0;

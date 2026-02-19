@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 
 import { OrdenCalendario } from '../orden-calendario.model';
+import { CalendarioDiaDTO } from '../calendario-dia.model';
 import { OrdenCalendarioService } from '../orden-calendario.service';
 
 @Component({
@@ -15,70 +16,39 @@ import { OrdenCalendarioService } from '../orden-calendario.service';
   styleUrls: ['./orden-calendario-list.css'],
 })
 export class OrdenCalendarioListComponent implements OnInit {
-  currentWeek: Date[] = [];
-  nextWeek: Date[] = [];
 
-  scheduledByDay: { [key: string]: OrdenCalendario[] } = {}; // clave = YYYY-MM-DD
+  thisWeekDays: CalendarioDiaDTO[] = [];
+  nextWeekDays: CalendarioDiaDTO[] = [];
 
   constructor(
     private ordenCalendarioService: OrdenCalendarioService,
+    private cd: ChangeDetectorRef,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.generateWeeks();
     this.loadCalendario();
   }
 
-  private generateWeeks() {
-    const today = new Date();
-    const startCurrent = this.getMonday(today);
-
-    this.currentWeek = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(startCurrent);
-      d.setDate(d.getDate() + i);
-      return d;
-    });
-
-    const startNext = new Date(startCurrent);
-    startNext.setDate(startNext.getDate() + 7);
-
-    this.nextWeek = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(startNext);
-      d.setDate(d.getDate() + i);
-      return d;
-    });
-  }
-
-  private getMonday(d: Date): Date {
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // lunes
-    return new Date(d.setDate(diff));
-  }
-
   loadCalendario() {
-    this.ordenCalendarioService.getAll().subscribe({
+    this.ordenCalendarioService.getCalendario().subscribe({
       next: (data) => {
-        this.scheduledByDay = {};
-        data.forEach(item => {
-          const key = item.fecha; // YYYY-MM-DD que ya viene del backend
-          if (!this.scheduledByDay[key]) this.scheduledByDay[key] = [];
-          this.scheduledByDay[key].push(item);
-        });
+        this.thisWeekDays = data
+          .filter(d => d.weekLabel === 'this week')
+          .sort((a, b) => a.date.localeCompare(b.date));
+
+        this.nextWeekDays = data
+          .filter(d => d.weekLabel === 'next week')
+          .sort((a, b) => a.date.localeCompare(b.date));
+
+        this.cd.detectChanges();
       },
       error: (err) => console.error('Error cargando calendario', err)
     });
   }
-  
 
-  goToScheduleDay(date: Date): void {
-    const fechaStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
-    this.router.navigate(['/ordenes-calendario', fechaStr, 'new']);
-  }
-
-  getOrdersForDay(date: Date): OrdenCalendario[] {
-    const key = date.toISOString().split('T')[0];
-    return this.scheduledByDay[key] || [];
+  goToScheduleDay(dateStr: string): void {
+    this.router.navigate(['/ordenes-calendario', dateStr, 'new']);
   }
 
   getLoadColor(count: number): string {
@@ -88,11 +58,16 @@ export class OrdenCalendarioListComponent implements OnInit {
     return 'bg-red-100 text-red-700 border-red-200';
   }
 
-  formatDayName(date: Date): string {
+  // Safe date creation (prevents timezone shift)
+  formatDayName(dateStr: string): string {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     return date.toLocaleDateString('es-NI', { weekday: 'short' }).toUpperCase();
   }
 
-  formatFullDate(date: Date): string {
+  formatFullDate(dateStr: string): string {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     return date.toLocaleDateString('es-NI', { day: 'numeric', month: 'short' });
   }
 
