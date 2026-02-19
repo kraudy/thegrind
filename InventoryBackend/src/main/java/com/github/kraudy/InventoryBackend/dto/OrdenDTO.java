@@ -11,7 +11,7 @@ public record OrdenDTO(
   BigDecimal totalMonto,
   int totalProductos,
   LocalDateTime fechaCreacion,
-  LocalDateTime fechaEntrega,
+  LocalDateTime fechaVencimiento,
   LocalDateTime fechaPreparada,
   LocalDateTime fechaDespachada,
   LocalDateTime fechaModificacion,

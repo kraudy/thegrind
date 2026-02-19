@@ -1,0 +1,131 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="flex justify-between items-center mb-10">
+    <div>
+      <h1 class="text-4xl font-bold text-gray-900">Calendario de Producción</h1>
+      <p class="text-gray-600 mt-2">Semana actual y siguiente • Planifica la carga de trabajo</p>
+    </div>
+    <button (click)="loadCalendario()" 
+            class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl flex items-center gap-2 transition">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.058 11H1M12 3v2m0 16v2m9-9H15M10 11l-.707.707M18.364 18.364l-.707-.707" />
+      </svg>
+      Actualizar
+    </button>
+  </div>
+
+  <!-- SEMANA ACTUAL -->
+  <div class="mb-12">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-3">
+      <span class="text-indigo-600">📅</span> Semana Actual
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
+      <div *ngFor="let day of currentWeek" class="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
+        
+        <!-- Cabecera del día -->
+        <div class="p-4 text-center border-b bg-gray-50">
+          <div class="text-xs font-medium text-gray-500">{{ formatDayName(day) }}</div>
+          <div class="text-2xl font-bold text-gray-900">{{ formatFullDate(day) }}</div>
+        </div>
+
+        <!-- Cantidad de órdenes -->
+        <div [class]="getLoadColor(getOrdersForDay(day).length) + ' p-4 text-center border-b'">
+          <span class="text-4xl font-bold">{{ getOrdersForDay(day).length }}</span>
+          <span class="block text-xs mt-1">órdenes</span>
+        </div>
+
+        <!-- Lista de órdenes programadas -->
+        <div class="p-4 min-h-[280px] space-y-3 overflow-auto">
+          <div *ngFor="let orden of getOrdersForDay(day)" 
+               class="bg-white border border-gray-200 rounded-xl p-3 hover:shadow transition cursor-pointer"
+               [routerLink]="['/ordenes', orden.idOrden]">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="font-semibold text-indigo-700">#{{ orden.idOrden }}</div>
+                <div class="text-xs text-gray-500 mt-1">
+                  {{ formatTime(orden.horaTrabajo, orden.minutoTrabajo) }}
+                </div>
+              </div>
+              <div class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded">
+                {{ orden.usuarioCreacion }}
+              </div>
+            </div>
+          </div>
+          
+          <div *ngIf="getOrdersForDay(day).length === 0" 
+               class="text-center text-gray-400 py-10 text-sm">
+            Sin órdenes programadas
+          </div>
+        </div>
+
+        <!-- BOTÓN QUE ABRE EL FORMULARIO PARA ESTE DÍA -->
+        <div class="p-4 border-t bg-gray-50">
+          <button (click)="goToScheduleDay(day)"
+                  class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Programar órdenes para este día
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEMANA SIGUIENTE -->
+  <div>
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-3">
+      <span class="text-indigo-600">📅</span> Semana Siguiente
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
+      <div *ngFor="let day of nextWeek" class="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
+        
+        <!-- Cabecera del día -->
+        <div class="p-4 text-center border-b bg-gray-50">
+          <div class="text-xs font-medium text-gray-500">{{ formatDayName(day) }}</div>
+          <div class="text-2xl font-bold text-gray-900">{{ formatFullDate(day) }}</div>
+        </div>
+
+        <!-- Cantidad de órdenes -->
+        <div [class]="getLoadColor(getOrdersForDay(day).length) + ' p-4 text-center border-b'">
+          <span class="text-4xl font-bold">{{ getOrdersForDay(day).length }}</span>
+          <span class="block text-xs mt-1">órdenes</span>
+        </div>
+
+        <!-- Lista de órdenes programadas -->
+        <div class="p-4 min-h-[280px] space-y-3 overflow-auto">
+          <div *ngFor="let orden of getOrdersForDay(day)" 
+               class="bg-white border border-gray-200 rounded-xl p-3 hover:shadow transition cursor-pointer"
+               [routerLink]="['/ordenes', orden.idOrden]">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="font-semibold text-indigo-700">#{{ orden.idOrden }}</div>
+                <div class="text-xs text-gray-500 mt-1">
+                  {{ formatTime(orden.horaTrabajo, orden.minutoTrabajo) }}
+                </div>
+              </div>
+              <div class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded">
+                {{ orden.usuarioCreacion }}
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="getOrdersForDay(day).length === 0" 
+               class="text-center text-gray-400 py-10 text-sm">
+            Sin órdenes programadas
+          </div>
+        </div>
+
+        <!-- BOTÓN QUE ABRE EL FORMULARIO PARA ESTE DÍA -->
+        <div class="p-4 border-t bg-gray-50">
+          <button (click)="goToScheduleDay(day)"
+                  class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Programar órdenes para este día
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

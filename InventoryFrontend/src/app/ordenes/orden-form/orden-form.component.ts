@@ -46,7 +46,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
     creadaPor: '',
     totalMonto: 0,
     totalProductos: 0,
-    fechaEntrega: null,
+    fechaVencimiento: null,
     fechaPreparada: null,
     fechaDespachada: null
   };
@@ -135,7 +135,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
       creadaPor: '',
       totalMonto: 0,
       totalProductos: 0,
-      fechaEntrega: null,
+      fechaVencimiento: null,
       fechaPreparada: null,
       fechaDespachada: null
     };
@@ -178,7 +178,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
       creadaPor: this.formOrden.creadaPor ?? '',
       totalMonto: this.formOrden.totalMonto ?? 0,
       totalProductos: this.formOrden.totalProductos ?? 0,
-      fechaEntrega: this.formOrden.fechaEntrega,
+      fechaVencimiento: this.formOrden.fechaVencimiento,
       fechaPreparada: this.formOrden.fechaPreparada ?? null,
       fechaDespachada: this.formOrden.fechaDespachada ?? null
     };

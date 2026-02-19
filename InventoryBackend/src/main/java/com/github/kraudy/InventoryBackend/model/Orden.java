@@ -47,7 +47,7 @@ public class Orden {
   // Establecer fecha de entrega propuesta al momento de crear la orden, no puede ser nula.
   // Es necesaria para poder planificar la preparación y despacho de la orden.
   @Column(nullable = false, columnDefinition = "TIMESTAMP")
-  private LocalDateTime fechaEntrega;
+  private LocalDateTime fechaVencimiento;
 
   // Optional: set when order is prepared
   @Column(nullable = true, columnDefinition = "TIMESTAMP")

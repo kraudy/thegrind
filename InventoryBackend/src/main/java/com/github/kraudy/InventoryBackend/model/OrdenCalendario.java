@@ -34,14 +34,14 @@ public class OrdenCalendario {
   private LocalDateTime fechaCreacion;
 
   @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
-  private String usuarioCrea;
+  private String usuarioCreacion;
 
   @UpdateTimestamp
   @Column(nullable = false)
   private LocalDateTime fechaModificacion;
 
   @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
-  private String usuarioModifica;
+  private String usuarioModificacion;
 
   @JsonIgnore
   @ManyToOne

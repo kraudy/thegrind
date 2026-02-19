@@ -21,7 +21,7 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
         ord.totalMonto,
         ord.totalProductos,
         ord.fechaCreacion,
-        ord.fechaEntrega,
+        ord.fechaVencimiento,
         ord.fechaPreparada,
         ord.fechaDespachada,
         ord.fechaModificacion,
@@ -42,7 +42,7 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
         ord.totalMonto,
         ord.totalProductos,
         ord.fechaCreacion,
-        ord.fechaEntrega,
+        ord.fechaVencimiento,
         ord.fechaPreparada,
         ord.fechaDespachada,
         ord.fechaModificacion,
@@ -69,4 +69,25 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
       Long idOrden,
       Long idProducto
   );
+
+  @Query("""
+    SELECT new com.github.kraudy.InventoryBackend.dto.OrdenDTO(
+        ord.id,
+        ord.cliente.id,                                       
+        CONCAT(cte.nombre, ' ', cte.apellido),                
+        ord.creadaPor,
+        ord.totalMonto,
+        ord.totalProductos,
+        ord.fechaCreacion,
+        ord.fechaVencimiento,
+        ord.fechaPreparada,
+        ord.fechaDespachada,
+        ord.fechaModificacion,
+        ord.estado
+    )
+    FROM Orden ord JOIN ord.cliente cte
+    WHERE ord.estado = 'Pendiente'
+    ORDER BY ord.fechaVencimiento ASC
+  """)
+  List<OrdenDTO> getPendientes();
 }

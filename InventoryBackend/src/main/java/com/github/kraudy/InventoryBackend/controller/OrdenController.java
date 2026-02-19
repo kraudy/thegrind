@@ -34,6 +34,11 @@ public class OrdenController {
     return ordenRepository.getOrdenById(id);
   }
 
+  @GetMapping("/pendientes")
+  public List<OrdenDTO> getPendientes() {
+    return ordenRepository.getPendientes();
+  }
+
   @PostMapping
   public Orden create(@RequestBody Orden orden) {
     setClienteFromIdCliente(orden); // ← resolve cliente

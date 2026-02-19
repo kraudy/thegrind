@@ -13,9 +13,9 @@ public record OrdenCalendarioDTO(
   Integer horaTrabajo,
   Integer minutoTrabajo,
   LocalDateTime fechaCreacion,
-  String usuarioCrea,
+  String usuarioCreacion,
   LocalDateTime fechaModificacion,
-  String usuarioModifica
+  String usuarioModificacion
 
 
 ) { }
