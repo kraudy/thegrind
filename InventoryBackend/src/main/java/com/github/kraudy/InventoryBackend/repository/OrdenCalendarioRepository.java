@@ -14,16 +14,20 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
     SELECT
         cal.id_orden,
         cal.fecha_trabajo,
-        DATE(cal.fecha_trabajo) AS fecha,
+        cal.fecha,
         EXTRACT(DAY FROM cal.fecha_trabajo)::integer AS diaTrabajo,
         EXTRACT(HOUR FROM cal.fecha_trabajo)::integer AS horaTrabajo,
         EXTRACT(MINUTE FROM cal.fecha_trabajo)::integer AS minutoTrabajo,
+        CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
+        ord.fecha_vencimiento,
         cal.fecha_creacion,
         cal.usuario_creacion,
         cal.fecha_modificacion,
         cal.usuario_modificacion
-
+        
     FROM orden_calendario cal
+    JOIN orden ord on (ord.id = cal.id_orden)
+    JOIN cliente cte on (cte.id = ord.id_cliente)
     ORDER BY cal.id_orden ASC
   """, nativeQuery = true)
   List<OrdenCalendarioDTO> getAllOrdenCalendario();
@@ -32,16 +36,21 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
     SELECT
         cal.id_orden,
         cal.fecha_trabajo,
-        DATE(cal.fecha_trabajo) AS fecha,
+        cal.fecha,
         EXTRACT(DAY FROM cal.fecha_trabajo)::integer AS diaTrabajo,
         EXTRACT(HOUR FROM cal.fecha_trabajo)::integer AS horaTrabajo,
         EXTRACT(MINUTE FROM cal.fecha_trabajo)::integer AS minutoTrabajo,
+        CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
+        ord.fecha_vencimiento,
         cal.fecha_creacion,
         cal.usuario_creacion,
         cal.fecha_modificacion,
         cal.usuario_modificacion
-
+        
     FROM orden_calendario cal
+    JOIN orden ord on (ord.id = cal.id_orden)
+    JOIN cliente cte on (cte.id = ord.id_cliente)
+
     WHERE cal.id_orden = :idOrden
     ORDER BY cal.id_orden ASC
   """, nativeQuery = true)
@@ -51,7 +60,7 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
       SELECT
           cal.id_orden,
           cal.fecha_trabajo,
-          DATE(cal.fecha_trabajo) AS fecha,
+          cal.fecha,
           EXTRACT(DAY FROM cal.fecha_trabajo)::integer AS diaTrabajo,
           EXTRACT(HOUR FROM cal.fecha_trabajo)::integer AS horaTrabajo,
           EXTRACT(MINUTE FROM cal.fecha_trabajo)::integer AS minutoTrabajo,
@@ -61,12 +70,20 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
           cal.usuario_modificacion
 
       FROM orden_calendario cal
-      WHERE DATE(cal.fecha_trabajo) = TO_DATE(:fecha, 'YYYY-MM-DD')
+      WHERE cal.fecha = TO_DATE(:fecha, 'YYYY-MM-DD')
       ORDER BY cal.fecha_trabajo ASC
   """, nativeQuery = true)
   List<OrdenCalendarioDTO> getByFecha(String fecha);
 
-  // Days + counts (uses clean generator)
+  @Query(value = """
+      SELECT Count(*)
+      FROM orden_calendario cal
+      WHERE cal.fecha = TO_DATE(:fecha, 'YYYY-MM-DD')
+      GROUP BY cal.fecha
+  """, nativeQuery = true)
+  Long getTotalPorFecha(String fecha);
+
+  // Genera calendario de fechas de la semana actual y la siguiente
   @Query(value = """
       WITH days AS (
         SELECT 
@@ -94,22 +111,26 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
       """, nativeQuery = true)
   List<Object[]> getCalendarDaysWithCountsRaw();
 
-  // All orders in the two-week window
+  // Obtiene todas las ordenes de la semana actual y la siguiente
   @Query(value = """
       SELECT
           cal.id_orden,
           cal.fecha_trabajo,
-          DATE(cal.fecha_trabajo) AS fecha,
+          cal.fecha,
           EXTRACT(DAY FROM cal.fecha_trabajo)::integer AS diaTrabajo,
           EXTRACT(HOUR FROM cal.fecha_trabajo)::integer AS horaTrabajo,
           EXTRACT(MINUTE FROM cal.fecha_trabajo)::integer AS minutoTrabajo,
+          CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
+          ord.fecha_vencimiento,
           cal.fecha_creacion,
           cal.usuario_creacion,
           cal.fecha_modificacion,
           cal.usuario_modificacion
       FROM orden_calendario cal
-      WHERE DATE(cal.fecha_trabajo) >= date_trunc('week', CURRENT_DATE)::date 
-        AND DATE(cal.fecha_trabajo) <= date_trunc('week', CURRENT_DATE)::date + 13
+      JOIN orden ord on (ord.id = cal.id_orden)
+      JOIN cliente cte on (cte.id = ord.id_cliente)
+      WHERE cal.fecha >= date_trunc('week', CURRENT_DATE)::date 
+        AND cal.fecha <= date_trunc('week', CURRENT_DATE)::date + 13
       ORDER BY cal.fecha_trabajo ASC
       """, nativeQuery = true)
   List<OrdenCalendarioDTO> getOrdersInTwoWeeks();

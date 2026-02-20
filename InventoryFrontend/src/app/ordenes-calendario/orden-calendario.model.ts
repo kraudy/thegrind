@@ -7,6 +7,9 @@ export interface OrdenCalendario {
   diaTrabajo: number;
   horaTrabajo: number;
   minutoTrabajo: number;
+
+  clienteNombre: string; 
+  fechaVencimiento: Date;
   
   fechaCreacion: string;
   usuarioCreacion: string;

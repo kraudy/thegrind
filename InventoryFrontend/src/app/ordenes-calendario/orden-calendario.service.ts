@@ -40,7 +40,7 @@ export class OrdenCalendarioService {
     return this.http.delete<void>(`${this.apiUrl}/${idOrden}`);
   }
 
-  getByDate(fecha: string): Observable<OrdenCalendario[]> {
-    return this.http.get<OrdenCalendario[]>(`${this.apiUrl}/por-fecha/${fecha}`);
+  getByDate(fecha: string): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/total-por-fecha/${fecha}`);
   }
 }

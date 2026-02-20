@@ -57,13 +57,30 @@ export class OrdenCalendarioFormComponent implements OnInit {
   private loadAlreadyScheduledCount(): void {
     this.calendarioService.getByDate(this.dateStr).subscribe({
       next: (data) => {
-        this.alreadyScheduledCount = data.length;
+        this.alreadyScheduledCount = data;
         this.cd.detectChanges();
       },
       error: () => {
         this.alreadyScheduledCount = 0;
         this.cd.detectChanges();
       }
+    });
+  }
+
+  formatDayName(): string {
+    const [year, month, day] = this.dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString('es-NI', { weekday: 'short' }).toUpperCase();
+  }
+
+  formatFullDate(): string {
+    const [year, month, day] = this.dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    // Incluye el año para mayor claridad en esta vista
+    return date.toLocaleDateString('es-NI', { 
+      day: 'numeric', 
+      month: 'short', 
+      year: 'numeric' 
     });
   }
 

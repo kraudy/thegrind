@@ -12,6 +12,8 @@ public record OrdenCalendarioDTO(
   Integer diaTrabajo,
   Integer horaTrabajo,
   Integer minutoTrabajo,
+  String clienteNombre,
+  LocalDateTime fechaVencimiento,
   LocalDateTime fechaCreacion,
   String usuarioCreacion,
   LocalDateTime fechaModificacion,

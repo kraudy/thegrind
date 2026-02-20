@@ -21,17 +21,8 @@ public class OrdenCalendario {
   @Column(nullable = false, columnDefinition = "TIMESTAMP")
   private LocalDateTime fechaTrabajo;
 
-  //@Column(nullable = false, columnDefinition = "TIMESTAMP")
-  //private LocalDate fecha;
-
-  //@Column(nullable = false, columnDefinition = "INTEGER")
-  //private int dia = 0;
-
-  //@Column(nullable = false, columnDefinition = "INTEGER")
-  //private int hora = 0;
-
-  //@Column(nullable = false, columnDefinition = "INTEGER")
-  //private int minuto = 0;
+  @Column(nullable = false, columnDefinition = "DATE")
+  private LocalDate fecha;
 
   @CreationTimestamp
   @Column(updatable = false, nullable = false)
