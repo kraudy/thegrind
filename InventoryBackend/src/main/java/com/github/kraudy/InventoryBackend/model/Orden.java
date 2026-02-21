@@ -62,12 +62,19 @@ public class Orden {
   @Column(nullable = false, columnDefinition = "TIMESTAMP")
   private LocalDateTime fechaModificacion;
 
-  @Column(nullable = false, columnDefinition = "VARCHAR(12)")
+  @Column(nullable = false, columnDefinition = "VARCHAR(25)")
   private String estado = "Recibida"; // Valor por default al ser creada la orden
+
+  // Relaciones
 
   // Relación OneToMany con OrdenDetalle
   @JsonIgnore // For now we don't need to return detalle, TODO: this can also be adde to the repository and used it by the controller
   @OneToMany(mappedBy = "orden", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<OrdenDetalle> detalles = new ArrayList<>();
+
+  @JsonIgnore
+  @ManyToOne
+  @JoinColumn(name = "estado", referencedColumnName = "estado", nullable = false, insertable = false, updatable = false)
+  private EstadoSeguimiento estadoSeguimiento;
 
 }

@@ -9,12 +9,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class OrdenSeguimientoPK implements Serializable {
-  private Long idOrden;
-
-  private Long idOrdenDetalle;
-
-  private Long idProducto;
+public class ProductoTipoEstadoPK implements Serializable {
+  private String tipo;
 
   private String estado;
 }
