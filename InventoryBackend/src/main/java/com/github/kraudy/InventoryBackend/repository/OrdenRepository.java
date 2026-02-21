@@ -86,8 +86,8 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
         ord.estado
     )
     FROM Orden ord JOIN ord.cliente cte
-    WHERE ord.estado = 'Pendiente'
+    WHERE ord.estado = 'Recibida'
     ORDER BY ord.fechaVencimiento ASC
   """)
-  List<OrdenDTO> getPendientes();
+  List<OrdenDTO> getRecibidas();
 }

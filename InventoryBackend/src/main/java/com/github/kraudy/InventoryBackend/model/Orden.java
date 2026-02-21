@@ -63,7 +63,7 @@ public class Orden {
   private LocalDateTime fechaModificacion;
 
   @Column(nullable = false, columnDefinition = "VARCHAR(12)")
-  private String estado = "Recibido"; // Valor por default al ser creada la orden
+  private String estado = "Recibida"; // Valor por default al ser creada la orden
 
   // Relación OneToMany con OrdenDetalle
   @JsonIgnore // For now we don't need to return detalle, TODO: this can also be adde to the repository and used it by the controller

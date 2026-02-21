@@ -17,8 +17,8 @@ export class OrdenService {
     return this.http.get<Orden[]>(this.apiUrl);
   }
 
-  getPendientes(): Observable<Orden[]> {
-    return this.http.get<Orden[]>(`${this.apiUrl}/pendientes`);
+  getRecibidas(): Observable<Orden[]> {
+    return this.http.get<Orden[]>(`${this.apiUrl}/recibidas`);
   }
 
   getById(id: number): Observable<Orden> {

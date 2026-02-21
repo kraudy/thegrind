@@ -27,6 +27,7 @@ public class OrdenCalendarioController {
   @Autowired
   private OrdenRepository ordenRepository;
   
+  
   @GetMapping
   public List<OrdenCalendarioDTO> getAll() {
     return ordenCalendarioRepository.getAllOrdenCalendario();
@@ -83,6 +84,9 @@ public class OrdenCalendarioController {
 
     ordenCalendario.setOrden(orden);
     ordenCalendario.setFecha(ordenCalendario.getFechaTrabajo().toLocalDate());
+
+    orden.setEstado("Repartida"); // Actualiza el estado de la orden
+    ordenRepository.save(orden);
 
     return ordenCalendarioRepository.save(ordenCalendario);
   }

@@ -34,9 +34,9 @@ public class OrdenController {
     return ordenRepository.getOrdenById(id);
   }
 
-  @GetMapping("/pendientes")
-  public List<OrdenDTO> getPendientes() {
-    return ordenRepository.getPendientes();
+  @GetMapping("/recibidas")
+  public List<OrdenDTO> getgetRecibidas() {
+    return ordenRepository.getRecibidas();
   }
 
   @PostMapping

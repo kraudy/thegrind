@@ -40,14 +40,14 @@ export class OrdenCalendarioFormComponent implements OnInit {
   }
 
   private loadPendingOrders(): void {
-    this.ordenService.getPendientes().subscribe({
+    this.ordenService.getRecibidas().subscribe({
       next: (data) => {
         this.pendingOrders = data || [];
         console.log('✅ Pending orders loaded:', this.pendingOrders.length, this.pendingOrders);
         this.cd.detectChanges();          // ← Fuerza la actualización de la vista
       },
       error: (err) => {
-        console.error('❌ Error cargando pendientes', err);
+        console.error('❌ Error cargando recibidas', err);
         this.pendingOrders = [];
         this.cd.detectChanges();
       }
@@ -57,7 +57,7 @@ export class OrdenCalendarioFormComponent implements OnInit {
   private loadAlreadyScheduledCount(): void {
     this.calendarioService.getByDate(this.dateStr).subscribe({
       next: (data) => {
-        this.alreadyScheduledCount = data;
+        this.alreadyScheduledCount = data || 0;
         this.cd.detectChanges();
       },
       error: () => {
@@ -102,18 +102,17 @@ export class OrdenCalendarioFormComponent implements OnInit {
       const cal: Partial<OrdenCalendario> = {
         idOrden: idOrden,
         fechaTrabajo: new Date(fechaTrabajo.getTime() + index * 60000).toISOString(),
-        usuarioCreacion: 'adminTest',           // ← Cambia por tu usuario real cuando tengas login
+        usuarioCreacion: 'adminTest',           // Cambia por usuario real del login
         usuarioModificacion: 'adminTest'
       };
       return this.calendarioService.create(cal);
     });
 
     Promise.all(requests.map(r => r.toPromise())).then(() => {
-      alert(`¡${this.selectedOrderIds.length} órdenes programadas con éxito!`);
       this.router.navigate(['/ordenes-calendario']);
     }).catch(err => {
       console.error(err);
-      alert('Error al guardar en el calendario');
+      alert('Error al guardar en el calendario, contactar profesional.');
     });
   }
 
