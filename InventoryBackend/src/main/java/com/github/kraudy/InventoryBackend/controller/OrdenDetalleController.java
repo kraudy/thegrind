@@ -13,7 +13,9 @@ import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoPrecioRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -56,10 +58,10 @@ public class OrdenDetalleController {
       @RequestBody OrdenDetalle ordenDetalle) {
 
     if (idOrden == null) {
-        throw new IllegalArgumentException("El ID de la orden es obligatorio");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El ID de la orden es obligatorio");
     }
     if (idProducto == null) {
-        throw new IllegalArgumentException("El ID del producto es obligatorio");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El ID del producto es obligatorio");
     }
 
     ordenDetalleRepository.insertDetalle(idOrden, idProducto, ordenDetalle.getCantidad(), ordenDetalle.getPrecioUnitario(), ordenDetalle.getSubtotal());

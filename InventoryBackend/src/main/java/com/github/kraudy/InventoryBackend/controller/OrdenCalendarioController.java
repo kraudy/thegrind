@@ -7,10 +7,16 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.github.kraudy.InventoryBackend.dto.CalendarioDiaDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenCalendarioDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenDetalleDTO;
 import com.github.kraudy.InventoryBackend.model.Orden;
 import com.github.kraudy.InventoryBackend.model.OrdenCalendario;
+import com.github.kraudy.InventoryBackend.model.OrdenDetalle;
+import com.github.kraudy.InventoryBackend.model.OrdenDetallePK;
+import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
 import com.github.kraudy.InventoryBackend.repository.OrdenCalendarioRepository;
+import com.github.kraudy.InventoryBackend.repository.OrdenDetalleRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
+import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,6 +32,12 @@ public class OrdenCalendarioController {
 
   @Autowired
   private OrdenRepository ordenRepository;
+
+  @Autowired
+  private OrdenSeguimientoRepository ordenSeguimientoRepository;
+
+  @Autowired
+  private OrdenDetalleRepository ordenDetalleRepository;
   
   
   @GetMapping
@@ -85,7 +97,21 @@ public class OrdenCalendarioController {
     ordenCalendario.setOrden(orden);
     ordenCalendario.setFecha(ordenCalendario.getFechaTrabajo().toLocalDate());
 
-    orden.setEstado("Repartida"); // Actualiza el estado de la orden
+    // Genera el seguimiento de cada detalle de la orden
+    for (OrdenDetalleDTO ordenDetalle : ordenDetalleRepository.getAllOrdenDetalle(orden.getId())) {
+      OrdenSeguimiento ordenSeguimiento = new OrdenSeguimiento();
+
+      ordenSeguimiento.setIdOrden(ordenDetalle.idOrden());
+      ordenSeguimiento.setIdOrdenDetalle(ordenDetalle.idOrdenDetalle());
+      ordenSeguimiento.setIdProducto(ordenDetalle.idProducto());
+      ordenSeguimiento.setEstado(orden.getEstado());
+      ordenSeguimiento.setSeguimientoPor("adminTest");
+      
+      ordenSeguimientoRepository.save(ordenSeguimiento);
+    }
+
+    // Actualiza el estado de la orden
+    orden.setEstado("Repartida"); 
     ordenRepository.save(orden);
 
     return ordenCalendarioRepository.save(ordenCalendario);
