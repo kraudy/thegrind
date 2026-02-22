@@ -24,10 +24,8 @@ public class Producto {
   @Column(name = "tipoProducto", nullable = false, columnDefinition = "VARCHAR(25)")
   private String tipoProducto;
 
-  @JsonIgnore
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "tipoProducto", referencedColumnName = "tipo", nullable = false, insertable = false, updatable = false)
-  private ProductoTipo productoTipo;
+  @Column(nullable = false, columnDefinition = "VARCHAR(25)")
+  private String subTipoProducto;
 
   @Column(nullable = false, columnDefinition = "VARCHAR(100)")
   private String nombre;
@@ -46,7 +44,13 @@ public class Producto {
   @Column(nullable = false)
   private boolean activo = true;
 
-  // === One-to-many relationship with ProductoPrecio ===
+  // Relaciones
+
+  @JsonIgnore
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "tipoProducto", referencedColumnName = "tipo", nullable = false, insertable = false, updatable = false)
+  private ProductoTipo productoTipo;
+
   // Deleting a product will delete all its prices
   @OneToMany(mappedBy = "producto", 
               fetch = FetchType.LAZY, 
@@ -54,4 +58,9 @@ public class Producto {
               orphanRemoval = true)
   @JsonIgnore  // Prevents serialization cycles and infinite recursion
   private List<ProductoPrecio> precios = new ArrayList<>();
+
+  @JsonIgnore
+  @ManyToOne
+  @JoinColumn(name = "subTipoProducto", referencedColumnName = "subTipo", nullable = false, insertable = false, updatable = false)
+  private ProductoSubTipo productoSubTipo;
 }

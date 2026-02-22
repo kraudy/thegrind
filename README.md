@@ -124,6 +124,10 @@ ng generate component productos-tipos/producto-tipo-list
 ng generate component productos-tipos/producto-tipo-form
 ng generate service productos-tipos/producto-tipo
 
+ng generate component productos-sub-tipos/producto-sub-tipo-list
+ng generate component productos-sub-tipos/producto-sub-tipo-form
+ng generate service productos-sub-tipos/producto-sub-tipo
+
 ng generate component productos-precios/producto-precio-list
 ng generate component productos-precios/producto-precio-form
 ng generate service productos-precios/producto-precio

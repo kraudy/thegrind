@@ -12,5 +12,7 @@ import java.io.Serializable;
 public class ProductoTipoEstadoPK implements Serializable {
   private String tipo;
 
+  private String subTipo;
+
   private String estado;
 }

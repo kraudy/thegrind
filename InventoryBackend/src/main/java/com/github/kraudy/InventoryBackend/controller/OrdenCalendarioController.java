@@ -97,6 +97,10 @@ public class OrdenCalendarioController {
     ordenCalendario.setOrden(orden);
     ordenCalendario.setFecha(ordenCalendario.getFechaTrabajo().toLocalDate());
 
+    // Actualiza el estado de la orden
+    orden.setEstado("Repartida"); 
+    ordenRepository.save(orden);
+
     // Genera el seguimiento de cada detalle de la orden
     for (OrdenDetalleDTO ordenDetalle : ordenDetalleRepository.getAllOrdenDetalle(orden.getId())) {
       OrdenSeguimiento ordenSeguimiento = new OrdenSeguimiento();
@@ -109,10 +113,6 @@ public class OrdenCalendarioController {
       
       ordenSeguimientoRepository.save(ordenSeguimiento);
     }
-
-    // Actualiza el estado de la orden
-    orden.setEstado("Repartida"); 
-    ordenRepository.save(orden);
 
     return ordenCalendarioRepository.save(ordenCalendario);
   }

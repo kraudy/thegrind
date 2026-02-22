@@ -7,6 +7,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProductoTipo } from '../../productos-tipos/producto-tipo.model';
 import { ProductoTipoService } from '../../productos-tipos/producto-tipo.service';
 
+import { ProductoSubTipo } from '../../productos-sub-tipos/producto-sub-tipo.model';
+import { ProductoSubTipoService } from '../../productos-sub-tipos/producto-sub-tipo.service';
+
 import { ProductoService } from '../producto.service';
 import { Producto } from '../producto.model';
 
@@ -23,16 +26,18 @@ export class ProductoFormComponent implements OnChanges, OnInit {
   isEdit = false;
   productoId: number | null = null;
   tipos: ProductoTipo[] = [];
+  subTipos: ProductoSubTipo[] = [];
 
   constructor(
     private productoService: ProductoService,
     private productoTipoService: ProductoTipoService,
+    private productoSubTipoService: ProductoSubTipoService,
     private location: Location,
     private route: ActivatedRoute,
     private cd: ChangeDetectorRef
   ) {}
 
-  formProducto: Partial<Producto> = { tipoProducto: '', nombre: '', descripcion: ''};
+  formProducto: Partial<Producto> = { tipoProducto: '', subTipoProducto: '', nombre: '', descripcion: ''};
 
   ngOnInit(): void {
     if (!this.producto) { // If no id in route — ensure fresh form
@@ -47,7 +52,20 @@ export class ProductoFormComponent implements OnChanges, OnInit {
         this.cd.detectChanges();
       },
       error: (err) => {
-        console.error('[ProductoForm] failed to load tipos de producto', err);
+        console.error('[ProductoForm] failed to load tipo producto', err);
+        this.tipos = [];
+        this.cd.detectChanges();
+      }
+    });
+
+    // Cargar sub-tipos de producto siempre
+    this.productoSubTipoService.getAll().subscribe({
+      next: (data) => {
+        this.subTipos = data || [];
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        console.error('[ProductoForm] failed to load sub-tipos products', err);
         this.tipos = [];
         this.cd.detectChanges();
       }
@@ -92,7 +110,7 @@ export class ProductoFormComponent implements OnChanges, OnInit {
   }
 
   resetForm(): void {
-    this.formProducto = {tipoProducto: '', nombre: '', descripcion: ''};
+    this.formProducto = {tipoProducto: '', subTipoProducto: '', nombre: '', descripcion: ''};
   }
 
   onSubmit(): void {
