@@ -31,13 +31,13 @@ public class ProductoTipoEstado {
   private String subTipo;  
   
   @Id
-  @EqualsAndHashCode.Include
-  @Column(nullable = false, columnDefinition = "VARCHAR(25)")
-  private String estado;  
-
   @Column(nullable = false, columnDefinition = "INTEGER CHECK (secuencia > 0)")
   private int secuencia;
 
+  @EqualsAndHashCode.Include
+  @Column(nullable = false, columnDefinition = "VARCHAR(25)")
+  private String estado;  
+  
   @CreationTimestamp
   @Column(updatable = false, nullable = false)
   private LocalDateTime fechaCreacion;
@@ -66,7 +66,7 @@ public class ProductoTipoEstado {
 
   @JsonIgnore
   @ManyToOne
-  @JoinColumn(name = "estado", nullable = false)
+  @JoinColumn(name = "estado", nullable = false, insertable = false, updatable = false)
   private EstadoSeguimiento estadoSeguimiento;
 
 }

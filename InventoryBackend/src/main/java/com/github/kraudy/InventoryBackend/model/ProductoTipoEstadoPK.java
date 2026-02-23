@@ -14,5 +14,5 @@ public class ProductoTipoEstadoPK implements Serializable {
 
   private String subTipo;
 
-  private String estado;
+  private int secuencia;
 }

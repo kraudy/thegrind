@@ -9,6 +9,9 @@ import com.github.kraudy.InventoryBackend.dto.CalendarioDiaDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenCalendarioDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenDetalleDTO;
 import com.github.kraudy.InventoryBackend.model.Orden;
+import com.github.kraudy.InventoryBackend.model.Producto;
+import com.github.kraudy.InventoryBackend.model.ProductoTipoEstado;
+import com.github.kraudy.InventoryBackend.model.ProductoTipoEstadoPK;
 import com.github.kraudy.InventoryBackend.model.OrdenCalendario;
 import com.github.kraudy.InventoryBackend.model.OrdenDetalle;
 import com.github.kraudy.InventoryBackend.model.OrdenDetallePK;
@@ -17,6 +20,8 @@ import com.github.kraudy.InventoryBackend.repository.OrdenCalendarioRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenDetalleRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoRepository;
+import com.github.kraudy.InventoryBackend.repository.ProductoRepository;
+import com.github.kraudy.InventoryBackend.repository.ProductoTipoEstadoRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -38,6 +43,12 @@ public class OrdenCalendarioController {
 
   @Autowired
   private OrdenDetalleRepository ordenDetalleRepository;
+
+  @Autowired
+  private ProductoRepository productoRepository;
+
+  @Autowired
+  private ProductoTipoEstadoRepository productoTipoEstadoRepository;
   
   
   @GetMapping
@@ -101,14 +112,24 @@ public class OrdenCalendarioController {
     orden.setEstado("Repartida"); 
     ordenRepository.save(orden);
 
+    //TODO: Move this to repo in sql
     // Genera el seguimiento de cada detalle de la orden
     for (OrdenDetalleDTO ordenDetalle : ordenDetalleRepository.getAllOrdenDetalle(orden.getId())) {
+
+      Producto producto = productoRepository.findById(ordenDetalle.idProducto()).
+        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
+
+      ProductoTipoEstadoPK productoTipoEstadoPK =new ProductoTipoEstadoPK(producto.getProductoTipo().getTipo(), producto.getSubTipoProducto(), 1);
+      
+      ProductoTipoEstado productoTipoEstado = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
+        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado inicial de Producto no encontrado"));
+
       OrdenSeguimiento ordenSeguimiento = new OrdenSeguimiento();
 
       ordenSeguimiento.setIdOrden(ordenDetalle.idOrden());
       ordenSeguimiento.setIdOrdenDetalle(ordenDetalle.idOrdenDetalle());
       ordenSeguimiento.setIdProducto(ordenDetalle.idProducto());
-      ordenSeguimiento.setEstado(orden.getEstado());
+      ordenSeguimiento.setEstado(productoTipoEstado.getEstado()); // Agregamos el estado obtenido
       ordenSeguimiento.setSeguimientoPor("adminTest");
       
       ordenSeguimientoRepository.save(ordenSeguimiento);

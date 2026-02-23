@@ -24,6 +24,8 @@ public class ProductoSubTipo {
   @Column(nullable = false, columnDefinition = "VARCHAR(25)")
   private String subTipo;  
 
+  //TODO: Agregar campo de cogido que se usara despues para formar el id del producto
+  
   @Column(nullable = false, columnDefinition = "VARCHAR(255)")
   private String descripcion;
 

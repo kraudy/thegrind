@@ -21,8 +21,9 @@ public class ProductoTipo {
   @Id
   @EqualsAndHashCode.Include
   @Column(nullable = false, columnDefinition = "VARCHAR(25)")
-  private String tipo;  
+  private String tipo;
 
+  //TODO: Agregar campo de cogido que se usara despues para formar el id del producto
   @Column(nullable = false, columnDefinition = "VARCHAR(255)")
   private String descripcion;
 

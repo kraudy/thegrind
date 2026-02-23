@@ -21,6 +21,8 @@ public class Producto {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  //TODO: Tal vez cambiar la llave a compuesta de : tipo, subtipo, medida, y otro campo mas para los estilos o variaciones
+
   @Column(name = "tipoProducto", nullable = false, columnDefinition = "VARCHAR(25)")
   private String tipoProducto;
 
