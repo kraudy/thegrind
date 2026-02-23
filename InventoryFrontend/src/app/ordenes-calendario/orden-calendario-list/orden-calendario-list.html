@@ -37,7 +37,7 @@
         <div class="p-4 min-h-[280px] space-y-3 overflow-auto">
           <div *ngFor="let ordenCalendario of day.orders" 
                class="bg-white border border-gray-200 rounded-xl p-3 hover:shadow transition cursor-pointer"
-               [routerLink]="['/ordenes-detalle', ordenCalendario.idOrden]">
+               [routerLink]="['/ordenes-seguimiento', ordenCalendario.idOrden, ordenCalendario.clienteNombre]">
             <div class="flex justify-between items-start">
               <div>
                 <div class="font-semibold text-indigo-700">#{{ ordenCalendario.idOrden }}</div>
@@ -95,7 +95,7 @@
         <div class="p-4 min-h-[280px] space-y-3 overflow-auto">
           <div *ngFor="let ordenCalendario of day.orders" 
                class="bg-white border border-gray-200 rounded-xl p-3 hover:shadow transition cursor-pointer"
-               [routerLink]="['/ordenes-detalle', ordenCalendario.idOrden]">
+               [routerLink]="['/ordenes-seguimiento', ordenCalendario.idOrden, ordenCalendario.clienteNombre]">
             <div class="flex justify-between items-start">
               <div>
                 <div class="font-semibold text-indigo-700">#{{ ordenCalendario.idOrden }}</div>

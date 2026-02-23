@@ -14,6 +14,9 @@ import { OrdenDetalleFormComponent } from './ordenes-detalle/orden-detalle-form/
 import { OrdenCalendarioListComponent } from './ordenes-calendario/orden-calendario-list/orden-calendario-list.component';
 import { OrdenCalendarioFormComponent } from './ordenes-calendario/orden-calendario-form/orden-calendario-form.component';
 
+import { OrdenSeguimientoListComponent } from './ordenes-seguimiento/orden-seguimiento-list/orden-seguimiento-list.component';
+//import { OrdenSeguimientoFormComponent } from './ordenes-seguimiento/orden-seguimiento-form/orden-seguimiento-form.component';
+
 import { ClienteListComponent } from './clientes/cliente-list/cliente-list.component';
 import { ClienteFormComponent } from './clientes/cliente-form/cliente-form.component';
 
@@ -50,6 +53,8 @@ export const routes: Routes = [
   { path: 'ordenes-calendario/:fecha/new', component: OrdenCalendarioFormComponent },
   //{ path: 'ordenes-calendario/:ordenId/new', component: OrdenCalendarioFormComponent },
   //{ path: 'ordenes-calendario/:ordenId/edit', component: OrdenCalendarioFormComponent },
+
+  { path: 'ordenes-seguimiento/:idOrden/:clienteNombre', component: OrdenSeguimientoListComponent },
 
   { path: 'clientes', component: ClienteListComponent },
   { path: 'clientes/new', component: ClienteFormComponent },

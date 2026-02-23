@@ -116,6 +116,10 @@ ng generate component ordenes-calendario/orden-calendario-list
 ng generate component ordenes-calendario/orden-calendario-form
 ng generate service ordenes-calendario/orden-calendario
 
+ng generate component ordenes-seguimiento/orden-seguimiento-list
+#ng generate component ordenes-seguimiento/orden-seguimiento-form
+ng generate service ordenes-seguimiento/orden-seguimiento
+
 ng generate component clientes/cliente-list
 ng generate component clientes/cliente-form
 ng generate service clientes/cliente
@@ -127,6 +131,10 @@ ng generate service productos-tipos/producto-tipo
 ng generate component productos-sub-tipos/producto-sub-tipo-list
 ng generate component productos-sub-tipos/producto-sub-tipo-form
 ng generate service productos-sub-tipos/producto-sub-tipo
+
+#ng generate component productos-tipo-estados/producto-tipo-estado-list
+#ng generate component productos-tipo-estados/producto-tipo-estado-form
+ng generate service productos-tipo-estados/producto-tipo-estado
 
 ng generate component productos-precios/producto-precio-list
 ng generate component productos-precios/producto-precio-form

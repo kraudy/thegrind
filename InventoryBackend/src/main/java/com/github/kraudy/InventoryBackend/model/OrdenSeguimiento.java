@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -30,6 +32,7 @@ public class OrdenSeguimiento {
   @Column(name = "estado", nullable = false, length = 100)
   private String estado;
 
+  @JsonIgnore
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumns({
       @JoinColumn(name = "id_orden", referencedColumnName = "id_orden", insertable = false, updatable = false),
