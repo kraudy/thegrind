@@ -98,9 +98,9 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
     });
   }
 
-  deleteOrdenDetalle(idOrden: number, idOrdenDetalle: number, idProducto: number): void {
+  deleteOrdenDetalle(idOrden: number, idOrdenDetalle: number): void {
     if (confirm('¿Seguro desea eliminar este detalle de orden?')) {
-      this.ordenDetalleService.delete(idOrden, idOrdenDetalle, idProducto).subscribe({
+      this.ordenDetalleService.delete(idOrden, idOrdenDetalle).subscribe({
         next: () => {
           console.log('Detalle eliminado correctamente');
           this.loadOrdenesDetalles();

@@ -85,14 +85,12 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     });
 
     const idOrdenDetalleStr = params.get('idOrdenDetalle');
-    const idProductoStr = params.get('idProducto');
 
-    if (idOrdenDetalleStr && idProductoStr) {
+    if (idOrdenDetalleStr) {
       // Modo edición
       const linea = Number(idOrdenDetalleStr);
-      const prodId = Number(idProductoStr);
 
-      this.ordenDetalleService.getByCompositeKey(this.formOrdenDetalle.idOrden, linea, prodId).subscribe({
+      this.ordenDetalleService.getById(this.formOrdenDetalle.idOrden, linea).subscribe({
         next: (data) => {
           this.loadForm(data);
           this.isEdit = true;
@@ -148,7 +146,6 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     }
   }
 
-  // Nuevo método (igual que en el ejemplo que me pasaste)
   onSearchChange(term: string): void {
     if (this.isEdit) return; // nunca debería llamarse en edición por el *ngIf
 
@@ -218,7 +215,6 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
       this.ordenDetalleService.update(
         this.formOrdenDetalle.idOrden!,
         this.formOrdenDetalle.idOrdenDetalle!,
-        this.formOrdenDetalle.idProducto!,
         updatePayload
       ).subscribe({
         next: () => {

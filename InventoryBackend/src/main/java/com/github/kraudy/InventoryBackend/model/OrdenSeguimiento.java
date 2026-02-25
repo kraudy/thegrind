@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Data
@@ -24,20 +25,26 @@ public class OrdenSeguimiento {
   @Column(name = "id_orden_detalle")
   private Long idOrdenDetalle;
 
-  @Id
-  @Column(name = "id_producto")
-  private Long idProducto;
+  @EqualsAndHashCode.Include
+  @Column(nullable = false, columnDefinition = "VARCHAR(25)")
+  private String tipo;
 
-  @Id
+  @EqualsAndHashCode.Include
+  @Column(nullable = false, columnDefinition = "VARCHAR(25)")
+  private String subTipo;
+
+  @Column(nullable = false, columnDefinition = "INTEGER CHECK (secuencia > 0)")
+  private int secuencia;
+
   @Column(name = "estado", nullable = false, length = 100)
   private String estado;
 
   @JsonIgnore
-  @ManyToOne(fetch = FetchType.LAZY)
+  //@ManyToOne(fetch = FetchType.LAZY)
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumns({
       @JoinColumn(name = "id_orden", referencedColumnName = "id_orden", insertable = false, updatable = false),
-      @JoinColumn(name = "id_orden_detalle", referencedColumnName = "id_orden_detalle", insertable = false, updatable = false),
-      @JoinColumn(name = "id_producto", referencedColumnName = "id_producto", insertable = false, updatable = false)
+      @JoinColumn(name = "id_orden_detalle", referencedColumnName = "id_orden_detalle", insertable = false, updatable = false)
   })
   private OrdenDetalle ordenDetalle;
 

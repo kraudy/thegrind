@@ -37,6 +37,9 @@ export class OrdenSeguimientoListComponent implements OnInit {
   }
 
   load() {
+    //TODO: Here call getPossibleStates and set it to a local map to just key it from getPossibleStatesJ()
+    // to not be calling the backend for each state
+    // The keys needs to be tipo and subtipo to not repeat the same pattern multiple times
     this.service.getFullByOrden(this.idOrden).subscribe({
       next: (data) => {
         this.detalles = data;
@@ -62,7 +65,7 @@ export class OrdenSeguimientoListComponent implements OnInit {
         this.cd.detectChanges();
       });
 
-      this.service.getByDetalle(det.idOrden, det.idOrdenDetalle, det.idProducto).subscribe(hist => {
+      this.service.getByDetalle(det.idOrden, det.idOrdenDetalle).subscribe(hist => {
         this.historyMap.set(detId, hist);
         this.cd.detectChanges();
       });
@@ -70,7 +73,7 @@ export class OrdenSeguimientoListComponent implements OnInit {
   }
 
   advanceDetail(det: OrdenSeguimiento) {
-    this.service.advance(det.idOrden, det.idOrdenDetalle, det.idProducto).subscribe(() => {
+    this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
       this.load();
     });
   }

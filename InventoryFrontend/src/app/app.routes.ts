@@ -47,7 +47,7 @@ export const routes: Routes = [
 
   { path: 'ordenes-detalle/:ordenId', component: OrdenDetalleListComponent },
   { path: 'ordenes-detalle/:ordenId/new', component: OrdenDetalleFormComponent },
-  { path: 'ordenes-detalle/:ordenId/:idOrdenDetalle/:idProducto/edit', component: OrdenDetalleFormComponent },
+  { path: 'ordenes-detalle/:ordenId/:idOrdenDetalle/edit', component: OrdenDetalleFormComponent },
 
   { path: 'ordenes-calendario', component: OrdenCalendarioListComponent },
   { path: 'ordenes-calendario/:fecha/new', component: OrdenCalendarioFormComponent },

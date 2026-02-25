@@ -15,6 +15,4 @@ public class OrdenDetallePK implements Serializable {
   private Long idOrden;
 
   private Long idOrdenDetalle;
-
-  private Long idProducto;
 }

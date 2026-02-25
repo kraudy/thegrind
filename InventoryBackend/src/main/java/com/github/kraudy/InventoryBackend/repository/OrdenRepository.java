@@ -66,8 +66,7 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
     WHERE id = :idOrden
   """, nativeQuery = true)
   void updateOrdenTotales(
-      Long idOrden,
-      Long idProducto
+      Long idOrden
   );
 
   @Query("""

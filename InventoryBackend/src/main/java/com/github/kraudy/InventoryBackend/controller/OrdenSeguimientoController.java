@@ -9,14 +9,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoPK;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
-import com.github.kraudy.InventoryBackend.model.Orden;
-import com.github.kraudy.InventoryBackend.model.OrdenDetalle;
-import com.github.kraudy.InventoryBackend.model.OrdenDetallePK;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
-import com.github.kraudy.InventoryBackend.model.ProductoTipo;
 import com.github.kraudy.InventoryBackend.model.ProductoTipoEstado;
-import com.github.kraudy.InventoryBackend.repository.OrdenDetalleRepository;
-import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
+import com.github.kraudy.InventoryBackend.model.ProductoTipoEstadoPK;
 import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoTipoEstadoRepository;
 
@@ -31,76 +26,25 @@ public class OrdenSeguimientoController {
   @Autowired
   private ProductoTipoEstadoRepository productoTipoEstadoRepository;
 
-  @Autowired
-  private OrdenDetalleRepository ordenDetalleRepository;
-
-  @Autowired
-  private OrdenRepository ordenRepository;
-
   @GetMapping
   public List<OrdenSeguimiento> getAll() {
     return ordenSeguimientoRepository.findAll();
   }
 
-  @GetMapping("/{idOrden}/{idOrdenDetalle}/{idProducto}/{estado}")
+  @GetMapping("/{idOrden}/{idOrdenDetalle}")
   public OrdenSeguimiento getById(
           @PathVariable Long idOrden,
-          @PathVariable Long idOrdenDetalle,
-          @PathVariable Long idProducto,
-          @PathVariable String estado) {
+          @PathVariable Long idOrdenDetalle) {
 
-    OrdenSeguimientoPK pk = new OrdenSeguimientoPK(idOrden, idOrdenDetalle, idProducto, estado);
+    OrdenSeguimientoPK pk = new OrdenSeguimientoPK(idOrden, idOrdenDetalle);
     return ordenSeguimientoRepository.findById(pk).orElse(null);
   }
 
-  @PostMapping
-  public OrdenSeguimiento create(
-      @PathVariable Long idOrden,
-      @PathVariable Long idOrdenDetalle,
-      @PathVariable Long idProducto,
-      @PathVariable String estado) {
-
-    if (idOrden == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El ID de la orden es obligatorio");
-    }
-    if (idProducto == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El ID del producto es obligatorio");
-    }
-
-    OrdenSeguimiento ordenSeguimiento = new OrdenSeguimiento();
-
-    ordenSeguimiento.setIdOrden(idOrden);
-    ordenSeguimiento.setIdOrdenDetalle(idOrdenDetalle);
-    ordenSeguimiento.setIdProducto(idProducto);
-    ordenSeguimiento.setEstado(estado);
-    
-    return ordenSeguimientoRepository.save(ordenSeguimiento);
-  }
-
-  // I think this is not needed here
-  //@PutMapping("/{idOrden}/{idOrdenDetalle}/{idProducto}/{estado}")
-  //public OrdenSeguimiento update(@PathVariable Long idOrden,
-  //    @PathVariable Long idOrdenDetalle,
-  //    @PathVariable Long idProducto,
-  //    @PathVariable String estado) {
-
-  //  OrdenSeguimientoPK pk = new OrdenSeguimientoPK(idOrden, idOrdenDetalle, idProducto, estado);
-
-  //  OrdenSeguimiento ordenSeguimiento = ordenSeguimientoRepository.findById(pk)
-  //          .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Detalle seguimeinto de orden no encontrado"));
-
-  //  ordenSeguimiento.setEstado(estado);
-
-  //  return ordenSeguimientoRepository.save(ordenSeguimiento);
-  //}
-
-  @DeleteMapping("/{idOrden}/{idOrdenDetalle}/{idProducto}/{estado}")
+  @DeleteMapping("/{idOrden}/{idOrdenDetalle}")
   public void delete(@PathVariable Long idOrden,
-      @PathVariable Long idOrdenDetalle,
-      @PathVariable Long idProducto,
-      @PathVariable String estado) {
+      @PathVariable Long idOrdenDetalle) {
 
-    OrdenSeguimientoPK pk = new OrdenSeguimientoPK(idOrden, idOrdenDetalle, idProducto, estado);
+    OrdenSeguimientoPK pk = new OrdenSeguimientoPK(idOrden, idOrdenDetalle);
 
     ordenSeguimientoRepository.deleteById(pk);
   }
@@ -119,86 +63,44 @@ public class OrdenSeguimientoController {
   }
 
   // 2. Historial de seguimiento de un detalle
-  @GetMapping("/por-detalle/{idOrden}/{idOrdenDetalle}/{idProducto}")
+  @GetMapping("/por-detalle/{idOrden}/{idOrdenDetalle}")
   public List<OrdenSeguimiento> getByDetalle(
           @PathVariable Long idOrden,
-          @PathVariable Long idOrdenDetalle,
-          @PathVariable Long idProducto) {
-      return ordenSeguimientoRepository.findByDetalleOrderByFechaCreacionAsc(idOrden, idOrdenDetalle, idProducto);
+          @PathVariable Long idOrdenDetalle) {
+      return ordenSeguimientoRepository.findByDetalleOrderByFechaCreacionAsc(idOrden, idOrdenDetalle);
   }
 
+  // @PutMapping?
   // 3. Avanzar al siguiente estado (la magia está aquí)
-  @PostMapping("/avanzar/{idOrden}/{idOrdenDetalle}/{idProducto}")
+  @PostMapping("/avanzar/{idOrden}/{idOrdenDetalle}")
   public OrdenSeguimiento advanceState(
           @PathVariable Long idOrden,
-          @PathVariable Long idOrdenDetalle,
-          @PathVariable Long idProducto) {
+          @PathVariable Long idOrdenDetalle) {
 
-      // Obtener tipo/subTipo del producto
-      OrdenDetalle detalle = ordenDetalleRepository.findById(new OrdenDetallePK(idOrden, idOrdenDetalle, idProducto))
-              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Detalle no encontrado"));
+    OrdenSeguimientoPK ordenSeguimientoPK = new OrdenSeguimientoPK(idOrden, idOrdenDetalle);
 
-      String tipo = detalle.getProducto().getTipoProducto();
-      String subTipo = detalle.getProducto().getSubTipoProducto();
+    OrdenSeguimiento ordenSeguimientoActual = ordenSeguimientoRepository.findById(ordenSeguimientoPK).
+      orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El detalle no se encuentra en seguimiento"));
 
-      List<ProductoTipoEstado> workflow = productoTipoEstadoRepository.findByTipoAndSubTipoOrderBySecuenciaAsc(tipo, subTipo);
-      if (workflow.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No hay workflow para este producto");
+    ProductoTipoEstadoPK productoTipoEstadoPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() + 1);
+    
+    ProductoTipoEstado productoTipoEstado = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
+      orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Siguiente estado no encontrado"));
 
-      // Estado actual (el más reciente)
-      List<OrdenSeguimiento> history = ordenSeguimientoRepository.findByDetalleOrderByFechaCreacionDesc(idOrden, idOrdenDetalle, idProducto);
-      int currentSec = history.isEmpty() ? 0 : workflow.stream()
-              .filter(s -> s.getEstado().equals(history.get(0).getEstado()))
-              .findFirst().map(ProductoTipoEstado::getSecuencia).orElse(0);
+    //TODO: Abregar aqui al historico 
 
-      int nextSec = currentSec + 1;
-      if (nextSec > workflow.size()) {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya está en el último estado");
-      }
+    // Se actualiza estado nuevo, secuencia y usuario que finaliza estado previo
+    ordenSeguimientoActual.setEstado(productoTipoEstado.getEstado());
+    ordenSeguimientoActual.setSecuencia(productoTipoEstado.getSecuencia());
+    ordenSeguimientoActual.setSeguimientoPor("adminTestfinaliza"); 
 
-      ProductoTipoEstado nextState = workflow.get(nextSec - 1);
+    OrdenSeguimiento saved = ordenSeguimientoRepository.save(ordenSeguimientoActual);
 
-      OrdenSeguimiento nuevo = new OrdenSeguimiento();
-      nuevo.setIdOrden(idOrden);
-      nuevo.setIdOrdenDetalle(idOrdenDetalle);
-      nuevo.setIdProducto(idProducto);
-      nuevo.setEstado(nextState.getEstado());
-      nuevo.setSeguimientoPor("adminTest");   // ← cambia por usuario real del login
+    // Si todos los detalles llegaron al final → orden lista
+    //TODO: Just add one to secuencia and do the get, then check if there is another and finish
+    //checkAndMarkOrderAsReady(idOrden);
 
-      OrdenSeguimiento saved = ordenSeguimientoRepository.save(nuevo);
-
-      // Si todos los detalles llegaron al final → orden lista
-      checkAndMarkOrderAsReady(idOrden);
-
-      return saved;
+    return saved;
   }
 
-  private void checkAndMarkOrderAsReady(Long idOrden) {
-    List<OrdenDetalle> detalles = ordenDetalleRepository.findByIdOrden(idOrden);
-    boolean allDone = true;
-
-    for (OrdenDetalle det : detalles) {
-      String t = det.getProducto().getTipoProducto();
-      String st = det.getProducto().getSubTipoProducto();
-      List<ProductoTipoEstado> wf = productoTipoEstadoRepository.findByTipoAndSubTipoOrderBySecuenciaAsc(t, st);
-      int maxSeq = wf.size();
-
-      List<OrdenSeguimiento> hist = ordenSeguimientoRepository.findByDetalleOrderByFechaCreacionDesc(
-              idOrden, det.getIdOrdenDetalle(), det.getIdProducto());
-
-      int lastSeq = hist.isEmpty() ? 0 : wf.stream()
-              .filter(s -> s.getEstado().equals(hist.get(0).getEstado()))
-              .findFirst().map(ProductoTipoEstado::getSecuencia).orElse(0);
-
-      if (lastSeq < maxSeq) {
-          allDone = false;
-          break;
-      }
-    }
-
-    if (allDone) {
-      Orden order = ordenRepository.findById(idOrden).orElseThrow();
-      order.setEstado("Lista");   // o "Preparada" según tu flujo
-      ordenRepository.save(order);
-    }
-  }
 }

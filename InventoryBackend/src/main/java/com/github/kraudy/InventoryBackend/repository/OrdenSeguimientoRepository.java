@@ -12,40 +12,32 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimiento, OrdenSeguimientoPK> {
-  @Query("SELECT s FROM OrdenSeguimiento s WHERE s.idOrden = :idOrden AND s.idOrdenDetalle = :idOrdenDetalle AND s.idProducto = :idProducto ORDER BY s.fechaCreacion ASC")
-  List<OrdenSeguimiento> findByDetalleOrderByFechaCreacionAsc(Long idOrden, Long idOrdenDetalle, Long idProducto);
+  @Query("SELECT s FROM OrdenSeguimiento s WHERE s.idOrden = :idOrden AND s.idOrdenDetalle = :idOrdenDetalle ORDER BY s.fechaCreacion ASC")
+  List<OrdenSeguimiento> findByDetalleOrderByFechaCreacionAsc(Long idOrden, Long idOrdenDetalle);
 
-  @Query("SELECT s FROM OrdenSeguimiento s WHERE s.idOrden = :idOrden AND s.idOrdenDetalle = :idOrdenDetalle AND s.idProducto = :idProducto ORDER BY s.fechaCreacion DESC")
-  List<OrdenSeguimiento> findByDetalleOrderByFechaCreacionDesc(Long idOrden, Long idOrdenDetalle, Long idProducto);
+  @Query("SELECT s FROM OrdenSeguimiento s WHERE s.idOrden = :idOrden AND s.idOrdenDetalle = :idOrdenDetalle ORDER BY s.fechaCreacion DESC")
+  List<OrdenSeguimiento> findByDetalleOrderByFechaCreacionDesc(Long idOrden, Long idOrdenDetalle);
 
   List<OrdenSeguimiento> findByIdOrden(Long idOrden);
 
   @Query(value = """
-    SELECT 
-        s.id_orden,
-        s.id_orden_detalle,
-        s.id_producto,
-        p.nombre,
-        d.cantidad,
-        p.tipo_producto,
-        p.sub_tipo_producto,
-        (SELECT estado 
-         FROM orden_seguimiento ss 
-         WHERE ss.id_orden = s.id_orden 
-           AND ss.id_orden_detalle = s.id_orden_detalle 
-           AND ss.id_producto = s.id_producto 
-         ORDER BY ss.fecha_creacion DESC 
-         LIMIT 1) AS estadoActual
-    FROM orden_seguimiento s
-    JOIN orden_detalle d ON d.id_orden = s.id_orden 
-                        AND d.id_orden_detalle = s.id_orden_detalle 
-                        AND d.id_producto = s.id_producto
-    JOIN producto p ON p.id = s.id_producto
-    WHERE s.id_orden = :idOrden
-    GROUP BY s.id_orden, s.id_orden_detalle, s.id_producto, p.nombre, 
-             d.cantidad,
-             p.tipo_producto, p.sub_tipo_producto
-    ORDER BY s.id_orden_detalle ASC
+    SELECT
+        seg.id_orden,
+        seg.id_orden_detalle,
+        det.id_producto,
+        prod.nombre,
+        det.cantidad,
+        seg.tipo,
+        seg.sub_tipo,
+        seg.estado AS estadoActual
+    FROM orden_seguimiento seg
+    JOIN orden_detalle det ON det.id_orden = seg.id_orden
+                        AND det.id_orden_detalle = seg.id_orden_detalle
+    JOIN producto prod ON prod.id = det.id_producto
+    WHERE seg.id_orden = :idOrden
+    ORDER BY seg.id_orden_detalle ASC
     """, nativeQuery = true)
   List<OrdenSeguimientoDTO> getFullSeguimientoByOrden(@Param("idOrden") Long idOrden);
+
+  //TODO: Agregar obtenerOrdenesPorEstado y pasarle el estado
 }

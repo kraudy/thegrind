@@ -26,28 +26,11 @@ public class OrdenDetalle {
   private Long idOrden;
 
   @Id
-  @Column(name = "id_producto", insertable = false, updatable = false)
-  private Long idProducto;
-
-  @Id
   @Column(name = "id_orden_detalle", nullable = false)
   private Long idOrdenDetalle;
 
-  // ================== Relaciones con MapsId ==================
-  //@JsonIgnore
-  @JsonProperty(access = Access.WRITE_ONLY)
-  @ManyToOne(fetch = FetchType.LAZY)
-  @MapsId("idOrden")
-  @JoinColumn(name = "id_orden", nullable = false)
-  private Orden orden;
-
-  //@JsonIgnore
-  @JsonProperty(access = Access.WRITE_ONLY)
-  @ManyToOne(fetch = FetchType.LAZY)
-  @MapsId("idProducto")
-  @JoinColumn(name = "id_producto", nullable = false)
-  private Producto producto;
-  // ================== Relaciones con MapsId ==================
+  @Column(name = "id_producto", insertable = false, updatable = false)
+  private Long idProducto;
 
   @Column(nullable = false, columnDefinition = "INTEGER")
   private int cantidad;
@@ -66,6 +49,28 @@ public class OrdenDetalle {
   @Column(nullable = false)
   private LocalDateTime fechaModificacion;
 
-  @OneToMany(mappedBy = "ordenDetalle", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<OrdenSeguimiento> seguimientos = new ArrayList<>();
+  // ================== Relaciones ==================
+  //@JsonIgnore
+  @JsonProperty(access = Access.WRITE_ONLY)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @MapsId("idOrden")
+  @JoinColumn(name = "id_orden", nullable = false)
+  private Orden orden;
+
+  //@JsonIgnore
+  @JsonProperty(access = Access.WRITE_ONLY)
+  @ManyToOne(fetch = FetchType.LAZY)
+  //@MapsId("idProducto")
+  @JoinColumn(name = "id_producto", referencedColumnName = "id", nullable = false)
+  private Producto producto;
+
+  //TODO: Creo que este no lo necesito porque al final el seguimiento lo borro y queda en el historico
+  //@OneToMany(mappedBy = "ordenDetalle", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumns({
+      @JoinColumn(name = "id_orden", referencedColumnName = "id_orden", insertable = false, updatable = false),
+      @JoinColumn(name = "id_orden_detalle", referencedColumnName = "id_orden_detalle", insertable = false, updatable = false)
+  })
+  private OrdenSeguimiento seguimientos;
+  //private List<OrdenSeguimiento> seguimientos = new ArrayList<>();
 }

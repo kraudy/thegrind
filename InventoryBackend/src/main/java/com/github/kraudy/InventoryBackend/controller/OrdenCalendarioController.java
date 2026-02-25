@@ -119,7 +119,7 @@ public class OrdenCalendarioController {
       Producto producto = productoRepository.findById(ordenDetalle.idProducto()).
         orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
 
-      ProductoTipoEstadoPK productoTipoEstadoPK =new ProductoTipoEstadoPK(producto.getProductoTipo().getTipo(), producto.getSubTipoProducto(), 1);
+      ProductoTipoEstadoPK productoTipoEstadoPK = new ProductoTipoEstadoPK(producto.getProductoTipo().getTipo(), producto.getSubTipoProducto(), 1);
       
       ProductoTipoEstado productoTipoEstado = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
         orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado inicial de Producto no encontrado"));
@@ -128,8 +128,10 @@ public class OrdenCalendarioController {
 
       ordenSeguimiento.setIdOrden(ordenDetalle.idOrden());
       ordenSeguimiento.setIdOrdenDetalle(ordenDetalle.idOrdenDetalle());
-      ordenSeguimiento.setIdProducto(ordenDetalle.idProducto());
+      ordenSeguimiento.setTipo(producto.getTipoProducto());
+      ordenSeguimiento.setSubTipo(producto.getSubTipoProducto());
       ordenSeguimiento.setEstado(productoTipoEstado.getEstado()); // Agregamos el estado obtenido
+      ordenSeguimiento.setSecuencia(productoTipoEstado.getSecuencia());
       ordenSeguimiento.setSeguimientoPor("adminTest");
       
       ordenSeguimientoRepository.save(ordenSeguimiento);

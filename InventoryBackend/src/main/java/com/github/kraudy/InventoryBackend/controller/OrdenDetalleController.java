@@ -40,13 +40,12 @@ public class OrdenDetalleController {
   }
 
   // Obtener un detalle específico por clave compuesta
-  @GetMapping("/{idOrden}/{idOrdenDetalle}/{idProducto}")
+  @GetMapping("/{idOrden}/{idOrdenDetalle}")
   public OrdenDetalle getById(
           @PathVariable Long idOrden,
-          @PathVariable Long idOrdenDetalle,
-          @PathVariable Long idProducto) {
+          @PathVariable Long idOrdenDetalle){
 
-    OrdenDetallePK pk = new OrdenDetallePK(idOrden, idOrdenDetalle, idProducto);
+    OrdenDetallePK pk = new OrdenDetallePK(idOrden, idOrdenDetalle);
     return ordenDetalleRepository.findById(pk).orElse(null);
   }
 
@@ -64,49 +63,64 @@ public class OrdenDetalleController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El ID del producto es obligatorio");
     }
 
-    ordenDetalleRepository.insertDetalle(idOrden, idProducto, ordenDetalle.getCantidad(), ordenDetalle.getPrecioUnitario(), ordenDetalle.getSubtotal());
+    ProductoPrecioPK pkPrecio = new ProductoPrecioPK(idProducto, ordenDetalle.getPrecioUnitario());
+
+    ProductoPrecio existingPrecio = productoPrecioRepository.findById(pkPrecio)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Precio de producto no encontrado"));
+    
+    // De existir, validamos que la cantidad del detalle cumpla con el requisito mínimo del precio
+    if (existingPrecio.getCantidadRequerida() > 0){
+      if (ordenDetalle.getCantidad() <= existingPrecio.getCantidadRequerida()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Para este precio, se necesita un minimo de " + existingPrecio.getCantidadRequerida() + " unidades del producto");
+      }
+    }
+
+    ordenDetalle.setPrecioUnitario(existingPrecio.getPrecio());
+    ordenDetalle.setSubtotal(existingPrecio.getPrecio().multiply(new BigDecimal(ordenDetalle.getCantidad())));
+
+    ordenDetalleRepository.insertDetalle(idOrden, idProducto, ordenDetalle.getCantidad(), existingPrecio.getPrecio(), ordenDetalle.getSubtotal());
 
     // Actualizar totales de la orden después de crear detalle
-    ordenRepository.updateOrdenTotales(idOrden, idProducto);
+    ordenRepository.updateOrdenTotales(idOrden);
 
     return;
   }
 
   // Actualizar un detalle existente
- @PutMapping("/{idOrden}/{idOrdenDetalle}/{idProducto}")
+ @PutMapping("/{idOrden}/{idOrdenDetalle}")
   public OrdenDetalle update(
           @PathVariable Long idOrden,
           @PathVariable Long idOrdenDetalle,
-          @PathVariable Long idProducto,
           @RequestBody OrdenDetalle ordenDetalleActualizado) {
 
     // Construimos la PK para buscar la entidad existente
-    OrdenDetallePK pk = new OrdenDetallePK(idOrden, idOrdenDetalle, idProducto);
+    OrdenDetallePK pk = new OrdenDetallePK(idOrden, idOrdenDetalle);
 
     OrdenDetalle existing = ordenDetalleRepository.findById(pk)
             .orElseThrow(() -> new RuntimeException("Detalle de orden no encontrado"));
 
+    existing.setPrecioUnitario(ordenDetalleActualizado.getPrecioUnitario());
+    existing.setCantidad(ordenDetalleActualizado.getCantidad());
+
     // PK de precio del producto para validar que exista el precio antes de actualizar el detalle
-    ProductoPrecioPK pkPrecio = new ProductoPrecioPK(idProducto, ordenDetalleActualizado.getPrecioUnitario());
+    ProductoPrecioPK pkPrecio = new ProductoPrecioPK(existing.getIdProducto(), existing.getPrecioUnitario());
 
     ProductoPrecio existingPrecio = productoPrecioRepository.findById(pkPrecio)
             .orElseThrow(() -> new RuntimeException("Precio de producto no encontrado"));
 
     // De existir, validamos que la cantidad del detalle cumpla con el requisito mínimo del precio
     if (existingPrecio.getCantidadRequerida() > 0){
-      if (ordenDetalleActualizado.getCantidad() <= existingPrecio.getCantidadRequerida()) {
+      if (existing.getCantidad() <= existingPrecio.getCantidadRequerida()) {
         throw new RuntimeException("Para este precio, se necesita un minimo de " + existingPrecio.getCantidadRequerida() + " unidades del producto");
       }
     }
     
-    existing.setCantidad(ordenDetalleActualizado.getCantidad());
-    existing.setPrecioUnitario(existingPrecio.getPrecio());
-    existing.setSubtotal(existingPrecio.getPrecio().multiply(new BigDecimal(ordenDetalleActualizado.getCantidad())));
+    existing.setSubtotal(existingPrecio.getPrecio().multiply(new BigDecimal(existing.getCantidad())));
 
     ordenDetalleRepository.save(existing);
 
     // Actualizar totales de la orden después de insertar el detalle
-    ordenRepository.updateOrdenTotales(idOrden, idProducto);
+    ordenRepository.updateOrdenTotales(idOrden);
 
     return existing;
   }
@@ -115,13 +129,12 @@ public class OrdenDetalleController {
   @DeleteMapping("/{idOrden}/{idOrdenDetalle}/{idProducto}")
   public void delete(
           @PathVariable Long idOrden,
-          @PathVariable Long idOrdenDetalle,
-          @PathVariable Long idProducto) {
+          @PathVariable Long idOrdenDetalle) {
 
-    OrdenDetallePK pk = new OrdenDetallePK(idOrden, idOrdenDetalle, idProducto);
+    OrdenDetallePK pk = new OrdenDetallePK(idOrden, idOrdenDetalle);
     ordenDetalleRepository.deleteById(pk);
 
     // Actualizar totales de la orden después de eliminar detalle
-    ordenRepository.updateOrdenTotales(idOrden, idProducto);
+    ordenRepository.updateOrdenTotales(idOrden);
   }
 }
