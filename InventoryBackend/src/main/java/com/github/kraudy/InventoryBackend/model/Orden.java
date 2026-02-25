@@ -22,12 +22,7 @@ public class Orden {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @JsonIgnore
-  @ManyToOne
-  @JoinColumn(name = "id_cliente", nullable = false)
-  private Cliente cliente;
-
-  @Transient
+  @Column(name = "id_cliente", updatable = false, nullable = false)
   private Long idCliente;
 
   @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
@@ -51,11 +46,11 @@ public class Orden {
 
   // Optional: set when order is prepared
   @Column(nullable = true, columnDefinition = "TIMESTAMP")
-  private LocalDateTime fechaPreparada;
+  private LocalDateTime fechaPreparada; //fechaLista
 
   // Optional: set when order is dispatched
   @Column(nullable = true, columnDefinition = "TIMESTAMP")
-  private LocalDateTime fechaDespachada;
+  private LocalDateTime fechaDespachada; // fechaEntrega
 
   // Update timestamp automatically when the order is updated
   @UpdateTimestamp
@@ -67,13 +62,18 @@ public class Orden {
 
   // Relaciones
 
+  @JsonIgnore
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "id_cliente", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+  private Cliente cliente;
+
   // Relación OneToMany con OrdenDetalle
   @JsonIgnore // For now we don't need to return detalle, TODO: this can also be adde to the repository and used it by the controller
   @OneToMany(mappedBy = "orden", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<OrdenDetalle> detalles = new ArrayList<>();
 
   @JsonIgnore
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "estado", referencedColumnName = "estado", nullable = false, insertable = false, updatable = false)
   private EstadoSeguimiento estadoSeguimiento;
 

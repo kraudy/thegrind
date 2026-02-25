@@ -10,10 +10,14 @@ import org.springframework.web.server.ResponseStatusException;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoPK;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
+import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoHistorico;
 import com.github.kraudy.InventoryBackend.model.ProductoTipoEstado;
 import com.github.kraudy.InventoryBackend.model.ProductoTipoEstadoPK;
+import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoHistoricoRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoTipoEstadoRepository;
+
+import java.time.Duration;
 
 @RestController
 @RequestMapping("/api/ordenes-seguimiento")
@@ -25,6 +29,9 @@ public class OrdenSeguimientoController {
 
   @Autowired
   private ProductoTipoEstadoRepository productoTipoEstadoRepository;
+
+  @Autowired
+  private OrdenSeguimientoHistoricoRepository ordenSeguimientoHistoricoRepository;
 
   @GetMapping
   public List<OrdenSeguimiento> getAll() {
@@ -82,25 +89,42 @@ public class OrdenSeguimientoController {
     OrdenSeguimiento ordenSeguimientoActual = ordenSeguimientoRepository.findById(ordenSeguimientoPK).
       orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El detalle no se encuentra en seguimiento"));
 
+    // Se le suma uno para obtener el siguiente estado
     ProductoTipoEstadoPK productoTipoEstadoPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() + 1);
     
     ProductoTipoEstado productoTipoEstado = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
       orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Siguiente estado no encontrado"));
 
-    //TODO: Abregar aqui al historico 
+    OrdenSeguimientoHistorico historico = new OrdenSeguimientoHistorico();
+    historico.setIdOrden(ordenSeguimientoActual.getIdOrden());
+    historico.setIdOrdenDetalle(ordenSeguimientoActual.getIdOrdenDetalle());
+    historico.setEstado(ordenSeguimientoActual.getEstado());
 
+    historico.setFechaCreacion(ordenSeguimientoActual.getFechaModificacion()); // Utilizamos la fecha de modificacion
+    historico.setUsuarioCreacion(ordenSeguimientoActual.getSeguimientoPor());
+
+    ordenSeguimientoActual.setSeguimientoPor("adminTestfinaliza");
     // Se actualiza estado nuevo, secuencia y usuario que finaliza estado previo
     ordenSeguimientoActual.setEstado(productoTipoEstado.getEstado());
     ordenSeguimientoActual.setSecuencia(productoTipoEstado.getSecuencia());
-    ordenSeguimientoActual.setSeguimientoPor("adminTestfinaliza"); 
 
-    OrdenSeguimiento saved = ordenSeguimientoRepository.save(ordenSeguimientoActual);
+    // Actualizamos el estado actual
+    ordenSeguimientoActual = ordenSeguimientoRepository.save(ordenSeguimientoActual);
+
+    // Agregamos datos pendientes al historico
+    historico.setFechaFinalizacion(ordenSeguimientoActual.getFechaModificacion());
+    historico.setUsuarioFinalizacion(ordenSeguimientoActual.getSeguimientoPor());
+
+    historico.setDuracion(Duration.between(historico.getFechaCreacion(), historico.getFechaFinalizacion()).toHours());
+
+    // Guardamos el historico
+    ordenSeguimientoHistoricoRepository.save(historico);
 
     // Si todos los detalles llegaron al final → orden lista
     //TODO: Just add one to secuencia and do the get, then check if there is another and finish
     //checkAndMarkOrderAsReady(idOrden);
 
-    return saved;
+    return ordenSeguimientoActual;
   }
 
 }

@@ -46,7 +46,7 @@ public class OrdenCalendario {
   private String usuarioModificacion;
 
   @JsonIgnore
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id", nullable = false)
   private Orden orden;
 }

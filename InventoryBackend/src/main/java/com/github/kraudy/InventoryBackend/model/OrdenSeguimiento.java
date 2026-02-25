@@ -39,15 +39,6 @@ public class OrdenSeguimiento {
   @Column(name = "estado", nullable = false, length = 100)
   private String estado;
 
-  @JsonIgnore
-  //@ManyToOne(fetch = FetchType.LAZY)
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumns({
-      @JoinColumn(name = "id_orden", referencedColumnName = "id_orden", insertable = false, updatable = false),
-      @JoinColumn(name = "id_orden_detalle", referencedColumnName = "id_orden_detalle", insertable = false, updatable = false)
-  })
-  private OrdenDetalle ordenDetalle;
-
   // Track who created the tracking record, required and not updatable
   @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
   private String seguimientoPor;
@@ -56,5 +47,19 @@ public class OrdenSeguimiento {
   @CreationTimestamp
   @Column(nullable = false, columnDefinition = "TIMESTAMP")
   private LocalDateTime fechaCreacion;
+
+  @UpdateTimestamp
+  @Column(nullable = false, columnDefinition = "TIMESTAMP")
+  private LocalDateTime fechaModificacion;
+
+  // Relations
+
+  @JsonIgnore
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumns({
+      @JoinColumn(name = "id_orden", referencedColumnName = "id_orden", insertable = false, updatable = false),
+      @JoinColumn(name = "id_orden_detalle", referencedColumnName = "id_orden_detalle", insertable = false, updatable = false)
+  })
+  private OrdenDetalle ordenDetalle;
 
 }

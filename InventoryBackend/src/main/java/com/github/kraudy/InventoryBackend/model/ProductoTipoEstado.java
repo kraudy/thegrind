@@ -55,17 +55,17 @@ public class ProductoTipoEstado {
   // Relations
 
   @JsonIgnore
-  @ManyToOne
-  @JoinColumn(name = "tipo", nullable = false)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "tipo", nullable = false, insertable = false, updatable = false)
   private ProductoTipo productoTipo;
 
   @JsonIgnore
-  @ManyToOne
-  @JoinColumn(name = "subTipo", nullable = false)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "subTipo", nullable = false, insertable = false, updatable = false)
   private ProductoSubTipo productoSubTipo;
 
   @JsonIgnore
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "estado", nullable = false, insertable = false, updatable = false)
   private EstadoSeguimiento estadoSeguimiento;
 

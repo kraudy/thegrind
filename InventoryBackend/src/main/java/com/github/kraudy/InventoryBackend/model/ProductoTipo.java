@@ -37,6 +37,6 @@ public class ProductoTipo {
 
   // Bi-directional relationship to Producto, get all products of this type
   @JsonIgnore
-  @OneToMany(mappedBy = "productoTipo")
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "productoTipo") // Maps by the relation not the filed
   private Set<Producto> productos = new HashSet<>();
 }

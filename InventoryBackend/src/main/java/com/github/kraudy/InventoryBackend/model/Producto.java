@@ -62,7 +62,7 @@ public class Producto {
   private List<ProductoPrecio> precios = new ArrayList<>();
 
   @JsonIgnore
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "subTipoProducto", referencedColumnName = "subTipo", nullable = false, insertable = false, updatable = false)
   private ProductoSubTipo productoSubTipo;
 }

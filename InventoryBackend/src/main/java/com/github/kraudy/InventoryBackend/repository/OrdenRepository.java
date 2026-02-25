@@ -12,47 +12,45 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface OrdenRepository extends JpaRepository<Orden, Long> {
-  @Query("""
-    SELECT new com.github.kraudy.InventoryBackend.dto.OrdenDTO(
-        ord.id,
-        ord.cliente.id,                                       
-        CONCAT(cte.nombre, ' ', cte.apellido),                
-        ord.creadaPor,
-        ord.totalMonto,
-        ord.totalProductos,
-        ord.fechaCreacion,
-        ord.fechaVencimiento,
-        ord.fechaPreparada,
-        ord.fechaDespachada,
-        ord.fechaModificacion,
-        ord.estado
-    )
-    FROM Orden ord
-    JOIN ord.cliente cte
+  @Query(value = """
+    SELECT
+      ord.id AS id,
+      ord.id_cliente AS idCliente,
+      CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
+      ord.creada_por AS creadaPor,
+      ord.total_monto AS totalMonto,
+      ord.total_productos AS totalProductos,
+      ord.fecha_creacion AS fechaCreacion,
+      ord.fecha_vencimiento AS fechaVencimiento,
+      ord.fecha_preparada AS fechaPreparada,
+      ord.fecha_despachada AS fechaDespachada,
+      ord.fecha_modificacion AS fechaModificacion,
+      ord.estado AS estado
+    FROM orden ord
+    JOIN cliente cte ON cte.id = ord.id_cliente
     ORDER BY ord.id ASC
-  """)
+    """, nativeQuery = true)
   List<OrdenDTO> getAll();
 
-  @Query("""
-    SELECT new com.github.kraudy.InventoryBackend.dto.OrdenDTO(
-        ord.id,
-        ord.cliente.id,                                       
-        CONCAT(cte.nombre, ' ', cte.apellido),                
-        ord.creadaPor,
-        ord.totalMonto,
-        ord.totalProductos,
-        ord.fechaCreacion,
-        ord.fechaVencimiento,
-        ord.fechaPreparada,
-        ord.fechaDespachada,
-        ord.fechaModificacion,
-        ord.estado
-    )
-    FROM Orden ord
-    JOIN ord.cliente cte
+
+  @Query(value = """
+    SELECT
+      ord.id AS id,
+      ord.id_cliente AS idCliente,
+      CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
+      ord.creada_por AS creadaPor,
+      ord.total_monto AS totalMonto,
+      ord.total_productos AS totalProductos,
+      ord.fecha_creacion AS fechaCreacion,
+      ord.fecha_vencimiento AS fechaVencimiento,
+      ord.fecha_preparada AS fechaPreparada,
+      ord.fecha_despachada AS fechaDespachada,
+      ord.fecha_modificacion AS fechaModificacion,
+      ord.estado AS estado
+    FROM orden ord
+    JOIN cliente cte ON cte.id = ord.id_cliente
     WHERE ord.id = :id
-    ORDER BY ord.id ASC
-  """)
+    """, nativeQuery = true)
   OrdenDTO getOrdenById(Long id);
 
   //TODO: Move this to a before insert,update, delete trigger in the database
@@ -69,24 +67,47 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
       Long idOrden
   );
 
-  @Query("""
-    SELECT new com.github.kraudy.InventoryBackend.dto.OrdenDTO(
-        ord.id,
-        ord.cliente.id,                                       
-        CONCAT(cte.nombre, ' ', cte.apellido),                
-        ord.creadaPor,
-        ord.totalMonto,
-        ord.totalProductos,
-        ord.fechaCreacion,
-        ord.fechaVencimiento,
-        ord.fechaPreparada,
-        ord.fechaDespachada,
-        ord.fechaModificacion,
-        ord.estado
-    )
-    FROM Orden ord JOIN ord.cliente cte
+  @Modifying
+  @Transactional
+  @Query(value = """
+    UPDATE orden
+    SET estado = :estado
+    WHERE id = :idOrden
+    """, nativeQuery = true)
+  void updateEstado(Long idOrden, String estado);
+
+  @Query(value = """
+    SELECT COALESCE(SUM(od.subtotal), 0)
+    FROM orden_detalle od
+    WHERE od.id_orden = :idOrden
+    """, nativeQuery = true)
+  BigDecimal calculateTotalMonto(Long idOrden);
+
+  @Query(value = """
+    SELECT COALESCE(SUM(od.cantidad), 0)
+    FROM orden_detalle od
+    WHERE od.id_orden = :idOrden
+    """, nativeQuery = true)
+  int calculateTotalProductos(Long idOrden);
+
+  @Query(value = """
+    SELECT
+      ord.id AS id,
+      ord.id_cliente AS idCliente,
+      CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
+      ord.creada_por AS creadaPor,
+      ord.total_monto AS totalMonto,
+      ord.total_productos AS totalProductos,
+      ord.fecha_creacion AS fechaCreacion,
+      ord.fecha_vencimiento AS fechaVencimiento,
+      ord.fecha_preparada AS fechaPreparada,
+      ord.fecha_despachada AS fechaDespachada,
+      ord.fecha_modificacion AS fechaModificacion,
+      ord.estado AS estado
+    FROM orden ord
+    JOIN cliente cte ON cte.id = ord.id_cliente
     WHERE ord.estado = 'Recibida'
-    ORDER BY ord.fechaVencimiento ASC
-  """)
+    ORDER BY ord.id ASC
+    """, nativeQuery = true)
   List<OrdenDTO> getRecibidas();
 }

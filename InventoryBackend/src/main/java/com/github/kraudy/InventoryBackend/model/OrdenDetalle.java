@@ -60,17 +60,14 @@ public class OrdenDetalle {
   //@JsonIgnore
   @JsonProperty(access = Access.WRITE_ONLY)
   @ManyToOne(fetch = FetchType.LAZY)
-  //@MapsId("idProducto")
   @JoinColumn(name = "id_producto", referencedColumnName = "id", nullable = false)
   private Producto producto;
 
   //TODO: Creo que este no lo necesito porque al final el seguimiento lo borro y queda en el historico
-  //@OneToMany(mappedBy = "ordenDetalle", cascade = CascadeType.ALL, orphanRemoval = true)
   @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumns({
       @JoinColumn(name = "id_orden", referencedColumnName = "id_orden", insertable = false, updatable = false),
       @JoinColumn(name = "id_orden_detalle", referencedColumnName = "id_orden_detalle", insertable = false, updatable = false)
   })
   private OrdenSeguimiento seguimientos;
-  //private List<OrdenSeguimiento> seguimientos = new ArrayList<>();
 }

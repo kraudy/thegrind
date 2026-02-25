@@ -43,4 +43,9 @@ public class ProductoSubTipo {
   @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
   private String usuarioModificacion;
 
+  // Bi-directional relationship to Producto, get all products of this sub type
+  @JsonIgnore
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "productoSubTipo")
+  private Set<Producto> productos = new HashSet<>();
+
 }
