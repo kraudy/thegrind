@@ -119,4 +119,8 @@ export class OrdenCalendarioFormComponent implements OnInit {
   goBack(): void {
     this.router.navigate(['/ordenes-calendario']);
   }
+
+  viewDetails(ordenId: number): void {
+    this.router.navigate(['/ordenes-detalle', ordenId], { queryParams: { from: 'calendario', fecha: this.dateStr } });
+  }
 }

@@ -43,25 +43,49 @@
       <h2 class="text-2xl font-semibold">Órdenes recibidas (selecciona para programar)</h2>
     </div>
 
-    <div class="divide-y max-h-[600px] overflow-auto">
-      <div *ngFor="let orden of pendingOrders" 
-           class="p-6 hover:bg-gray-50 flex items-center gap-6 cursor-pointer"
-           (click)="toggleOrder(orden.id!)">
-        <input type="checkbox" 
-               [checked]="selectedOrderIds.includes(orden.id!)"
-               class="w-6 h-6 text-indigo-600 rounded focus:ring-indigo-500">
-
-        <div class="flex-1">
-          <div class="flex justify-between">
-            <span class="font-semibold text-lg">#{{ orden.id }} — {{ orden.clienteNombre }}</span>
-            <span class="text-sm bg-gray-100 px-3 py-1 rounded-full">{{ orden.totalProductos }} prod</span>
-          </div>
-          <p class="text-sm text-gray-600 mt-1">
-            Vence: {{ orden.fechaVencimiento | date:'dd/MM/yyyy HH:mm' }}
-          </p>
-        </div>
-      </div>
-    </div>
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <input type="checkbox" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Creación</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Vencimiento</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Productos</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Monto</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let orden of pendingOrders" class="hover:bg-gray-50 cursor-pointer" (click)="orden.id && viewDetails(orden.id)">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <input type="checkbox" 
+                   [checked]="selectedOrderIds.includes(orden.id!)"
+                   (click)="toggleOrder(orden.id!); $event.stopPropagation()"
+                   class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ orden.id }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ orden.clienteNombre }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  [ngClass]="{
+                    'bg-green-100 text-green-800': orden.estado === 'Recibida',
+                    'bg-yellow-100 text-yellow-800': orden.estado === 'Preparada',
+                    'bg-blue-100 text-blue-800': orden.estado === 'Despachada',
+                    'bg-gray-100 text-gray-800': orden.estado !== 'Recibida' && orden.estado !== 'Preparada' && orden.estado !== 'Despachada'
+                  }">
+              {{ orden.estado }}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ orden.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ orden.fechaVencimiento | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ orden.totalProductos }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ orden.totalMonto | currency:'USD':'symbol':'1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
 
     <div class="p-8 bg-gray-50 flex justify-end">
       <button (click)="scheduleSelected()"

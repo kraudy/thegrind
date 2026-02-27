@@ -40,13 +40,10 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr *ngFor="let orden of ordenes" class="hover:bg-gray-50 transition cursor-pointer">
-            <!-- Hacer el ID clickable para ir a detalles -->
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <a [routerLink]="['/ordenes-detalle', orden.id]"
-                class="text-indigo-600 hover:text-indigo-900 hover:underline">
-                {{ orden.id }}
-              </a>
+          <tr *ngFor="let orden of ordenes" class="hover:bg-gray-50 transition cursor-pointer" (click)="orden.id && viewDetails(orden.id)">
+            <!-- ID no longer clickable -->
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              {{ orden.id }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ orden.clienteNombre }}</td>
             <td class="px-6 py-4 whitespace-nowrap">
@@ -75,10 +72,6 @@
             </td>
 
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-4">
-              <a [routerLink]="['/ordenes-detalle', orden.id]"
-                class="text-green-600 hover:text-green-900 font-medium">
-                Detalles
-              </a>
               <a [routerLink]="['/ordenes', orden.id, 'edit']"
                 class="text-indigo-600 hover:text-indigo-900 font-medium">
                 Editar

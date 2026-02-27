@@ -2,7 +2,7 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/cor
 import { ChangeDetectorRef } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 
 import { OrdenDetalleService } from '../orden-detalle.service';
 import { OrdenDetalle } from '../orden-detalle.model';
@@ -25,6 +25,7 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
       private ordenDetalleService: OrdenDetalleService,
       private ordenService: OrdenService,      // ← Nuevo
       private route: ActivatedRoute,
+      private router: Router,
       private cd: ChangeDetectorRef
   ) {}
 
@@ -110,6 +111,16 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
           alert('No se pudo eliminar el detalle. Ver consola para más detalles.');
         }
       });
+    }
+  }
+
+  goBack(): void {
+    const from = this.route.snapshot.queryParams['from'];
+    const fecha = this.route.snapshot.queryParams['fecha'];
+    if (from === 'calendario' && fecha) {
+      this.router.navigate(['/ordenes-calendario', fecha, 'new']);
+    } else {
+      this.router.navigate(['/ordenes']);
     }
   }
 }

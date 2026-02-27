@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 
 import { OrdenService } from '../orden.service';
 import { Orden } from '../orden.model';
@@ -19,6 +19,7 @@ export class OrdenListComponent implements OnInit {
 
   constructor(
       private ordenService: OrdenService,
+      private router: Router,
       private cd: ChangeDetectorRef
   ) {}
 
@@ -54,4 +55,7 @@ export class OrdenListComponent implements OnInit {
     }
   }
 
+  viewDetails(ordenId: number): void {
+    this.router.navigate(['/ordenes-detalle', ordenId], { queryParams: { from: 'list' } });
+  }
 }
