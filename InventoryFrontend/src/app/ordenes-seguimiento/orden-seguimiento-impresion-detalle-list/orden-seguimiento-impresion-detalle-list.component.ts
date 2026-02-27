@@ -8,13 +8,13 @@ import { OrdenSeguimientoDetalle } from '../orden-seguimiento-detalle.model';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
 
 @Component({
-  selector: 'app-orden-seguimiento-list',
+  selector: 'app-orden-seguimiento-impresion-detalle-list',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './orden-seguimiento-list.html',
-  styleUrls: ['./orden-seguimiento-list.css'],
+  templateUrl: './orden-seguimiento-impresion-detalle-list.html',
+  styleUrls: ['./orden-seguimiento-impresion-detalle-list.css'],
 })
-export class OrdenSeguimientoListComponent implements OnInit {
+export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
   idOrden!: number;
   detalles: OrdenSeguimientoDetalle[] = [];
   clienteNombre = 'Cargando...';
@@ -37,17 +37,13 @@ export class OrdenSeguimientoListComponent implements OnInit {
   }
 
   load() {
-    //TODO: Here call getPossibleStates and set it to a local map to just key it from getPossibleStatesJ()
-    // to not be calling the backend for each state
-    // The keys needs to be tipo and subtipo to not repeat the same pattern multiple times
-    this.service.getFullByOrden(this.idOrden).subscribe({
+    this.service.getOrdenDetalleParaImpresion(this.idOrden).subscribe({
       next: (data) => {
-        this.detalles = data;
+        this.detalles = data || [];
         this.loadStepperDataForAll();
-
         this.cd.detectChanges();
       },
-      error: (err) => console.error('❌ Error cargando seguimiento', err)
+      error: (err) => console.error('❌ Error cargando detalle de impresión', err),
     });
   }
 
@@ -56,17 +52,17 @@ export class OrdenSeguimientoListComponent implements OnInit {
     this.historyMap.clear();
     this.currentStateMap.clear();
 
-    this.detalles.forEach(det => {
+    this.detalles.forEach((det) => {
       const detId = det.idOrdenDetalle;
       this.currentStateMap.set(detId, det.estadoActual || '');
 
-      this.service.getPossibleStates(det.tipoProducto, det.subTipoProducto).subscribe(states => {
-        this.possibleStatesMap.set(detId, states);
+      this.service.getPossibleStates(det.tipoProducto, det.subTipoProducto).subscribe((states) => {
+        this.possibleStatesMap.set(detId, states || []);
         this.cd.detectChanges();
       });
 
-      this.service.getByDetalle(det.idOrden, det.idOrdenDetalle).subscribe(hist => {
-        this.historyMap.set(detId, hist);
+      this.service.getByDetalle(det.idOrden, det.idOrdenDetalle).subscribe((hist) => {
+        this.historyMap.set(detId, hist || []);
         this.cd.detectChanges();
       });
     });
@@ -83,6 +79,7 @@ export class OrdenSeguimientoListComponent implements OnInit {
   }
 
   isReached(detId: number, estado: string): boolean {
+    if (!estado) return false;
     return this.historyMap.get(detId)?.some((h: any) => h.estado === estado) || false;
   }
 
@@ -91,14 +88,13 @@ export class OrdenSeguimientoListComponent implements OnInit {
     return this.currentStateMap.get(detId) === estado;
   }
 
-  // Nuevo helper seguro para el botón
   isLastState(detId: number): boolean {
     const states = this.getPossibleStates(detId);
     if (states.length === 0) return true;
-    return this.isCurrent(detId, states[states.length - 1].estado);
+    return this.isCurrent(detId, states[states.length - 1]?.estado);
   }
 
   goBack() {
-    this.router.navigate(['/ordenes-calendario']);
+    this.router.navigate(['/ordenes-seguimiento-impresion']);
   }
 }

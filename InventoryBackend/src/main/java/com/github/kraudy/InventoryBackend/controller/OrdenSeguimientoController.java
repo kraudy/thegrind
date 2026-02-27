@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoPK;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoHistorico;
 import com.github.kraudy.InventoryBackend.model.ProductoTipoEstado;
@@ -16,6 +17,8 @@ import com.github.kraudy.InventoryBackend.model.ProductoTipoEstadoPK;
 import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoHistoricoRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoTipoEstadoRepository;
+
+import jakarta.websocket.server.PathParam;
 
 import java.time.Duration;
 
@@ -56,9 +59,20 @@ public class OrdenSeguimientoController {
     ordenSeguimientoRepository.deleteById(pk);
   }
 
+  /* Retorna lista de ordenes con detalle en estados de espera de impresion */
+  @GetMapping("/para-impresion")
+  public List<OrdenSeguimientoDTO> getOrdenesParaImpresion() {
+    return ordenSeguimientoRepository.getOrdenesParaImpresion();
+  }
+
+  @GetMapping("/para-impresion/{idOrden}")
+  public List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaImpresion(@PathVariable Long idOrden) {
+    return ordenSeguimientoRepository.getSeguimientoDeOrdenParaImpresion(idOrden);
+  }
+
   @GetMapping("/orden/{idOrden}")
-  public List<OrdenSeguimientoDTO> getFullSeguimiento(@PathVariable Long idOrden) {
-      return ordenSeguimientoRepository.getFullSeguimientoByOrden(idOrden);
+  public List<OrdenSeguimientoDetalleDTO> getFullSeguimiento(@PathVariable Long idOrden) {
+    return ordenSeguimientoRepository.getFullSeguimientoByOrden(idOrden);
   }
 
   // 1. Estados posibles para un producto
@@ -69,7 +83,7 @@ public class OrdenSeguimientoController {
     return productoTipoEstadoRepository.findByTipoAndSubTipoOrderBySecuenciaAsc(tipo, subTipo);
   }
 
-  // 2. Historial de seguimiento de un detalle
+  // 2. seguimiento de un detalle
   @GetMapping("/por-detalle/{idOrden}/{idOrdenDetalle}")
   public List<OrdenSeguimiento> getByDetalle(
           @PathVariable Long idOrden,

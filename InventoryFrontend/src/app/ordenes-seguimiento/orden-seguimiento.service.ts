@@ -2,8 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { OrdenSeguimiento } from './orden-seguimiento.model';
+import { OrdenSeguimientoDetalle } from './orden-seguimiento-detalle.model';
 import { ProductoTipoEstado } from '../productos-tipo-estados/producto-tipo-estado.model';
+import { OrdenSeguimiento } from './orden-seguimiento.model';
 
 
 @Injectable({
@@ -14,12 +15,20 @@ export class OrdenSeguimientoService {
 
   constructor(private http: HttpClient) {}
 
-  getByDetalle(idOrden: number, idOrdenDetalle: number): Observable<OrdenSeguimiento[]> {
-    return this.http.get<OrdenSeguimiento[]>(`${this.apiUrl}/por-detalle/${idOrden}/${idOrdenDetalle}`);
+  getOrdenesParaImpresion(): Observable<OrdenSeguimiento[]> {
+    return this.http.get<OrdenSeguimiento[]>(`${this.apiUrl}/para-impresion`);
   }
 
-  getFullByOrden(idOrden: number): Observable<OrdenSeguimiento[]> {
-    return this.http.get<OrdenSeguimiento[]>(`${this.apiUrl}/orden/${idOrden}`);
+  getOrdenDetalleParaImpresion(idOrden: number): Observable<OrdenSeguimientoDetalle[]> {
+    return this.http.get<OrdenSeguimientoDetalle[]>(`${this.apiUrl}/para-impresion/${idOrden}`);
+  }
+
+  getByDetalle(idOrden: number, idOrdenDetalle: number): Observable<OrdenSeguimientoDetalle[]> {
+    return this.http.get<OrdenSeguimientoDetalle[]>(`${this.apiUrl}/por-detalle/${idOrden}/${idOrdenDetalle}`);
+  }
+
+  getFullByOrden(idOrden: number): Observable<OrdenSeguimientoDetalle[]> {
+    return this.http.get<OrdenSeguimientoDetalle[]>(`${this.apiUrl}/orden/${idOrden}`);
   }
 
   //TODO: Move this to its own service
@@ -29,7 +38,7 @@ export class OrdenSeguimientoService {
     return this.http.get<ProductoTipoEstado[]>(`${this.apiUrl}/posibles/${tipo}/${subTipo}`);
   }
 
-  advance(idOrden: number, idOrdenDetalle: number): Observable<OrdenSeguimiento> {
-    return this.http.post<OrdenSeguimiento>(`${this.apiUrl}/avanzar/${idOrden}/${idOrdenDetalle}`, {});
+  advance(idOrden: number, idOrdenDetalle: number): Observable<OrdenSeguimientoDetalle> {
+    return this.http.post<OrdenSeguimientoDetalle>(`${this.apiUrl}/avanzar/${idOrden}/${idOrdenDetalle}`, {});
   }
 }

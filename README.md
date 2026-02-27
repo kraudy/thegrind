@@ -118,6 +118,8 @@ ng generate service ordenes-calendario/orden-calendario
 
 ng generate component ordenes-seguimiento/orden-seguimiento-list
 #ng generate component ordenes-seguimiento/orden-seguimiento-form
+ng generate component ordenes-seguimiento/orden-seguimiento-impresion-list
+ng generate component ordenes-seguimiento/orden-seguimiento-impresion-detalle-list
 ng generate service ordenes-seguimiento/orden-seguimiento
 
 ng generate component clientes/cliente-list

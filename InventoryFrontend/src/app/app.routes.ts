@@ -16,6 +16,7 @@ import { OrdenCalendarioFormComponent } from './ordenes-calendario/orden-calenda
 
 import { OrdenSeguimientoListComponent } from './ordenes-seguimiento/orden-seguimiento-list/orden-seguimiento-list.component';
 //import { OrdenSeguimientoFormComponent } from './ordenes-seguimiento/orden-seguimiento-form/orden-seguimiento-form.component';
+import { OrdenSeguimientoImpresionListComponent } from './ordenes-seguimiento/orden-seguimiento-impresion-list/orden-seguimiento-impresion-list.component';
 
 import { ClienteListComponent } from './clientes/cliente-list/cliente-list.component';
 import { ClienteFormComponent } from './clientes/cliente-form/cliente-form.component';
@@ -25,6 +26,7 @@ import { ProductoTipoFormComponent } from './productos-tipos/producto-tipo-form/
 
 import { ProductoPrecioListComponent } from './productos-precios/producto-precio-list/producto-precio-list.component';
 import { ProductoPrecioFormComponent } from './productos-precios/producto-precio-form/producto-precio-form.component';
+import { OrdenSeguimientoImpresionDetalleListComponent } from './ordenes-seguimiento/orden-seguimiento-impresion-detalle-list/orden-seguimiento-impresion-detalle-list.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent }, 
@@ -55,6 +57,8 @@ export const routes: Routes = [
   //{ path: 'ordenes-calendario/:ordenId/edit', component: OrdenCalendarioFormComponent },
 
   { path: 'ordenes-seguimiento/:idOrden/:clienteNombre', component: OrdenSeguimientoListComponent },
+  { path: 'ordenes-seguimiento-impresion', component: OrdenSeguimientoImpresionListComponent },
+  { path: 'ordenes-seguimiento-impresion/:idOrden/:clienteNombre', component: OrdenSeguimientoImpresionDetalleListComponent },
 
   { path: 'clientes', component: ClienteListComponent },
   { path: 'clientes/new', component: ClienteFormComponent },
