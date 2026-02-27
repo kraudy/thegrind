@@ -92,6 +92,16 @@ export class OrdenCalendarioFormComponent implements OnInit {
     }
   }
 
+  selectAllOrders(): void {
+    if (this.selectedOrderIds.length === this.pendingOrders.length) {
+      // If all are selected, deselect all
+      this.selectedOrderIds = [];
+    } else {
+      // Select all
+      this.selectedOrderIds = this.pendingOrders.map(order => order.id!).filter(id => id !== undefined);
+    }
+  }
+
   scheduleSelected(): void {
     if (this.selectedOrderIds.length === 0) return;
 
