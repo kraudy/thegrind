@@ -70,7 +70,7 @@ export class OrdenCalendarioFormComponent implements OnInit {
   formatDayName(): string {
     const [year, month, day] = this.dateStr.split('-').map(Number);
     const date = new Date(year, month - 1, day);
-    return date.toLocaleDateString('es-NI', { weekday: 'short' }).toUpperCase();
+    return date.toLocaleDateString('es-NI', { weekday: 'long' });
   }
 
   formatFullDate(): string {

@@ -62,7 +62,7 @@ export class OrdenCalendarioListComponent implements OnInit {
   formatDayName(dateStr: string): string {
     const [year, month, day] = dateStr.split('-').map(Number);
     const date = new Date(year, month - 1, day);
-    return date.toLocaleDateString('es-NI', { weekday: 'short' }).toUpperCase();
+    return date.toLocaleDateString('es-NI', { weekday: 'long' });
   }
 
   formatFullDate(dateStr: string): string {
@@ -73,5 +73,13 @@ export class OrdenCalendarioListComponent implements OnInit {
 
   formatTime(hora: number, minuto: number): string {
     return `${hora.toString().padStart(2, '0')}:${minuto.toString().padStart(2, '0')}`;
+  }
+
+  isPastDay(dateStr: string): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const dayDate = new Date(year, month - 1, day);
+    return dayDate < today;
   }
 }
