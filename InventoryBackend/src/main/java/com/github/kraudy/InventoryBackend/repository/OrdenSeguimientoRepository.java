@@ -22,6 +22,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
 
   List<OrdenSeguimiento> findByIdOrden(Long idOrden);
 
+  /* Muestra el seguimiento de todos los detalles de una orden */
   @Query(value = """
     SELECT
         seg.id_orden,

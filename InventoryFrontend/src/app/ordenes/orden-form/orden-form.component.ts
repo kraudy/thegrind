@@ -38,6 +38,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
     private clienteService: ClienteService,
     private location: Location,
     private route: ActivatedRoute,
+    private router: Router,
     private cd: ChangeDetectorRef
   ) {}
 
@@ -50,6 +51,17 @@ export class OrdenFormComponent implements OnChanges, OnInit{
     fechaPreparada: null,
     fechaDespachada: null
   };
+
+  // Get minimum date for fechaVencimiento (current date/time)
+  get minFechaVencimiento(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`; // Format: YYYY-MM-DDTHH:MM
+  }
 
   ngOnInit(): void {
     if (!this.orden) {
@@ -203,10 +215,11 @@ export class OrdenFormComponent implements OnChanges, OnInit{
     } else {
       // Create new Orden
       this.ordenService.create(payload).subscribe({
-        next: () => {
+        next: (createdOrden) => {
           this.ordenSaved.emit();
           this.resetForm();
-          this.goBack();
+          // Navigate to orden-detalle to add details
+          this.router.navigate(['/ordenes-detalle', createdOrden.id]);
         },
         complete: () => {
           console.log('Orden payload send sucessfully for create:', payload);

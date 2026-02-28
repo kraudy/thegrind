@@ -109,7 +109,7 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
     FROM orden ord
     JOIN cliente cte ON cte.id = ord.id_cliente
     WHERE ord.estado = 'Recibida'
-    ORDER BY ord.id ASC
+    ORDER BY cte.id, ord.fecha_vencimiento ASC   --ord.id ASC
     """, nativeQuery = true)
   List<OrdenDTO> getRecibidas();
 }

@@ -129,7 +129,7 @@ public class OrdenSeguimientoController {
     historico.setFechaFinalizacion(ordenSeguimientoActual.getFechaModificacion());
     historico.setUsuarioFinalizacion(ordenSeguimientoActual.getSeguimientoPor());
 
-    historico.setDuracion(Duration.between(historico.getFechaCreacion(), historico.getFechaFinalizacion()).toHours());
+    historico.setDuracion(Duration.between(historico.getFechaCreacion(), historico.getFechaFinalizacion()).toMinutes());
 
     // Guardamos el historico
     ordenSeguimientoHistoricoRepository.save(historico);
