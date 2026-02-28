@@ -85,12 +85,6 @@
         </tbody>
       </table>
 
-      <!-- Debug: muestra el JSON crudo para verificar que los datos llegan al template -->
-      <div class="p-4 bg-gray-100 text-sm text-gray-800 mt-4">
-        <strong>Debug ordenes:</strong>
-        <pre class="whitespace-pre-wrap">{{ ordenes | json }}</pre>
-      </div>
-
       <!-- Mensaje cuando no hay órdenes -->
       <div *ngIf="ordenes.length === 0" class="text-center py-12">
         <p class="text-gray-500 text-lg">No hay órdenes registradas aún.</p>

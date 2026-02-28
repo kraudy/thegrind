@@ -72,21 +72,6 @@
         <p class="text-gray-500 text-lg">No hay precios de productos registrados aún.</p>
         <p class="text-gray-400 text-sm mt-2">Use el botón "Agregar Precio" para crear el primero.</p>
       </div>
-
-      <!-- Debug (útil mientras desarrollas, puedes quitarlo después) -->
-      <div class="p-4 bg-gray-100 text-sm text-gray-800 mt-4">
-        <strong>Debug productos (datos cargados):</strong>
-        <pre class="whitespace-pre-wrap">{{ productos | json }}</pre>
-      </div>
     </div>
-  </div>
-
-  <!-- Opcional: sección para mostrar el producto seleccionado (ya que tienes selectedProductoPrecio) -->
-  <div *ngIf="selectedProductoPrecio" class="mt-12 bg-white shadow-xl rounded-xl p-8">
-    <h2 class="text-2xl font-bold text-gray-900 mb-6">Precio Seleccionado (detalle)</h2>
-    <pre class="bg-gray-50 p-4 rounded-lg text-sm">{{ selectedProductoPrecio | json }}</pre>
-    <button (click)="selectedProductoPrecio = null" class="mt-4 text-sm text-indigo-600 hover:text-indigo-800">
-      Cerrar detalle
-    </button>
   </div>
 </div>

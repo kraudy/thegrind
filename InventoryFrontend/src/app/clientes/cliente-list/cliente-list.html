@@ -67,12 +67,6 @@
         </tbody>
       </table>
 
-      <!-- Debug: muestra el JSON crudo para verificar que los datos llegan al template -->
-      <div class="p-4 bg-gray-100 text-sm text-gray-800 mt-4">
-        <strong>Debug clientes:</strong>
-        <pre class="whitespace-pre-wrap">{{ clientes | json }}</pre>
-      </div>
-
       <!-- Mensaje cuando no hay clientes -->
       <div *ngIf="clientes.length === 0" class="text-center py-12">
         <p class="text-gray-500 text-lg">No hay clientes registrados aún.</p>

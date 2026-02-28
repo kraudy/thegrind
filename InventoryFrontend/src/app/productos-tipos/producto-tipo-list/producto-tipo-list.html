@@ -54,12 +54,6 @@
         </tbody>
       </table>
 
-      <!-- Debug -->
-      <div class="p-4 bg-gray-100 text-sm text-gray-800 mt-4">
-        <strong>Debug productosTipos:</strong>
-        <pre class="whitespace-pre-wrap">{{ productosTipos | json }}</pre>
-      </div>
-
       <!-- Empty state -->
       <div *ngIf="productosTipos.length === 0" class="text-center py-12">
         <p class="text-gray-500 text-lg">No hay tipos de productos registrados aún.</p>
