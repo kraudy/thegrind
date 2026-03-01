@@ -51,6 +51,23 @@ export class OrdenCalendarioListComponent implements OnInit {
     this.router.navigate(['/ordenes-calendario', dateStr, 'new']);
   }
 
+  deleteOrderFromCalendar(orderId: number, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (confirm(`¿Estás seguro de que quieres eliminar la orden #${orderId} del calendario?`)) {
+      this.ordenCalendarioService.delete(orderId).subscribe({
+        next: () => {
+          this.loadCalendario(); // Recargar el calendario después de eliminar
+        },
+        error: (err) => {
+          console.error('Error eliminando orden del calendario', err);
+          alert('Error al eliminar la orden del calendario');
+        }
+      });
+    }
+  }
+
   getLoadColor(count: number): string {
     if (count === 0) return 'bg-gray-100 text-gray-400';
     if (count <= 3) return 'bg-green-100 text-green-700 border-green-200';

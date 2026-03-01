@@ -177,7 +177,6 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
 
 
   @Modifying
-  @Transactional
   @Query(value = """
     DELETE FROM orden_seguimiento seg
     WHERE seg.id_orden = :idOrden

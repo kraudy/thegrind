@@ -75,9 +75,8 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
     UPDATE orden
     SET estado = :estado
     WHERE id = :idOrden
-    RETURNING *
     """, nativeQuery = true)
-  Orden updateEstado(Long idOrden, String estado);
+  void updateEstado(Long idOrden, String estado);
 
   @Query(value = """
     SELECT COALESCE(SUM(od.subtotal), 0)
