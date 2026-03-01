@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoPK;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoHistorico;
 import com.github.kraudy.InventoryBackend.model.ProductoTipoEstado;
@@ -59,7 +60,13 @@ public class OrdenSeguimientoController {
     ordenSeguimientoRepository.deleteById(pk);
   }
 
-  /* Retorna lista de ordenes con detalle en estados de espera de impresion */
+  /* Retorna lista de ordenes de hoy con detalles en estados de seguimiento */
+  @GetMapping("/por-estados")
+  public List<OrdenSeguimientoEstadosDTO> getOrdenesPorEstadosSeguimiento() {
+    return ordenSeguimientoRepository.getOrdenesPorEstadosSeguimiento();
+  }
+
+  /* Retorna lista de ordenes de hoy con detalle en estados de espera de impresion */
   @GetMapping("/para-impresion")
   public List<OrdenSeguimientoDTO> getOrdenesParaImpresion() {
     return ordenSeguimientoRepository.getOrdenesParaImpresion();

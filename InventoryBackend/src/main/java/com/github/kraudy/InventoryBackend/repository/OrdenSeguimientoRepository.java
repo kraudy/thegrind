@@ -1,6 +1,7 @@
 package com.github.kraudy.InventoryBackend.repository;
 
 import com.github.kraudy.InventoryBackend.dto.OrdenDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleDTO;
 
@@ -87,4 +88,89 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     ORDER BY seg.id_orden_detalle ASC
     """, nativeQuery = true)
   List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaImpresion(@Param("idOrden") Long idOrden);
+
+  @Query(value = """
+  WITH 
+  cal AS (
+    SELECT
+      cal.id_orden,
+      ord.id_cliente,
+      CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
+      ord.creada_por,
+      ord.fecha_vencimiento
+
+    FROM orden_calendario cal
+
+    JOIN orden ord ON ord.id = cal.id_orden
+    JOIN cliente cte ON cte.id = ord.id_cliente
+    WHERE cal.fecha = current_date                            -- No necesita group by porque solo hay un registro por orden
+      AND ord.estado = 'Repartida'                            -- Solo considerar ordenes que están en estado Repartida
+  ),
+  seg AS (
+    SELECT
+      seg.id_orden,
+      seg.estado 
+      
+    FROM orden_seguimiento seg
+    JOIN cal ON cal.id_orden = seg.id_orden
+
+    WHERE seg.estado IN ('Normal', 'Reparacion','Impresion', 'Enmarcado', 'Pegado') 
+    GROUP BY seg.id_orden, seg.estado
+  ),
+  normales AS (
+    SELECT id_orden
+    FROM seg
+    WHERE estado = 'Normal'
+    GROUP BY id_orden
+  ),
+  reparacion AS (
+    SELECT id_orden
+    FROM seg
+    WHERE estado = 'Reparacion'
+    GROUP BY id_orden
+  ),
+  impresion AS (
+    SELECT id_orden 
+    FROM seg
+    WHERE estado = 'Impresion'
+    GROUP BY id_orden
+  ),
+  enmarcado AS (
+    SELECT id_orden 
+    FROM seg
+    WHERE estado = 'Enmarcado'
+    GROUP BY id_orden
+  ),
+  pegado AS (
+    SELECT id_orden 
+    FROM seg
+    WHERE estado = 'Pegado'
+    GROUP BY id_orden
+  )
+  SELECT
+    cal.id_orden,
+    cal.id_cliente AS idCliente,
+    cal.clienteNombre,
+    cal.creada_por AS creadaPor,
+    cal.fecha_vencimiento AS fechaVencimiento,
+    (fecha_vencimiento - current_timestamp)::text AS tiempoRestante,
+    CASE WHEN normales.id_orden IS NOT NULL THEN true ELSE false END AS tieneNormales,
+    CASE WHEN reparacion.id_orden IS NOT NULL THEN true ELSE false END AS tieneReparacion,
+    CASE WHEN impresion.id_orden IS NOT NULL THEN true ELSE false END AS tieneImpresion,
+    CASE WHEN enmarcado.id_orden IS NOT NULL THEN true ELSE false END AS tieneEnmarcado,
+    CASE WHEN pegado.id_orden IS NOT NULL THEN true ELSE false END AS tienePegado
+
+  FROM cal
+
+  LEFT JOIN normales ON normales.id_orden = cal.id_orden
+  LEFT JOIN reparacion ON reparacion.id_orden = cal.id_orden
+  LEFT JOIN impresion ON impresion.id_orden = cal.id_orden
+  LEFT JOIN enmarcado ON enmarcado.id_orden = cal.id_orden
+  LEFT JOIN pegado ON pegado.id_orden = cal.id_orden
+
+  
+  ORDER BY cal.id_cliente, cal.id_orden ASC
+  """, nativeQuery = true)
+  List<OrdenSeguimientoEstadosDTO> getOrdenesPorEstadosSeguimiento();
+  
 }
