@@ -149,7 +149,16 @@ public class OrdenCalendarioController {
 
   @DeleteMapping("/{id}")
   public void delete(@PathVariable Long id) {
+    //TODO: Deberia eleminar el historico tambien?
+
+    //TODO: Try to move to cascade
+    /* Elimina el seguimiento de los detalles */
+    ordenSeguimientoRepository.deleteByOrden(id);
+
+    /* Elimina el calendario de la orden */
     ordenCalendarioRepository.deleteById(id);
+
+    ordenRepository.updateEstado(id, "Recibida"); // Deja la orden como recibida para que pueda ser re-agendada
   }
 
 }

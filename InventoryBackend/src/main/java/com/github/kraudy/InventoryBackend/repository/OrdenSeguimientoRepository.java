@@ -9,8 +9,10 @@ import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoPK;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -172,5 +174,14 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
   ORDER BY cal.id_cliente, cal.id_orden ASC
   """, nativeQuery = true)
   List<OrdenSeguimientoEstadosDTO> getOrdenesPorEstadosSeguimiento();
+
+
+  @Modifying
+  @Transactional
+  @Query(value = """
+    DELETE FROM orden_seguimiento seg
+    WHERE seg.id_orden = :idOrden
+    """, nativeQuery = true)
+  void deleteByOrden(@Param("idOrden") Long idOrden);
   
 }
