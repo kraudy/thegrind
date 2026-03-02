@@ -1,5 +1,6 @@
 package com.github.kraudy.InventoryBackend.repository;
 
+import com.github.kraudy.InventoryBackend.dto.EstadosPorDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
@@ -177,10 +178,28 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
 
 
   @Modifying
+  @Transactional
   @Query(value = """
     DELETE FROM orden_seguimiento seg
     WHERE seg.id_orden = :idOrden
     """, nativeQuery = true)
   void deleteByOrden(@Param("idOrden") Long idOrden);
+
+
+  @Query(value = """
+    SELECT
+      seg.id_orden_detalle,
+      json_agg(pte.estado ORDER BY pte.secuencia ASC)::text
+
+    FROM orden_seguimiento seg
+    JOIN producto_tipo_estado pte 
+      ON pte.tipo = seg.tipo AND pte.sub_tipo = seg.sub_tipo
+
+    WHERE seg.id_orden = :idOrden
+
+    GROUP BY seg.id_orden_detalle
+    ORDER BY seg.id_orden_detalle ASC
+    """, nativeQuery = true)
+  List<EstadosPorDetalleDTO> getEstadosPorDetalle(@Param("idOrden") Long idOrden);
   
 }

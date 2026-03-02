@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { OrdenSeguimientoDetalle } from './orden-seguimiento-detalle.model';
 import { ProductoTipoEstado } from '../productos-tipo-estados/producto-tipo-estado.model';
 import { OrdenSeguimiento } from './orden-seguimiento.model';
+import { EstadosPorDetalleDTO } from './estados-por-detalle.model';
 
 
 @Injectable({
@@ -31,11 +32,13 @@ export class OrdenSeguimientoService {
     return this.http.get<OrdenSeguimientoDetalle[]>(`${this.apiUrl}/orden/${idOrden}`);
   }
 
-  //TODO: Move this to its own service
-  // maybe just generate a map with a list of strings to get all at the same time on load in the component 
-  // end then just key them in the ngFor
   getPossibleStates(tipo: string, subTipo: string): Observable<ProductoTipoEstado[]> {
     return this.http.get<ProductoTipoEstado[]>(`${this.apiUrl}/posibles/${tipo}/${subTipo}`);
+  }
+
+  /* Obtiene lista de posibles estados por detalle */
+  getEstadosPorDetalle(idOrden: number): Observable<EstadosPorDetalleDTO[]> {
+    return this.http.get<EstadosPorDetalleDTO[]>(`${this.apiUrl}/estados-por-detalle/${idOrden}`);
   }
 
   advance(idOrden: number, idOrdenDetalle: number): Observable<OrdenSeguimientoDetalle> {

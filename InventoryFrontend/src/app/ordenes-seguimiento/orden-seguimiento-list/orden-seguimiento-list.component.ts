@@ -6,6 +6,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimientoDetalle } from '../orden-seguimiento-detalle.model';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
+import { EstadosPorDetalleDTO } from '../estados-por-detalle.model';
 
 @Component({
   selector: 'app-orden-seguimiento-list',
@@ -19,7 +20,7 @@ export class OrdenSeguimientoListComponent implements OnInit {
   detalles: OrdenSeguimientoDetalle[] = [];
   clienteNombre = 'Cargando...';
 
-  possibleStatesMap = new Map<number, ProductoTipoEstado[]>();
+  possibleStatesMap = new Map<number, string[]>();
   historyMap = new Map<number, any[]>();
   currentStateMap = new Map<number, string>();
 
@@ -37,12 +38,10 @@ export class OrdenSeguimientoListComponent implements OnInit {
   }
 
   load() {
-    //TODO: Here call getPossibleStates and set it to a local map to just key it from getPossibleStatesJ()
-    // to not be calling the backend for each state
-    // The keys needs to be tipo and subtipo to not repeat the same pattern multiple times
     this.service.getFullByOrden(this.idOrden).subscribe({
       next: (data) => {
         this.detalles = data;
+        this.loadEstadosPorDetalle();
         this.loadStepperDataForAll();
 
         this.cd.detectChanges();
@@ -51,19 +50,25 @@ export class OrdenSeguimientoListComponent implements OnInit {
     });
   }
 
+  private loadEstadosPorDetalle() {
+    this.service.getEstadosPorDetalle(this.idOrden).subscribe({
+      next: (data) => {
+        data.forEach(item => {
+          this.possibleStatesMap.set(item.idOrdenDetalle, item.estados);
+        });
+        this.cd.detectChanges();
+      },
+      error: (err) => console.error('❌ Error cargando estados por detalle', err)
+    });
+  }
+
   private loadStepperDataForAll() {
-    this.possibleStatesMap.clear();
     this.historyMap.clear();
     this.currentStateMap.clear();
 
     this.detalles.forEach(det => {
       const detId = det.idOrdenDetalle;
       this.currentStateMap.set(detId, det.estadoActual || '');
-
-      this.service.getPossibleStates(det.tipoProducto, det.subTipoProducto).subscribe(states => {
-        this.possibleStatesMap.set(detId, states);
-        this.cd.detectChanges();
-      });
 
       this.service.getByDetalle(det.idOrden, det.idOrdenDetalle).subscribe(hist => {
         this.historyMap.set(detId, hist);
@@ -78,7 +83,7 @@ export class OrdenSeguimientoListComponent implements OnInit {
     });
   }
 
-  getPossibleStates(detId: number): ProductoTipoEstado[] {
+  getPossibleStates(detId: number): string[] {
     return this.possibleStatesMap.get(detId) || [];
   }
 
@@ -95,7 +100,7 @@ export class OrdenSeguimientoListComponent implements OnInit {
   isLastState(detId: number): boolean {
     const states = this.getPossibleStates(detId);
     if (states.length === 0) return true;
-    return this.isCurrent(detId, states[states.length - 1].estado);
+    return this.isCurrent(detId, states[states.length - 1]);
   }
 
   goBack() {

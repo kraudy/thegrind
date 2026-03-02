@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoPK;
+import com.github.kraudy.InventoryBackend.dto.EstadosPorDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosDTO;
@@ -88,6 +89,11 @@ public class OrdenSeguimientoController {
           @PathVariable String tipo, 
           @PathVariable String subTipo) {
     return productoTipoEstadoRepository.findByTipoAndSubTipoOrderBySecuenciaAsc(tipo, subTipo);
+  }
+
+  @GetMapping("/estados-por-detalle/{idOrden}")
+  public List<EstadosPorDetalleDTO> getEstadosPorDetalle(@PathVariable Long idOrden) {
+      return ordenSeguimientoRepository.getEstadosPorDetalle(idOrden);
   }
 
   // 2. seguimiento de un detalle
