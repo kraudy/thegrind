@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { OrdenSeguimientoPreparacionDetalleList } from './orden-seguimiento-preparacion-detalle-list.component';
+import { OrdenSeguimientoPreparacionDetalleListComponent } from './orden-seguimiento-preparacion-detalle-list.component';
 
-describe('OrdenSeguimientoPreparacionDetalleList', () => {
-  let component: OrdenSeguimientoPreparacionDetalleList;
-  let fixture: ComponentFixture<OrdenSeguimientoPreparacionDetalleList>;
+describe('OrdenSeguimientoPreparacionDetalleListComponent', () => {
+  let component: OrdenSeguimientoPreparacionDetalleListComponent;
+  let fixture: ComponentFixture<OrdenSeguimientoPreparacionDetalleListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [OrdenSeguimientoPreparacionDetalleList]
+      imports: [OrdenSeguimientoPreparacionDetalleListComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(OrdenSeguimientoPreparacionDetalleList);
+    fixture = TestBed.createComponent(OrdenSeguimientoPreparacionDetalleListComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

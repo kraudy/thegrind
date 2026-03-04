@@ -1,1 +1,72 @@
-<p>orden-seguimiento-preparacion-list works!</p>
+<div class="max-w-7xl mx-auto px-4 py-12">
+  <div class="relative flex justify-between items-center mb-8">
+    <a
+      routerLink="/"
+      class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-md transition transform hover:scale-105"
+    >
+      ← Volver al Inicio
+    </a>
+
+    <button
+      (click)="loadOrdenesParaPreparacion()"
+      class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition transform hover:scale-105"
+    >
+      Actualizar
+    </button>
+
+    <h1
+      class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-bold text-gray-900 pointer-events-none"
+    >
+      Órdenes para Preparación
+    </h1>
+  </div>
+
+  <div class="bg-white shadow-xl rounded-xl overflow-hidden">
+    <!-- Loading -->
+    <div *ngIf="loading" class="p-10 text-center text-gray-600">
+      Cargando órdenes...
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="!loading && errorMessage" class="p-6 bg-red-50 text-red-700 text-center font-medium">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Table -->
+    <div *ngIf="!loading && !errorMessage" class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Orden</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Cliente</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Creada Por</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Vence</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tiempo Restante</th>
+          </tr>
+        </thead>
+
+        <tbody class="bg-white divide-y divide-gray-100">
+          <tr
+            *ngFor="let orden of ordenes"
+            (click)="goToDetalle(orden)"
+            class="cursor-pointer hover:bg-indigo-50 transition"
+            title="Ver detalle de preparación"
+          >
+            <td class="px-6 py-4 font-semibold text-indigo-700">#{{ orden.id }}</td>
+            <td class="px-6 py-4 text-gray-800">{{ orden.clienteNombre }}</td>
+            <td class="px-6 py-4 text-gray-700">{{ orden.creadaPor }}</td>
+            <td class="px-6 py-4 text-gray-700">{{ orden.fechaVencimiento | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td class="px-6 py-4 font-semibold" [ngClass]="getTiempoRestanteClass(orden.tiempoRestante)">
+              {{ orden.tiempoRestante }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Empty -->
+      <div *ngIf="ordenes.length === 0" class="text-center py-12 text-gray-500">
+        No hay órdenes pendientes para preparación.
+      </div>
+    </div>
+  </div>
+</div>
