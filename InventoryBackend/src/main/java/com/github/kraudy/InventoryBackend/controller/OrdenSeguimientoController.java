@@ -61,7 +61,7 @@ public class OrdenSeguimientoController {
     ordenSeguimientoRepository.deleteById(pk);
   }
 
-  /* Retorna lista de ordenes de hoy con detalles en estados de seguimiento */
+  /* Retorna lista de ordenes de hoy con detalles en estados de seguimiento para vista de seguimiento general */
   @GetMapping("/por-estados")
   public List<OrdenSeguimientoEstadosDTO> getOrdenesPorEstadosSeguimiento() {
     return ordenSeguimientoRepository.getOrdenesPorEstadosSeguimiento();
@@ -76,6 +76,17 @@ public class OrdenSeguimientoController {
   @GetMapping("/para-impresion/{idOrden}")
   public List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaImpresion(@PathVariable Long idOrden) {
     return ordenSeguimientoRepository.getSeguimientoDeOrdenParaImpresion(idOrden);
+  }
+
+  /* Retorna lista de ordenes de hoy con detalle en estados de espera de preparacion */
+  @GetMapping("/para-preparacion")
+  public List<OrdenSeguimientoDTO> getOrdenesParaPreparacion() {
+    return ordenSeguimientoRepository.getOrdenesParaPreparacion();
+  }
+
+  @GetMapping("/para-preparacion/{idOrden}")
+  public List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaPreparacion(@PathVariable Long idOrden) {
+    return ordenSeguimientoRepository.getSeguimientoDeOrdenParaPreparacion(idOrden);
   }
 
   @GetMapping("/orden/{idOrden}")

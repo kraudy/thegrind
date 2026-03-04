@@ -16,12 +16,22 @@ export class OrdenSeguimientoService {
 
   constructor(private http: HttpClient) {}
 
+  /* Seguimiento para impresion */
   getOrdenesParaImpresion(): Observable<OrdenSeguimiento[]> {
     return this.http.get<OrdenSeguimiento[]>(`${this.apiUrl}/para-impresion`);
   }
 
   getOrdenDetalleParaImpresion(idOrden: number): Observable<OrdenSeguimientoDetalle[]> {
     return this.http.get<OrdenSeguimientoDetalle[]>(`${this.apiUrl}/para-impresion/${idOrden}`);
+  }
+
+  /* Seguimiento para preparacion */
+  getOrdenesParaPreparacion(): Observable<OrdenSeguimiento[]> {
+    return this.http.get<OrdenSeguimiento[]>(`${this.apiUrl}/para-preparacion`);
+  }
+
+  getOrdenDetalleParaPreparacion(idOrden: number): Observable<OrdenSeguimientoDetalle[]> {
+    return this.http.get<OrdenSeguimientoDetalle[]>(`${this.apiUrl}/para-preparacion/${idOrden}`);
   }
 
   getByDetalle(idOrden: number, idOrdenDetalle: number): Observable<OrdenSeguimientoDetalle[]> {
