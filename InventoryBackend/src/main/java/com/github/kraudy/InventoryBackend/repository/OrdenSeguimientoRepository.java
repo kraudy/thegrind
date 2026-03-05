@@ -36,7 +36,8 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
         det.cantidad,
         seg.tipo,
         seg.sub_tipo,
-        seg.estado AS estadoActual
+        seg.estado AS estadoActual,
+        false AS permiteMover
     FROM orden_seguimiento seg
     JOIN orden_detalle det ON det.id_orden = seg.id_orden
                         AND det.id_orden_detalle = seg.id_orden_detalle

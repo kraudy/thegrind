@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.github.kraudy.InventoryBackend.dto.CalendarioDiaDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenCalendarioDTO;
@@ -149,7 +148,6 @@ public class OrdenCalendarioController {
   }
 
   @DeleteMapping("/{id}")
-  @Transactional
   public void delete(@PathVariable Long id) {
     //TODO: Deberia eleminar el historico tambien?
 

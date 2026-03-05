@@ -1,11 +1,13 @@
 <div class="max-w-7xl mx-auto px-4 py-12">
-  <div class="flex justify-between items-center mb-10">
-    <button (click)="goBack()" 
+  <div class="flex justify-between items-center mb-6">
+    <button (click)="goBack()"
             class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-xl">
       ← Volver al Calendario
     </button>
+  </div>
+  <div class="text-center mb-10">
     <h1 class="text-4xl font-bold text-gray-900">Seguimiento Orden #{{ idOrden }}</h1>
-    <div class="text-xl text-gray-600">{{ clienteNombre }}</div>
+    <div class="text-2xl font-bold text-gray-800 mt-2">{{ clienteNombre }}</div>
   </div>
 
   <div *ngFor="let det of detalles" class="mb-12 bg-white rounded-3xl shadow-xl overflow-hidden">

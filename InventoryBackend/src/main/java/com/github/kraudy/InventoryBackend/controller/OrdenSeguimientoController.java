@@ -89,6 +89,7 @@ public class OrdenSeguimientoController {
     return ordenSeguimientoRepository.getSeguimientoDeOrdenParaPreparacion(idOrden);
   }
 
+  /* Muestra el seguimiento completo de los detalles de una orden */
   @GetMapping("/orden/{idOrden}")
   public List<OrdenSeguimientoDetalleDTO> getFullSeguimiento(@PathVariable Long idOrden) {
     return ordenSeguimientoRepository.getFullSeguimientoByOrden(idOrden);
@@ -115,8 +116,9 @@ public class OrdenSeguimientoController {
       return ordenSeguimientoRepository.findByDetalleOrderByFechaCreacionAsc(idOrden, idOrdenDetalle);
   }
 
-  // @PutMapping?
-  // 3. Avanzar al siguiente estado (la magia está aquí)
+  /* Movimientos de estados */
+
+  // Avanzar detalle al siguiente estado
   @PostMapping("/avanzar/{idOrden}/{idOrdenDetalle}")
   public OrdenSeguimiento advanceState(
           @PathVariable Long idOrden,
