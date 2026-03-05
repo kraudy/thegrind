@@ -10,5 +10,6 @@ public record OrdenSeguimientoDetalleDTO(
     int cantidad,
     String tipoProducto,
     String subTipoProducto,
-    String estadoActual
-) {}
+    String estadoActual,
+    boolean permiteMover
+  ) {}

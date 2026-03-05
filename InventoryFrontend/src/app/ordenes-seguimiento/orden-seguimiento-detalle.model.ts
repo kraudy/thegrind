@@ -8,4 +8,5 @@ export interface OrdenSeguimientoDetalle {
   tipoProducto: string;
   subTipoProducto: string;
   estadoActual: string;
+  permiteMover: boolean;
 }

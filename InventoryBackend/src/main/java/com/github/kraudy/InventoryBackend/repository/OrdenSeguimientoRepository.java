@@ -84,13 +84,18 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
         det.cantidad,
         seg.tipo,
         seg.sub_tipo,
-        seg.estado AS estadoActual
+        seg.estado AS estadoActual,
+        CASE 
+          WHEN seg.estado IN ('Normal', 'Reparacion','Impresion') THEN true 
+          ELSE false 
+        END AS permiteMover                                                 -- Solo permitir mover si el estado es Normal, Reparacion o Impresion
     FROM orden_seguimiento seg
     JOIN orden_detalle det ON det.id_orden = seg.id_orden
                         AND det.id_orden_detalle = seg.id_orden_detalle
     JOIN producto prod ON prod.id = det.id_producto
     WHERE seg.id_orden = :idOrden
       AND seg.estado IN ('Normal', 'Reparacion','Impresion')  -- Solo mostrar detalles que están en estado Normal, Reparacion o Impresion
+                                                              -- Por ahora estamos dejando solo los que les corresponden para impresion pero se podrian mostrar todos y marcar cuales se pueden mover a impresion
     ORDER BY seg.id_orden_detalle ASC
     """, nativeQuery = true)
   List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaImpresion(@Param("idOrden") Long idOrden);
@@ -150,13 +155,17 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
         det.cantidad,
         seg.tipo,
         seg.sub_tipo,
-        seg.estado AS estadoActual
+        seg.estado AS estadoActual,
+        CASE 
+          WHEN seg.estado IN ('Enmarcado', 'Pegado') THEN true 
+          ELSE false 
+        END AS permiteMover                                                 -- Solo permitir mover si el estado es Enmarcado o Pegado
     FROM orden_seguimiento seg
     JOIN orden_detalle det ON det.id_orden = seg.id_orden                   -- Necesitamos el deatalle para mostrar el producto y la cantidad
                         AND det.id_orden_detalle = seg.id_orden_detalle
     JOIN producto prod ON prod.id = det.id_producto
     WHERE seg.id_orden = :idOrden
-      AND seg.estado IN ('Enmarcado', 'Pegado')                             -- Solo mostrar detalles que están en estado Enmarcado o Pegado
+      AND seg.estado IN ('Normal', 'Reparacion','Impresion', 'Enmarcado', 'Pegado') -- Mostrar detalles anteriores a preparacion. Aqui agregar nuevos estados para otros productos como sublimacion, Ruteado, etc.
     ORDER BY seg.id_orden_detalle ASC
     """, nativeQuery = true)
   List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaPreparacion(@Param("idOrden") Long idOrden);
