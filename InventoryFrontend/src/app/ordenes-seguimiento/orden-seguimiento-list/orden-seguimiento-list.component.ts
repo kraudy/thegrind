@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
+import { OrdenCalendarioService } from '../../ordenes-calendario/orden-calendario.service';
 import { OrdenSeguimientoDetalle } from '../orden-seguimiento-detalle.model';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
 import { EstadosPorDetalleDTO } from '../estados-por-detalle.model';
@@ -28,6 +29,7 @@ export class OrdenSeguimientoListComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private service: OrdenSeguimientoService,
+    private ordenCalendarioService: OrdenCalendarioService,
     private cd: ChangeDetectorRef
   ) {}
 
@@ -116,5 +118,24 @@ export class OrdenSeguimientoListComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/ordenes-calendario']);
+  }
+
+  deleteOrderFromCalendar(): void {
+    if (confirm(`¿Estás seguro de que quieres eliminar la orden #${this.idOrden} del calendario?`)) {
+      this.ordenCalendarioService.delete(this.idOrden).subscribe({
+        next: () => {
+          alert('Orden eliminada del calendario exitosamente');
+          this.router.navigate(['/ordenes-calendario']); // Regresar al calendario después de eliminar
+        },
+        error: (err) => {
+          console.error('Error eliminando orden del calendario', err);
+          if (err.status === 400) {
+            alert('No se puede eliminar la orden del calendario porque algunos detalles ya han avanzado en su proceso de producción');
+          } else {
+            alert('Error al eliminar la orden del calendario');
+          }
+        }
+      });
+    }
   }
 }

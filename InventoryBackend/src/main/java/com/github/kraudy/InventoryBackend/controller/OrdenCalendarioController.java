@@ -149,6 +149,12 @@ public class OrdenCalendarioController {
 
   @DeleteMapping("/{id}")
   public void delete(@PathVariable Long id) {
+    // Verificar que todos los detalles estén en su primer estado antes de eliminar
+    if (!ordenSeguimientoRepository.areAllDetailsInFirstState(id)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+        "No se puede eliminar la orden del calendario porque algunos detalles ya han avanzado en su proceso de producción");
+    }
+
     //TODO: Deberia eleminar el historico tambien?
 
     //TODO: Try to move to cascade
