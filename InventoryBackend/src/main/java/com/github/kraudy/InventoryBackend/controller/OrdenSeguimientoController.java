@@ -118,6 +118,56 @@ public class OrdenSeguimientoController {
 
   /* Movimientos de estados */
 
+  // Regresar detalle al estado anterior
+  @PostMapping("/regresar/{idOrden}/{idOrdenDetalle}")
+  public OrdenSeguimiento reverseState(
+          @PathVariable Long idOrden,
+          @PathVariable Long idOrdenDetalle) {
+
+    OrdenSeguimientoPK ordenSeguimientoPK = new OrdenSeguimientoPK(idOrden, idOrdenDetalle);
+
+    OrdenSeguimiento ordenSeguimientoActual = ordenSeguimientoRepository.findById(ordenSeguimientoPK).
+      orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El detalle no se encuentra en seguimiento"));
+
+    // Verificar si hay un estado anterior (secuencia - 1)
+    if (ordenSeguimientoActual.getSecuencia() <= 1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No hay estado anterior disponible");
+    }
+
+    // Se le resta uno para obtener el estado anterior
+    ProductoTipoEstadoPK productoTipoEstadoPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 1);
+
+    ProductoTipoEstado productoTipoEstado = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
+      orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
+
+    OrdenSeguimientoHistorico historico = new OrdenSeguimientoHistorico();
+    historico.setIdOrden(ordenSeguimientoActual.getIdOrden());
+    historico.setIdOrdenDetalle(ordenSeguimientoActual.getIdOrdenDetalle());
+    historico.setEstado(ordenSeguimientoActual.getEstado());
+
+    historico.setFechaCreacion(ordenSeguimientoActual.getFechaModificacion()); // Utilizamos la fecha de modificacion
+    historico.setUsuarioCreacion(ordenSeguimientoActual.getSeguimientoPor());
+
+    ordenSeguimientoActual.setSeguimientoPor("adminTestregresa");
+    // Se actualiza estado nuevo, secuencia y usuario que finaliza estado previo
+    ordenSeguimientoActual.setEstado(productoTipoEstado.getEstado());
+    ordenSeguimientoActual.setSecuencia(productoTipoEstado.getSecuencia());
+
+    // Actualizamos el estado actual
+    ordenSeguimientoActual = ordenSeguimientoRepository.save(ordenSeguimientoActual);
+
+    // Agregamos datos pendientes al historico
+    historico.setFechaFinalizacion(ordenSeguimientoActual.getFechaModificacion());
+    historico.setUsuarioFinalizacion(ordenSeguimientoActual.getSeguimientoPor());
+
+    historico.setDuracion(Duration.between(historico.getFechaCreacion(), historico.getFechaFinalizacion()).toMinutes());
+
+    // Guardamos el historico
+    ordenSeguimientoHistoricoRepository.save(historico);
+
+    return ordenSeguimientoActual;
+  }
+
   // Avanzar detalle al siguiente estado
   @PostMapping("/avanzar/{idOrden}/{idOrdenDetalle}")
   public OrdenSeguimiento advanceState(

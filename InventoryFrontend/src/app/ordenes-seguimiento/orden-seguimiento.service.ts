@@ -54,4 +54,8 @@ export class OrdenSeguimientoService {
   advance(idOrden: number, idOrdenDetalle: number): Observable<OrdenSeguimientoDetalle> {
     return this.http.post<OrdenSeguimientoDetalle>(`${this.apiUrl}/avanzar/${idOrden}/${idOrdenDetalle}`, {});
   }
+
+  reverse(idOrden: number, idOrdenDetalle: number): Observable<OrdenSeguimientoDetalle> {
+    return this.http.post<OrdenSeguimientoDetalle>(`${this.apiUrl}/regresar/${idOrden}/${idOrdenDetalle}`, {});
+  }
 }

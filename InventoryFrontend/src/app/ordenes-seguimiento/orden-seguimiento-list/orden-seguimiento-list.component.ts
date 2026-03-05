@@ -83,6 +83,17 @@ export class OrdenSeguimientoListComponent implements OnInit {
     });
   }
 
+  reverseDetail(det: OrdenSeguimientoDetalle) {
+    this.service.reverse(det.idOrden, det.idOrdenDetalle).subscribe({
+      next: () => {
+        this.load();
+      },
+      error: (error) => {
+        alert(error.error?.message || 'Error al regresar el estado');
+      }
+    });
+  }
+
   getPossibleStates(detId: number): string[] {
     return this.possibleStatesMap.get(detId) || [];
   }
@@ -97,10 +108,10 @@ export class OrdenSeguimientoListComponent implements OnInit {
   }
 
   // Nuevo helper seguro para el botón
-  isLastState(detId: number): boolean {
+  isFirstState(detId: number): boolean {
     const states = this.getPossibleStates(detId);
     if (states.length === 0) return true;
-    return this.isCurrent(detId, states[states.length - 1]);
+    return this.isCurrent(detId, states[0]);
   }
 
   goBack() {
