@@ -166,10 +166,61 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
                         AND det.id_orden_detalle = seg.id_orden_detalle
     JOIN producto prod ON prod.id = det.id_producto
     WHERE seg.id_orden = :idOrden
-      AND seg.estado IN ('Normal', 'Reparacion','Impresion', 'Enmarcado', 'Pegado') -- Mostrar detalles anteriores a preparacion. Aqui agregar nuevos estados para otros productos como sublimacion, Ruteado, etc.
+      AND seg.estado NOT IN ('Listo', 'Entregado') -- Mostrar detalles anteriores a preparacion pero que no estén listos o entregados
     ORDER BY seg.id_orden_detalle ASC
     """, nativeQuery = true)
   List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaPreparacion(@Param("idOrden") Long idOrden);
+
+  /* Seguimiento para entrega */
+
+  //TODO: Deberia solo mostrar el trabajo de hoy? Creo que deberia ser cualquier orden que tenga detalles listos o que este lista en si.
+  // esto porque la orden puede estar lista un dia antes de su entrega
+  @Query(value = """
+    SELECT
+      ord.id,
+      ord.id_cliente AS idCliente,
+      CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
+      ord.creada_por  AS creadaPor,
+      ord.fecha_vencimiento AS fechaVencimiento,
+      (fecha_vencimiento - current_timestamp)::text AS tiempoRestante
+
+    FROM orden_calendario cal
+
+    JOIN orden ord ON ord.id = cal.id_orden
+    JOIN cliente cte ON cte.id = ord.id_cliente
+    WHERE ord.estado = 'Listo'                            -- Obtenemos las ordenes que están en estado Listo de cualquier fecha, porque la orden puede estar lista un dia antes de su entrega
+    ORDER BY ord.id_cliente, ord.id ASC
+
+  """, nativeQuery = true)
+  List<OrdenSeguimientoDTO> getOrdenesParaEntrega();
+
+  /* Aqui no se especifica current date porque el id ya deberia estar filtrado */
+  @Query(value = """
+    SELECT
+        seg.id_orden,
+        seg.id_orden_detalle,
+        det.id_producto,
+        prod.nombre,
+        det.cantidad,
+        seg.tipo,
+        seg.sub_tipo,
+        seg.estado AS estadoActual,
+        CASE 
+          WHEN seg.estado IN ('Listo') THEN true 
+          ELSE false 
+        END AS permiteMover                                                 -- Permite mover porque los detalles en estado Listo. Una vez en entregado ya no se puede mover
+
+    FROM orden_seguimiento seg
+    JOIN orden_detalle det ON det.id_orden = seg.id_orden                   -- Necesitamos el deatalle para mostrar el producto y la cantidad
+                        AND det.id_orden_detalle = seg.id_orden_detalle
+    JOIN producto prod ON prod.id = det.id_producto
+    WHERE seg.id_orden = :idOrden
+                                                                            -- por ahora mostramos todos los estados
+    ORDER BY seg.id_orden_detalle ASC
+    """, nativeQuery = true)
+  List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaEntrega(@Param("idOrden") Long idOrden);
+
+  /* Monitoreo general de todas las ordenes del dia en todos los estados*/
 
   @Query(value = """
   WITH 
@@ -284,5 +335,13 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
   /* Verifica si todos los detalles de una orden están en su primer estado (secuencia = 1) */
   @Query(value = "SELECT COUNT(*) = 0 FROM orden_seguimiento WHERE id_orden = :idOrden AND secuencia > 1", nativeQuery = true)
   boolean areAllDetailsInFirstState(@Param("idOrden") Long idOrden);
-  
+
+  /* Verifica si todos los detalles de una orden están en estado Listo */
+  @Query(value = "SELECT COUNT(*) = 0 FROM orden_seguimiento WHERE id_orden = :idOrden AND estado <> 'Listo'", nativeQuery = true)
+  boolean estanTodosLosDetallesListos(@Param("idOrden") Long idOrden);
+
+  /* Verifica si todos los detalles de una orden están en estado Entregado */
+  @Query(value = "SELECT COUNT(*) = 0 FROM orden_seguimiento WHERE id_orden = :idOrden AND estado <> 'Entregado'", nativeQuery = true)
+  boolean estanTodosLosDetallesEntregados(@Param("idOrden") Long idOrden);
+
 }

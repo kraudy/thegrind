@@ -18,6 +18,7 @@ import com.github.kraudy.InventoryBackend.model.ProductoTipoEstado;
 import com.github.kraudy.InventoryBackend.model.ProductoTipoEstadoPK;
 import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoHistoricoRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoRepository;
+import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoTipoEstadoRepository;
 
 import jakarta.websocket.server.PathParam;
@@ -28,6 +29,9 @@ import java.time.Duration;
 @RequestMapping("/api/ordenes-seguimiento")
 @CrossOrigin(origins = "http://localhost:4200")
 public class OrdenSeguimientoController {
+
+  @Autowired
+  private OrdenRepository ordenRepository;
 
   @Autowired
   private OrdenSeguimientoRepository ordenSeguimientoRepository;
@@ -87,6 +91,17 @@ public class OrdenSeguimientoController {
   @GetMapping("/para-preparacion/{idOrden}")
   public List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaPreparacion(@PathVariable Long idOrden) {
     return ordenSeguimientoRepository.getSeguimientoDeOrdenParaPreparacion(idOrden);
+  }
+
+  /* Retorna lista de ordenes de hoy con detalle en estados de espera de entrega */
+  @GetMapping("/para-entrega")
+  public List<OrdenSeguimientoDTO> getOrdenesParaEntrega() {
+    return ordenSeguimientoRepository.getOrdenesParaEntrega();
+  }
+
+  @GetMapping("/para-entrega/{idOrden}")
+  public List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaEntrega(@PathVariable Long idOrden) {
+    return ordenSeguimientoRepository.getSeguimientoDeOrdenParaEntrega(idOrden);
   }
 
   /* Muestra el seguimiento completo de los detalles de una orden */
@@ -182,7 +197,7 @@ public class OrdenSeguimientoController {
     // Se le suma uno para obtener el siguiente estado
     ProductoTipoEstadoPK productoTipoEstadoPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() + 1);
     
-    ProductoTipoEstado productoTipoEstado = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
+    ProductoTipoEstado productoTipoEstadoSiguiente = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
       orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Siguiente estado no encontrado"));
 
     OrdenSeguimientoHistorico historico = new OrdenSeguimientoHistorico();
@@ -195,8 +210,8 @@ public class OrdenSeguimientoController {
 
     ordenSeguimientoActual.setSeguimientoPor("adminTestfinaliza");
     // Se actualiza estado nuevo, secuencia y usuario que finaliza estado previo
-    ordenSeguimientoActual.setEstado(productoTipoEstado.getEstado());
-    ordenSeguimientoActual.setSecuencia(productoTipoEstado.getSecuencia());
+    ordenSeguimientoActual.setEstado(productoTipoEstadoSiguiente.getEstado());
+    ordenSeguimientoActual.setSecuencia(productoTipoEstadoSiguiente.getSecuencia());
 
     // Actualizamos el estado actual
     ordenSeguimientoActual = ordenSeguimientoRepository.save(ordenSeguimientoActual);
@@ -209,6 +224,22 @@ public class OrdenSeguimientoController {
 
     // Guardamos el historico
     ordenSeguimientoHistoricoRepository.save(historico);
+
+    // Validamos si todos los detalles estan listos para marcar orden como lista
+    if (productoTipoEstadoSiguiente.getEstado().equals("Listo")) {
+      if (ordenSeguimientoRepository.estanTodosLosDetallesListos(ordenSeguimientoActual.getIdOrden())){
+        // Se marca orden como lista
+        ordenRepository.updateEstado(ordenSeguimientoActual.getIdOrden(), productoTipoEstadoSiguiente.getEstado());
+      }
+    }
+
+    // Validamos si todos los detalles estan entregados para marcar orden como entregada
+    if (productoTipoEstadoSiguiente.getEstado().equals("Entregado")) {
+      if (ordenSeguimientoRepository.estanTodosLosDetallesEntregados(ordenSeguimientoActual.getIdOrden())){
+        // Se marca orden como entregada
+        ordenRepository.updateEstado(ordenSeguimientoActual.getIdOrden(), productoTipoEstadoSiguiente.getEstado());
+      }
+    }
 
     // Si todos los detalles llegaron al final → orden lista
     //TODO: Just add one to secuencia and do the get, then check if there is another and finish
