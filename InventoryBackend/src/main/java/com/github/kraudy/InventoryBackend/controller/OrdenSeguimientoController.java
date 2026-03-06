@@ -93,7 +93,7 @@ public class OrdenSeguimientoController {
     return ordenSeguimientoRepository.getSeguimientoDeOrdenParaPreparacion(idOrden);
   }
 
-  /* Retorna lista de ordenes de hoy con detalle en estados de espera de entrega */
+  /* Retorna lista de ordenes con detalle en estados de espera de entrega */
   @GetMapping("/para-entrega")
   public List<OrdenSeguimientoDTO> getOrdenesParaEntrega() {
     return ordenSeguimientoRepository.getOrdenesParaEntrega();
@@ -155,6 +155,12 @@ public class OrdenSeguimientoController {
     ProductoTipoEstado productoTipoEstado = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
       orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
 
+    // Si el estado era listo, se marca orden como repartida otra vez
+    if (ordenSeguimientoActual.getEstado().equals("Listo")) {
+      // Se marca orden como repartida
+      ordenRepository.updateEstado(ordenSeguimientoActual.getIdOrden(), "Repartida");
+    }
+
     OrdenSeguimientoHistorico historico = new OrdenSeguimientoHistorico();
     historico.setIdOrden(ordenSeguimientoActual.getIdOrden());
     historico.setIdOrdenDetalle(ordenSeguimientoActual.getIdOrdenDetalle());
@@ -176,6 +182,8 @@ public class OrdenSeguimientoController {
     historico.setUsuarioFinalizacion(ordenSeguimientoActual.getSeguimientoPor());
 
     historico.setDuracion(Duration.between(historico.getFechaCreacion(), historico.getFechaFinalizacion()).toMinutes());
+
+
 
     // Guardamos el historico
     ordenSeguimientoHistoricoRepository.save(historico);
