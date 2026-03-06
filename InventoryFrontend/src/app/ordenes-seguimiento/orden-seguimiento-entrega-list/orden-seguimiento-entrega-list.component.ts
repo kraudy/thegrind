@@ -14,6 +14,8 @@ import { OrdenSeguimiento } from '../orden-seguimiento.model';
 })
 export class OrdenSeguimientoEntregaListComponent implements OnInit {
   ordenes: OrdenSeguimiento[] = [];
+  loading = false;
+  errorMessage = '';
 
   constructor(
     private ordenSeguimientoService: OrdenSeguimientoService,
@@ -22,22 +24,37 @@ export class OrdenSeguimientoEntregaListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadOrdenes();
+    this.loadOrdenesParaEntrega();
   }
 
-  loadOrdenes(): void {
+  loadOrdenesParaEntrega(): void {
+    this.loading = true;
+    this.errorMessage = '';
+
     this.ordenSeguimientoService.getOrdenesParaEntrega().subscribe({
       next: (ordenes) => {
-        this.ordenes = ordenes;
+        this.ordenes = ordenes || [];
+        this.loading = false;
         this.cd.detectChanges();
       },
       error: (error) => {
         console.error('Error loading ordenes para entrega:', error);
+        this.ordenes = [];
+        this.loading = false;
+        this.errorMessage = 'No se pudo cargar la lista de órdenes para entrega.';
+        this.cd.detectChanges();
       }
     });
   }
 
-  viewDetails(idOrden: number): void {
-    this.router.navigate(['/ordenes-seguimiento', idOrden]);
+  viewDetails(orden: OrdenSeguimiento): void {
+    this.router.navigate(['/ordenes-seguimiento-entrega', orden.id, orden.clienteNombre]);
+  }
+
+  getTiempoRestanteClass(tiempoRestante: string): string {
+    const t = (tiempoRestante || '').toLowerCase();
+    if (t.includes('-')) return 'text-red-600';
+    if (t.includes('00:')) return 'text-amber-600';
+    return 'text-emerald-600';
   }
 }

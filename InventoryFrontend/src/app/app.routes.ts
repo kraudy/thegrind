@@ -22,6 +22,7 @@ import { OrdenSeguimientoPreparacionListComponent } from './ordenes-seguimiento/
 import { OrdenSeguimientoPreparacionDetalleListComponent } from './ordenes-seguimiento/orden-seguimiento-preparacion-detalle-list/orden-seguimiento-preparacion-detalle-list.component';
 
 import { OrdenSeguimientoEntregaListComponent } from './ordenes-seguimiento/orden-seguimiento-entrega-list/orden-seguimiento-entrega-list.component';
+import { OrdenSeguimientoEntregaDetalleListComponent } from './ordenes-seguimiento/orden-seguimiento-entrega-detalle-list/orden-seguimiento-entrega-detalle-list.component';
 
 import { ClienteListComponent } from './clientes/cliente-list/cliente-list.component';
 import { ClienteFormComponent } from './clientes/cliente-form/cliente-form.component';
@@ -72,6 +73,7 @@ export const routes: Routes = [
   { path: 'ordenes-seguimiento-preparacion/:idOrden/:clienteNombre', component: OrdenSeguimientoPreparacionDetalleListComponent},
 
   { path: 'ordenes-seguimiento-entrega', component: OrdenSeguimientoEntregaListComponent },
+  { path: 'ordenes-seguimiento-entrega/:idOrden/:clienteNombre', component: OrdenSeguimientoEntregaDetalleListComponent},
 
   { path: 'clientes', component: ClienteListComponent },
   { path: 'clientes/new', component: ClienteFormComponent },

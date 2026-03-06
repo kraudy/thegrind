@@ -1,7 +1,6 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
   <div class="relative flex justify-between items-center mb-8">
-    <!-- Botón Volver al Inicio (izquierda) -->
     <a routerLink="/" class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-md transition transform hover:scale-105">
       <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -9,43 +8,49 @@
       Volver al Inicio
     </a>
 
-    <!-- Título perfectamente centrado -->
+    <button
+      (click)="loadOrdenesParaEntrega()"
+      class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg shadow-md transition transform hover:scale-105"
+    >
+      Actualizar
+    </button>
+
     <h1 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-bold text-gray-900 pointer-events-none">
       Órdenes para Entrega
     </h1>
   </div>
 
   <div class="bg-white shadow-xl rounded-xl overflow-hidden">
-    <div class="overflow-x-auto">
+    <!-- Loading -->
+    <div *ngIf="loading" class="p-10 text-center text-gray-600">
+      Cargando órdenes...
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="!loading && errorMessage" class="p-6 bg-red-50 text-red-700 text-center font-medium">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Table -->
+    <div *ngIf="!loading && !errorMessage" class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creada Por</th>
-            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Vencimiento</th>
-            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiempo Restante</th>
-            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Orden</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Cliente</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Creada Por</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Vence</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tiempo Restante</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr *ngFor="let orden of ordenes" class="hover:bg-gray-50 transition cursor-pointer" (click)="orden.id && viewDetails(orden.id)">
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              {{ orden.id }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ orden.clienteNombre }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ orden.creadaPor }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-              {{ orden.fechaVencimiento ? (orden.fechaVencimiento | date:'dd/MM/yyyy HH:mm') : '-' }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+          <tr *ngFor="let orden of ordenes" class="cursor-pointer hover:bg-purple-50 transition" (click)="orden.id && viewDetails(orden)" title="Ver detalle de entrega">
+            <td class="px-6 py-4 font-semibold text-purple-700">#{{ orden.id }}</td>
+            <td class="px-6 py-4 text-gray-800">{{ orden.clienteNombre }}</td>
+            <td class="px-6 py-4 text-gray-700">{{ orden.creadaPor }}</td>
+            <td class="px-6 py-4 text-gray-700">{{ orden.fechaVencimiento | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td class="px-6 py-4 font-semibold" [ngClass]="getTiempoRestanteClass(orden.tiempoRestante)">
               {{ orden.tiempoRestante }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <a [routerLink]="['/ordenes-seguimiento', orden.id]"
-                class="text-indigo-600 hover:text-indigo-900 font-medium">
-                Ver Detalles
-              </a>
             </td>
           </tr>
         </tbody>
