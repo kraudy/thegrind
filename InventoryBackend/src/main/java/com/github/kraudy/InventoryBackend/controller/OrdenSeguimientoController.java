@@ -104,6 +104,17 @@ public class OrdenSeguimientoController {
     return ordenSeguimientoRepository.getSeguimientoDeOrdenParaEntrega(idOrden);
   }
 
+  /* Retorna lista de ordenes para repartir */
+  @GetMapping("/para-repartir")
+  public List<OrdenSeguimientoDTO> getOrdenesParaRepartir() {
+    return ordenSeguimientoRepository.getOrdenesParaRepartir();
+  }
+
+  @GetMapping("/para-repartir/{idOrden}")
+  public List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaRepartir(@PathVariable Long idOrden) {
+    return ordenSeguimientoRepository.getSeguimientoDeOrdenParaRepartir(idOrden);
+  }
+
   /* Muestra el seguimiento completo de los detalles de una orden */
   @GetMapping("/orden/{idOrden}")
   public List<OrdenSeguimientoDetalleDTO> getFullSeguimiento(@PathVariable Long idOrden) {

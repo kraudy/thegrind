@@ -101,6 +101,77 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     """, nativeQuery = true)
   List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaImpresion(@Param("idOrden") Long idOrden);
 
+  /* Seguimiento para repartir */
+
+  @Query(value = """
+    WITH 
+    cal AS (
+      SELECT
+        ord.id,
+        ord.id_cliente,
+        CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
+        ord.creada_por,
+        ord.fecha_vencimiento,
+        (fecha_vencimiento - current_timestamp)::text AS tiempoRestante
+
+      FROM orden_calendario cal
+
+      JOIN orden ord ON ord.id = cal.id_orden
+      JOIN cliente cte ON cte.id = ord.id_cliente
+      WHERE ord.estado = 'Repartida'                            -- Solo considerar ordenes que están en estado Repartida
+            -- No filtramos por fecha porque se pueden repartir las ordenes por adelantado
+    ),
+    seg AS (
+      SELECT
+        seg.id_orden
+        
+      FROM orden_seguimiento seg                                -- Relacionamos con orden_seguimiento para obtener el estado actual de cada orden
+      JOIN cal ON cal.id = seg.id_orden
+
+      WHERE seg.estado IN ('Repartida') 
+      GROUP BY seg.id_orden
+    )
+    SELECT
+      cal.id AS id,
+      cal.id_cliente AS idCliente,
+      cal.clienteNombre,
+      cal.creada_por AS creadaPor,
+      cal.fecha_vencimiento AS fechaVencimiento,
+      cal.tiempoRestante
+
+    FROM cal
+    JOIN seg ON seg.id_orden = cal.id
+    ORDER BY cal.id_cliente, cal.id ASC
+
+  """, nativeQuery = true)
+  List<OrdenSeguimientoDTO> getOrdenesParaRepartir();
+
+  /* Aqui no se especifica current date porque el id ya deberia estar filtrado */
+  @Query(value = """
+    SELECT
+        seg.id_orden,
+        seg.id_orden_detalle,
+        det.id_producto,
+        prod.nombre,
+        det.cantidad,
+        seg.tipo,
+        seg.sub_tipo,
+        seg.estado AS estadoActual,
+        CASE 
+          WHEN seg.estado IN ('Repartida') THEN true 
+          ELSE false 
+        END AS permiteMover                                                 -- Solo permitir mover si el estado es Repartida
+
+    FROM orden_seguimiento seg
+    JOIN orden_detalle det ON det.id_orden = seg.id_orden                   -- Necesitamos el deatalle para mostrar el producto y la cantidad
+                        AND det.id_orden_detalle = seg.id_orden_detalle
+    JOIN producto prod ON prod.id = det.id_producto
+    WHERE seg.id_orden = :idOrden
+      AND seg.estado IN ('Repartida', 'Normal', 'Reparacion') -- Mostrar detalles en estado Repartida, Normal o Reparacion para dar visibilidad de lo que se tiene que repartir pero solo permitir mover los que están en Repartida
+    ORDER BY seg.id_orden_detalle ASC
+    """, nativeQuery = true)
+  List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaRepartir(@Param("idOrden") Long idOrden);
+
   /* Seguimiento para preparacion */
 
   @Query(value = """
