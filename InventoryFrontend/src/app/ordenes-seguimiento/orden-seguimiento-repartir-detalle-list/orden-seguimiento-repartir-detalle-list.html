@@ -1,1 +1,83 @@
-<p>orden-seguimiento-repartir-detalle-list works!</p>
+<div class="max-w-7xl mx-auto px-4 py-12">
+  <div class="flex justify-between items-center mb-6">
+    <button (click)="goBack()"
+            class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-xl">
+      ← Volver a Repartir
+    </button>
+  </div>
+  <div class="text-center mb-10">
+    <h1 class="text-4xl font-bold text-gray-900">Repartir Orden #{{ idOrden }}</h1>
+    <div class="text-2xl font-bold text-gray-800 mt-2">{{ clienteNombre }}</div>
+  </div>
+
+  <!-- Completion Message -->
+  <div *ngIf="isOrderCompleted" class="mb-12 bg-green-50 border border-green-200 rounded-3xl p-12 text-center">
+    <div class="text-6xl mb-6">✅</div>
+    <h2 class="text-4xl font-bold text-green-800 mb-4">¡Orden Completada!</h2>
+    <p class="text-xl text-green-700 mb-6">Todos los productos han completado el proceso de repartir.</p>
+    <button (click)="goBack()"
+            class="inline-flex items-center px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md transition">
+      Volver a Lista de Repartir
+    </button>
+  </div>
+
+  <div *ngFor="let det of detalles" class="mb-12 bg-white rounded-3xl shadow-xl overflow-hidden"
+       [ngClass]="{'opacity-50': !det.permiteMover}">
+
+    <!-- Cabecera -->
+    <div class="p-8 border-b bg-gray-50 flex justify-between items-center">
+      <div>
+        <span class="text-2xl font-bold">#{{ det.idOrdenDetalle }} - {{ det.nombreProducto }} - {{ det.cantidad }} unidades</span>
+        <p class="text-gray-500 mt-1">{{ det.tipoProducto }} / {{ det.subTipoProducto }}</p>
+      </div>
+      <span class="px-5 py-2 bg-teal-100 text-teal-700 rounded-2xl text-sm font-medium">
+        {{ det.estadoActual || 'Sin estado' }}
+      </span>
+    </div>
+
+    <!-- STEPPER -->
+    <div class="p-8 bg-gray-50">
+      <div class="flex items-center justify-between relative mb-8">
+        <div *ngFor="let state of getPossibleStates(det.idOrdenDetalle); let i = index"
+             class="flex-1 text-center relative z-10">
+
+          <div *ngIf="i < getPossibleStates(det.idOrdenDetalle).length - 1"
+               class="absolute top-5 left-1/2 w-full h-0.5 bg-gray-200 -z-10"
+               [ngClass]="{
+                 'bg-green-500': isReached(det.idOrdenDetalle, getPossibleStates(det.idOrdenDetalle)[i + 1]?.estado ?? '')
+               }"></div>
+
+          <div class="mx-auto w-11 h-11 rounded-2xl flex items-center justify-center text-lg font-bold border-4 transition-all"
+               [ngClass]="{
+                 'bg-green-500 border-green-500 text-white': isReached(det.idOrdenDetalle, state.estado),
+                 'bg-teal-600 border-teal-600 text-white ring-4 ring-teal-100': isCurrent(det.idOrdenDetalle, state.estado),
+                 'bg-white border-gray-300 text-gray-400': !isReached(det.idOrdenDetalle, state.estado) && !isCurrent(det.idOrdenDetalle, state.estado)
+               }">
+            {{ i + 1 }}
+          </div>
+
+          <div class="mt-3 text-xs font-medium leading-tight"
+               [ngClass]="{
+                 'text-green-700': isReached(det.idOrdenDetalle, state.estado),
+                 'text-teal-700 font-semibold': isCurrent(det.idOrdenDetalle, state.estado),
+                 'text-gray-400': !isReached(det.idOrdenDetalle, state.estado) && !isCurrent(det.idOrdenDetalle, state.estado)
+               }">
+            {{ state.estado }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón Avanzar -->
+      <div class="flex justify-end" *ngIf="det.permiteMover">
+        <button (click)="advanceDetail(det)"
+                [disabled]="isLastState(det.idOrdenDetalle)"
+                class="px-10 py-3 bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 text-white font-semibold rounded-2xl flex items-center gap-3 transition">
+          Avanzar al siguiente estado
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
