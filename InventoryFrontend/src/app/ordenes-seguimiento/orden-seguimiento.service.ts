@@ -43,6 +43,11 @@ export class OrdenSeguimientoService {
     return this.http.get<OrdenSeguimientoDetalle[]>(`${this.apiUrl}/para-entrega/${idOrden}`);
   }
 
+  /* Seguimiento para repartir */
+  getOrdenesParaRepartir(): Observable<OrdenSeguimiento[]> {
+    return this.http.get<OrdenSeguimiento[]>(`${this.apiUrl}/para-repartir`);
+  }
+
   getByDetalle(idOrden: number, idOrdenDetalle: number): Observable<OrdenSeguimientoDetalle[]> {
     return this.http.get<OrdenSeguimientoDetalle[]>(`${this.apiUrl}/por-detalle/${idOrden}/${idOrdenDetalle}`);
   }
