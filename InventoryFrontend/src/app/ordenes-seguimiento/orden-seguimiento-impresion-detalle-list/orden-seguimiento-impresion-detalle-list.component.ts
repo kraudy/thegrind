@@ -23,7 +23,6 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
   historyMap = new Map<number, any[]>();
   currentStateMap = new Map<number, string>();
   isOrderCompleted = false;
-  dataLoaded = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -42,7 +41,6 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
     this.service.getOrdenDetalleParaImpresion(this.idOrden).subscribe({
       next: (data) => {
         this.detalles = data || [];
-        this.dataLoaded = true;
         this.loadStepperDataForAll();
         this.cd.detectChanges();
       },
@@ -61,27 +59,17 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
 
       this.service.getPossibleStates(det.tipoProducto, det.subTipoProducto).subscribe((states) => {
         this.possibleStatesMap.set(detId, states || []);
-        this.checkOrderCompletion();
         this.cd.detectChanges();
       });
 
       this.service.getByDetalle(det.idOrden, det.idOrdenDetalle).subscribe((hist) => {
         this.historyMap.set(detId, hist || []);
-        this.checkOrderCompletion();
         this.cd.detectChanges();
       });
     });
-
-    // Check completion even if no details (empty array)
-    this.checkOrderCompletion();
-  }
-
-  private checkOrderCompletion() {
-    // Only check completion after data has been loaded
-    if (!this.dataLoaded) return;
     
     // If no details are returned, the order is completed (all items moved to next stage)
-    if (this.detalles.length === 0 && !this.isOrderCompleted) {
+    if (this.detalles.length === 0) {
       this.isOrderCompleted = true;
     }
   }
