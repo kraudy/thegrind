@@ -61,6 +61,9 @@ GRANT ALL PRIVILEGES ON DATABASE inventorydb TO inventoryuser
 \c  -- Change database
 \dt -- show tables inside database
 \e  -- Select editor
+\d table -- show colums, keys and indexs
+
+ALTER TABLE orden_seguimiento_historico DROP CONSTRAINT orden_seguimiento_historico_pkey;
 ```
 
 Creat db user

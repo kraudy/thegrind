@@ -15,18 +15,29 @@ import lombok.Data;
 
 @Entity
 @Data
-@IdClass(OrdenSeguimientoHistoricoPK.class)
-@Table(name = "orden_seguimiento_historico")
+@Table(name = "orden_seguimiento_historico",
+  indexes = {  
+    @Index( // Index para ordenes
+      name = "idx_id_orden",
+      columnList = "id_orden"
+    ),
+    @Index( // Index para estados
+      name = "idx_estado",
+      columnList = "estado"
+    )
+  }
+)
 public class OrdenSeguimientoHistorico {
   @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
   @Column(name = "id_orden")
   private Long idOrden;
 
-  @Id
   @Column(name = "id_orden_detalle")
   private Long idOrdenDetalle;
 
-  @Id
   @Column(name = "estado", nullable = false, length = 100)
   private String estado;
 
