@@ -40,7 +40,7 @@ public class OrdenSeguimiento {
   private String estado;
 
   // Track who created the tracking record, required and not updatable
-  @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
+  @Column(nullable = false, columnDefinition = "VARCHAR(50)")
   private String seguimientoPor;
 
   // Automatically set the creation timestamp when a new tracking record is created

@@ -44,13 +44,13 @@ public class OrdenSeguimientoHistorico {
   @Column(updatable = false, nullable = false)
   private LocalDateTime fechaCreacion;
 
-  @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
+  @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(50)")
   private String usuarioCreacion;
 
   @Column(nullable = false)
   private LocalDateTime fechaFinalizacion;
 
-  @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
+  @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(50)")
   private String usuarioFinalizacion;
 
   @Column(nullable = false)

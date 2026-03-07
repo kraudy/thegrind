@@ -129,6 +129,8 @@ ng generate component ordenes-seguimiento/orden-seguimiento-preparacion-detalle-
 ng generate component ordenes-seguimiento/orden-seguimiento-entrega-list
 ng generate component ordenes-seguimiento/orden-seguimiento-entrega-detalle-list
 
+
+
 ng generate service ordenes-seguimiento/orden-seguimiento
 
 ng generate component clientes/cliente-list
