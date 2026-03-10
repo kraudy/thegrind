@@ -212,7 +212,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
 
     FROM cal
     JOIN seg ON seg.id_orden = cal.id
-    ORDER BY cal.id_cliente, cal.id ASC
+    ORDER BY cal.id_cliente, cal.fecha_vencimiento ASC
 
   """, nativeQuery = true)
   List<OrdenSeguimientoDTO> getOrdenesParaPreparacion();
@@ -238,7 +238,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     JOIN producto prod ON prod.id = det.id_producto
     WHERE seg.id_orden = :idOrden
       AND seg.estado NOT IN ('Listo', 'Entregado') -- Mostrar detalles anteriores a preparacion pero que no estén listos o entregados
-    ORDER BY seg.id_orden_detalle ASC
+    ORDER BY seg.id_orden_detalle ASC 
     """, nativeQuery = true)
   List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaPreparacion(@Param("idOrden") Long idOrden);
 
@@ -260,7 +260,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     JOIN orden ord ON ord.id = cal.id_orden
     JOIN cliente cte ON cte.id = ord.id_cliente
     WHERE ord.estado = 'Listo'                            -- Obtenemos las ordenes que están en estado Listo de cualquier fecha, porque la orden puede estar lista un dia antes de su entrega
-    ORDER BY ord.id_cliente, ord.id ASC
+    ORDER BY ord.id_cliente, ord.fecha_vencimiento ASC
 
   """, nativeQuery = true)
   List<OrdenSeguimientoDTO> getOrdenesParaEntrega();
@@ -390,7 +390,8 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
   @Query(value = """
     SELECT
       seg.id_orden_detalle,
-      json_agg(pte.estado ORDER BY pte.secuencia ASC)::text
+      json_agg(pte.estado ORDER BY pte.secuencia ASC)::text,
+      seg.estado AS estadoActual
 
     FROM orden_seguimiento seg
     JOIN producto_tipo_estado pte 
@@ -398,7 +399,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
 
     WHERE seg.id_orden = :idOrden
 
-    GROUP BY seg.id_orden_detalle
+    GROUP BY seg.id_orden_detalle, seg.estado
     ORDER BY seg.id_orden_detalle ASC
     """, nativeQuery = true)
   List<EstadosPorDetalleDTO> getEstadosPorDetalle(@Param("idOrden") Long idOrden);

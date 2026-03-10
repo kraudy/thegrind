@@ -22,13 +22,12 @@ export class OrdenSeguimientoListComponent implements OnInit {
   clienteNombre = 'Cargando...';
 
   possibleStatesMap = new Map<number, string[]>();
-  historyMap = new Map<number, any[]>();
   currentStateMap = new Map<number, string>();
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private service: OrdenSeguimientoService,
+    private ordenSeguimientoService: OrdenSeguimientoService,
     private ordenCalendarioService: OrdenCalendarioService,
     private cd: ChangeDetectorRef
   ) {}
@@ -40,12 +39,10 @@ export class OrdenSeguimientoListComponent implements OnInit {
   }
 
   load() {
-    this.service.getFullByOrden(this.idOrden).subscribe({
+    this.ordenSeguimientoService.getFullByOrden(this.idOrden).subscribe({
       next: (data) => {
         this.detalles = data;
         this.loadEstadosPorDetalle();
-        this.loadStepperDataForAll();
-
         this.cd.detectChanges();
       },
       error: (err) => console.error('❌ Error cargando seguimiento', err)
@@ -53,10 +50,11 @@ export class OrdenSeguimientoListComponent implements OnInit {
   }
 
   private loadEstadosPorDetalle() {
-    this.service.getEstadosPorDetalle(this.idOrden).subscribe({
+    this.ordenSeguimientoService.getEstadosPorDetalle(this.idOrden).subscribe({
       next: (data) => {
         data.forEach(item => {
           this.possibleStatesMap.set(item.idOrdenDetalle, item.estados);
+          this.currentStateMap.set(item.idOrdenDetalle, item.estadoActual);
         });
         this.cd.detectChanges();
       },
@@ -64,29 +62,8 @@ export class OrdenSeguimientoListComponent implements OnInit {
     });
   }
 
-  private loadStepperDataForAll() {
-    this.historyMap.clear();
-    this.currentStateMap.clear();
-
-    this.detalles.forEach(det => {
-      const detId = det.idOrdenDetalle;
-      this.currentStateMap.set(detId, det.estadoActual || '');
-
-      this.service.getByDetalle(det.idOrden, det.idOrdenDetalle).subscribe(hist => {
-        this.historyMap.set(detId, hist);
-        this.cd.detectChanges();
-      });
-    });
-  }
-
-  advanceDetail(det: OrdenSeguimientoDetalle) {
-    this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
-      this.load();
-    });
-  }
-
   reverseDetail(det: OrdenSeguimientoDetalle) {
-    this.service.reverse(det.idOrden, det.idOrdenDetalle).subscribe({
+    this.ordenSeguimientoService.reverse(det.idOrden, det.idOrdenDetalle).subscribe({
       next: () => {
         this.load();
       },
@@ -101,7 +78,7 @@ export class OrdenSeguimientoListComponent implements OnInit {
   }
 
   isReached(detId: number, estado: string): boolean {
-    return this.historyMap.get(detId)?.some((h: any) => h.estado === estado) || false;
+    return this.possibleStatesMap.get(detId)?.some((h: any) => h.estado === estado) || false;
   }
 
   isCurrent(detId: number, estado: string | undefined): boolean {

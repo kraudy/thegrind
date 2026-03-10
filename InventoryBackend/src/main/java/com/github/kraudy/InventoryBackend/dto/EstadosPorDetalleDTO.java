@@ -14,6 +14,7 @@ public class EstadosPorDetalleDTO {
 
     private Long idOrdenDetalle;
     private List<String> estados;
+    private String estadoActual;
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -21,9 +22,10 @@ public class EstadosPorDetalleDTO {
      * Basicamente estamos convirtiendo los estados a JSON y luego a una lista
      * que despues de vuelve a pasar a JSON al devolverla
      */
-    public EstadosPorDetalleDTO(Long idOrdenDetalle, String estadosJson) {
+    public EstadosPorDetalleDTO(Long idOrdenDetalle, String estadosJson, String estadoActual) {
         this.idOrdenDetalle = idOrdenDetalle;
         this.estados = parseJson(estadosJson);
+        this.estadoActual = estadoActual;
     }
 
     private List<String> parseJson(String json) {
