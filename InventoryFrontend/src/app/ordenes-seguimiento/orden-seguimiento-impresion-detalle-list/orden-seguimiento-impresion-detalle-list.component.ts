@@ -27,7 +27,7 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private service: OrdenSeguimientoService,
+    private ordenSeguimientoService: OrdenSeguimientoService,
     private cd: ChangeDetectorRef
   ) {}
 
@@ -38,7 +38,7 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
   }
 
   load() {
-    this.service.getOrdenDetalleParaImpresion(this.idOrden).subscribe({
+    this.ordenSeguimientoService.getOrdenDetalleParaImpresion(this.idOrden).subscribe({
       next: (data) => {
         this.detalles = data || [];
         this.loadStepperDataForAll();
@@ -57,12 +57,12 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
       const detId = det.idOrdenDetalle;
       this.currentStateMap.set(detId, det.estadoActual || '');
 
-      this.service.getPossibleStates(det.tipoProducto, det.subTipoProducto).subscribe((states) => {
+      this.ordenSeguimientoService.getPossibleStates(det.tipoProducto, det.subTipoProducto).subscribe((states) => {
         this.possibleStatesMap.set(detId, states || []);
         this.cd.detectChanges();
       });
 
-      this.service.getByDetalle(det.idOrden, det.idOrdenDetalle).subscribe((hist) => {
+      this.ordenSeguimientoService.getByDetalle(det.idOrden, det.idOrdenDetalle).subscribe((hist) => {
         this.historyMap.set(detId, hist || []);
         this.cd.detectChanges();
       });
@@ -75,7 +75,7 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
   }
 
   advanceDetail(det: OrdenSeguimientoDetalle) {
-    this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
+    this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
       this.load();
     });
   }

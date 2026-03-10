@@ -403,7 +403,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     ORDER BY seg.id_orden_detalle ASC
     """, nativeQuery = true)
   List<EstadosPorDetalleDTO> getEstadosPorDetalle(@Param("idOrden") Long idOrden);
-
+  
   /* Verifica si todos los detalles de una orden están en su primer estado (secuencia = 1) */
   @Query(value = "SELECT COUNT(*) = 0 FROM orden_seguimiento WHERE id_orden = :idOrden AND secuencia > 1", nativeQuery = true)
   boolean areAllDetailsInFirstState(@Param("idOrden") Long idOrden);
