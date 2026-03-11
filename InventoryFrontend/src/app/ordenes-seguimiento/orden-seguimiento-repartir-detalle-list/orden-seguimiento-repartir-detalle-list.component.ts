@@ -1,16 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimientoDetalle } from '../orden-seguimiento-detalle.model';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
+import { Usuario } from '../../usuarios/usuario.model';
+import { UsuarioService } from '../../usuarios/usuario.service';
 
 @Component({
   selector: 'app-orden-seguimiento-repartir-detalle-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './orden-seguimiento-repartir-detalle-list.html',
   styleUrls: ['./orden-seguimiento-repartir-detalle-list.css'],
 })
@@ -28,14 +31,18 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private service: OrdenSeguimientoService,
+    private usuarioService: UsuarioService,
     private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.idOrden = Number(this.route.snapshot.paramMap.get('idOrden'));
     this.clienteNombre = String(this.route.snapshot.paramMap.get('clienteNombre'));
+
     this.load();
   }
+
+
 
   load() {
     this.service.getOrdenDetalleParaRepartir(this.idOrden).subscribe({

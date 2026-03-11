@@ -2,6 +2,7 @@ package com.github.kraudy.InventoryBackend.controller;
 
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajo;
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajoPK;
+import com.github.kraudy.InventoryBackend.dto.UsuarioDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenDetalle;
 import com.github.kraudy.InventoryBackend.model.OrdenDetallePK;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
@@ -75,6 +76,15 @@ public class OrdenTrabajoController {
 
       return ordenTrabajoRepository.save(trabajo);
   }
+
+  @GetMapping("/obtener-reparador/{idOrden}/{idOrdenDetalle}")
+  public UsuarioDTO getReparadores(
+            @PathVariable Long idOrden, 
+            @PathVariable Long idOrdenDetalle) {
+
+    return ordenTrabajoRepository.getReparador(idOrden, idOrdenDetalle);
+  }
+  
   // Avanzar detalle
   //  al siguiente estado
   @PostMapping("/asignar-reparacion/{idOrden}/{idOrdenDetalle}/{reparador}")
@@ -114,6 +124,8 @@ public class OrdenTrabajoController {
 
     trabajoReparacion.setIdOrden(idOrden);
     trabajoReparacion.setIdOrdenDetalle(idOrdenDetalle);
+    trabajoReparacion.setEstado(productoTipoEstadoSiguiente.getEstado());
+    trabajoReparacion.setSecuencia(productoTipoEstadoSiguiente.getSecuencia());
     trabajoReparacion.setTrabajador(reparador);
     trabajoReparacion.setRol("repara");
     trabajoReparacion.setIdProducto(detalleReparacion.getIdProducto());

@@ -24,4 +24,15 @@ public interface OrdenTrabajoRepository extends JpaRepository<OrdenTrabajo, Orde
     """, nativeQuery = true)
   boolean detalleEstaAsignado(Long idOrden, Long idOrdenDetalle, String estado);
 
+  @Query(value = """
+    SELECT
+        trabajo.trabajador AS usuario
+
+    FROM orden_trabajo trabajo
+    WHERE trabajo.id_orden = :idOrden
+      AND trabajo.id_orden_detalle = :idOrdenDetalle
+      AND trabajo.estado = 'Reparacion'
+    """, nativeQuery = true)
+  UsuarioDTO getReparador(Long idOrden, Long idOrdenDetalle);
+
 }

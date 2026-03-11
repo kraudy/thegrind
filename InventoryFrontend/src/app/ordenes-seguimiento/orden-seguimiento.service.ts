@@ -6,6 +6,7 @@ import { OrdenSeguimientoDetalle } from './orden-seguimiento-detalle.model';
 import { ProductoTipoEstado } from '../productos-tipo-estados/producto-tipo-estado.model';
 import { OrdenSeguimiento } from './orden-seguimiento.model';
 import { EstadosPorDetalleDTO } from './estados-por-detalle.model';
+import { Usuario } from '../usuarios/usuario.model';
 
 
 @Injectable({
@@ -75,5 +76,9 @@ export class OrdenSeguimientoService {
 
   reverse(idOrden: number, idOrdenDetalle: number): Observable<OrdenSeguimientoDetalle> {
     return this.http.post<OrdenSeguimientoDetalle>(`${this.apiUrl}/regresar/${idOrden}/${idOrdenDetalle}`, {});
+  }
+
+  assignReparacion(idOrden: number, idOrdenDetalle: number, reparador: string): Observable<Usuario> {
+    return this.http.post<Usuario>(`/api/ordenes-trabajo/asignar-reparacion/${idOrden}/${idOrdenDetalle}/${encodeURIComponent(reparador)}`, {});
   }
 }
