@@ -35,4 +35,15 @@ public interface OrdenTrabajoRepository extends JpaRepository<OrdenTrabajo, Orde
     """, nativeQuery = true)
   UsuarioDTO getReparador(Long idOrden, Long idOrdenDetalle);
 
+  @Query(value = """
+    SELECT
+        trabajo.trabajador AS usuario
+
+    FROM orden_trabajo trabajo
+    WHERE trabajo.id_orden = :idOrden
+      AND trabajo.id_orden_detalle = :idOrdenDetalle
+      AND trabajo.estado = 'Normal'
+    """, nativeQuery = true)
+  UsuarioDTO getNormal(Long idOrden, Long idOrdenDetalle);
+
 }

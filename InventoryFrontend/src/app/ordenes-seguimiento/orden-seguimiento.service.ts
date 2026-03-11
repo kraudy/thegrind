@@ -81,4 +81,16 @@ export class OrdenSeguimientoService {
   assignReparacion(idOrden: number, idOrdenDetalle: number, reparador: string): Observable<Usuario> {
     return this.http.post<Usuario>(`/api/ordenes-trabajo/asignar-reparacion/${idOrden}/${idOrdenDetalle}/${encodeURIComponent(reparador)}`, {});
   }
+
+  getReparador(idOrden: number, idOrdenDetalle: number): Observable<Usuario | null> {
+    return this.http.get<Usuario | null>(`/api/ordenes-trabajo/obtener-reparador/${idOrden}/${idOrdenDetalle}`);
+  }
+
+  assignNormal(idOrden: number, idOrdenDetalle: number, usuario: string): Observable<Usuario> {
+    return this.http.post<Usuario>(`/api/ordenes-trabajo/asignar-normal/${idOrden}/${idOrdenDetalle}/${encodeURIComponent(usuario)}`, {});
+  }
+
+  getNormal(idOrden: number, idOrdenDetalle: number): Observable<Usuario | null> {
+    return this.http.get<Usuario | null>(`/api/ordenes-trabajo/obtener-normal/${idOrden}/${idOrdenDetalle}`);
+  }
 }

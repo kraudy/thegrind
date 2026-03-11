@@ -97,6 +97,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     WHERE seg.id_orden = :idOrden
       AND seg.estado IN ('Normal', 'Reparacion','Impresion')  -- Solo mostrar detalles que están en estado Normal, Reparacion o Impresion
                                                               -- Por ahora estamos dejando solo los que les corresponden para impresion pero se podrian mostrar todos y marcar cuales se pueden mover a impresion
+      AND seg.sub_tipo IN ('Normal', 'Reparacion') -- Solo mostrar detalles que son de tipo Normal o Reparacion porque son los unicos que se imprimen
     ORDER BY seg.id_orden_detalle ASC
     """, nativeQuery = true)
   List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaImpresion(@Param("idOrden") Long idOrden);
@@ -168,6 +169,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     JOIN producto prod ON prod.id = det.id_producto
     WHERE seg.id_orden = :idOrden
       AND seg.estado IN ('Repartida', 'Normal', 'Reparacion') -- Mostrar detalles en estado Repartida, Normal o Reparacion para dar visibilidad de lo que se tiene que repartir pero solo permitir mover los que están en Repartida
+      AND seg.sub_tipo IN ('Normal', 'Reparacion') -- Solo mostrar detalles que son de tipo Normal o Reparacion
     ORDER BY seg.id_orden_detalle ASC
     """, nativeQuery = true)
   List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaRepartir(@Param("idOrden") Long idOrden);

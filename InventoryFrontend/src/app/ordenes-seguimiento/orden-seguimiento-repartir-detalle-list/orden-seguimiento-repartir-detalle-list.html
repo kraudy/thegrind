@@ -67,16 +67,80 @@
         </div>
       </div>
 
-      <!-- Botón Avanzar -->
-      <div class="flex justify-end" *ngIf="det.permiteMover">
-        <button (click)="advanceDetail(det)"
-                [disabled]="isLastState(det.idOrdenDetalle)"
-                class="px-10 py-3 bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 text-white font-semibold rounded-2xl flex items-center gap-3 transition">
-          Avanzar al siguiente estado
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7-7 7" />
-          </svg>
-        </button>
+      <!-- Asignación / avance según subTipoProducto -->
+      <div class="flex justify-between items-center" *ngIf="det.permiteMover">
+        <ng-container [ngSwitch]="det.subTipoProducto">
+          <!-- Reparación -->
+          <ng-container *ngSwitchCase="'Reparacion'">
+            <div *ngIf="getAssignedReparador(det.idOrdenDetalle); else asignarReparador" class="flex items-center gap-3 bg-green-50 text-green-700 px-4 py-2 rounded-xl border border-green-200">
+              <span class="text-xl">🛠️</span>
+              <div>
+                <p class="text-sm font-semibold">Reparador asignado</p>
+                <p class="text-base font-bold">{{ getAssignedReparador(det.idOrdenDetalle) }}</p>
+              </div>
+            </div>
+
+            <ng-template #asignarReparador>
+              <div class="flex flex-wrap gap-3 items-center justify-end w-full">
+                <div class="flex flex-col">
+                  <label class="text-sm text-gray-600 font-medium">Asignar reparador</label>
+                  <select [(ngModel)]="selectedReparador[det.idOrdenDetalle]"
+                          class="mt-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 min-w-56">
+                    <option value="">Selecciona un reparador</option>
+                    <option *ngFor="let rep of reparadores" [value]="rep.usuario">{{ rep.usuario }}</option>
+                  </select>
+                </div>
+
+                <button (click)="assignReparador(det)"
+                        [disabled]="!selectedReparador[det.idOrdenDetalle] || isAssigning(det.idOrdenDetalle)"
+                        class="px-6 py-3 bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 text-white font-semibold rounded-2xl flex items-center gap-3 transition">
+                  Asignar y avanzar a Reparación
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7-7 7" />
+                  </svg>
+                </button>
+
+                <div *ngIf="assignError[det.idOrdenDetalle]" class="text-sm text-red-600 w-full text-right">{{ assignError[det.idOrdenDetalle] }}</div>
+              </div>
+            </ng-template>
+          </ng-container>
+
+          <!-- Normal -->
+          <ng-container *ngSwitchCase="'Normal'">
+            <div *ngIf="getAssignedNormal(det.idOrdenDetalle); else asignarNormal" class="flex items-center gap-3 bg-blue-50 text-blue-700 px-4 py-2 rounded-xl border border-blue-200">
+              <span class="text-xl">👤</span>
+              <div>
+                <p class="text-sm font-semibold">Usuario asignado</p>
+                <p class="text-base font-bold">{{ getAssignedNormal(det.idOrdenDetalle) }}</p>
+              </div>
+            </div>
+
+            <ng-template #asignarNormal>
+              <div class="flex flex-wrap gap-3 items-center justify-end w-full">
+                <div class="flex flex-col">
+                  <label class="text-sm text-gray-600 font-medium">Asignar normal</label>
+                  <select [(ngModel)]="selectedNormal[det.idOrdenDetalle]"
+                          class="mt-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 min-w-56">
+                    <option value="">Selecciona un usuario</option>
+                    <option *ngFor="let user of normales" [value]="user.usuario">{{ user.usuario }}</option>
+                  </select>
+                </div>
+
+                <button (click)="assignNormal(det)"
+                        [disabled]="!selectedNormal[det.idOrdenDetalle] || isAssigning(det.idOrdenDetalle)"
+                        class="px-6 py-3 bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 text-white font-semibold rounded-2xl flex items-center gap-3 transition">
+                  Asignar y avanzar
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7-7 7" />
+                  </svg>
+                </button>
+
+                <div *ngIf="assignError[det.idOrdenDetalle]" class="text-sm text-red-600 w-full text-right">{{ assignError[det.idOrdenDetalle] }}</div>
+              </div>
+            </ng-template>
+          </ng-container>
+
+        </ng-container>
       </div>
     </div>
   </div>

@@ -49,7 +49,7 @@ public class OrdenTrabajoController {
   private UsuarioRepository usuarioRepository;
 
 
-  // Endpoint
+  /* Registra progreso de trabajo, aplica para reparadores, normal y pegado */
   @PostMapping("/registrar-trabajo/{idOrden}/{idOrdenDetalle}/{estado}/{cantidadTrabajada}")
   public OrdenTrabajo registrarProgreso(
           @PathVariable Long idOrden,
@@ -83,6 +83,25 @@ public class OrdenTrabajoController {
             @PathVariable Long idOrdenDetalle) {
 
     return ordenTrabajoRepository.getReparador(idOrden, idOrdenDetalle);
+  }
+
+  @GetMapping("/obtener-normal/{idOrden}/{idOrdenDetalle}")
+  public UsuarioDTO getNormal(
+            @PathVariable Long idOrden, 
+            @PathVariable Long idOrdenDetalle) {
+
+    return ordenTrabajoRepository.getNormal(idOrden, idOrdenDetalle);
+  }
+
+  @PostMapping("/asignar-normal/{idOrden}/{idOrdenDetalle}/{normal}")
+  public OrdenTrabajo asignarNormal(
+          @PathVariable Long idOrden,
+          @PathVariable Long idOrdenDetalle,
+          @PathVariable String normal) {
+
+    OrdenTrabajo trabajoReparacion = new OrdenTrabajo();
+    
+    return trabajoReparacion;
   }
   
   // Avanzar detalle

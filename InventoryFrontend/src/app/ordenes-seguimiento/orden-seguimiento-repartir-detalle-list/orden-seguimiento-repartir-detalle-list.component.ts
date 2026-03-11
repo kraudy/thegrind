@@ -27,6 +27,15 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit {
   currentStateMap = new Map<number, string>();
   isOrderCompleted = false;
 
+  reparadores: Usuario[] = [];
+  normales: Usuario[] = [];
+  selectedReparador: Record<number, string> = {};
+  selectedNormal: Record<number, string> = {};
+  assignedReparador = new Map<number, string>();
+  assignedNormal = new Map<number, string>();
+  assigning = new Set<number>();
+  assignError: Record<number, string> = {};
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -39,6 +48,16 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit {
     this.idOrden = Number(this.route.snapshot.paramMap.get('idOrden'));
     this.clienteNombre = String(this.route.snapshot.paramMap.get('clienteNombre'));
 
+    this.usuarioService.getReparadores().subscribe({
+      next: (users) => (this.reparadores = users || []),
+      error: (err) => console.error('❌ Error cargando reparadores', err),
+    });
+
+    this.usuarioService.getNormales().subscribe({
+      next: (users) => (this.normales = users || []),
+      error: (err) => console.error('❌ Error cargando usuarios normales', err),
+    });
+
     this.load();
   }
 
@@ -48,10 +67,39 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit {
     this.service.getOrdenDetalleParaRepartir(this.idOrden).subscribe({
       next: (data) => {
         this.detalles = data || [];
+        this.assigning.clear();
+        this.assignError = {};
         this.loadStepperDataForAll();
+        this.loadReparadoresAsignados();
         this.cd.detectChanges();
       },
       error: (err) => console.error('❌ Error cargando detalle de repartir', err),
+    });
+  }
+
+  private loadReparadoresAsignados() {
+    this.assignedReparador.clear();
+    this.assignedNormal.clear();
+    this.detalles.forEach((det) => {
+      this.service.getReparador(det.idOrden, det.idOrdenDetalle).subscribe({
+        next: (resp) => {
+          if (resp?.usuario) {
+            this.assignedReparador.set(det.idOrdenDetalle, resp.usuario);
+          }
+          this.cd.detectChanges();
+        },
+        error: (err) => console.error('❌ Error cargando reparador asignado', err),
+      });
+
+      this.service.getNormal(det.idOrden, det.idOrdenDetalle).subscribe({
+        next: (resp) => {
+          if (resp?.usuario) {
+            this.assignedNormal.set(det.idOrdenDetalle, resp.usuario);
+          }
+          this.cd.detectChanges();
+        },
+        error: (err) => console.error('❌ Error cargando usuario normal asignado', err),
+      });
     });
   }
 
@@ -87,6 +135,60 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit {
     });
   }
 
+  assignReparador(det: OrdenSeguimientoDetalle) {
+    const reparador = this.selectedReparador[det.idOrdenDetalle];
+    if (!reparador) return;
+
+    this.assignError[det.idOrdenDetalle] = '';
+    this.assigning.add(det.idOrdenDetalle);
+
+    this.service.assignReparacion(det.idOrden, det.idOrdenDetalle, reparador).subscribe({
+      next: () => {
+        this.assignedReparador.set(det.idOrdenDetalle, reparador);
+        this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe({
+          next: () => this.load(),
+          error: (err) => {
+            console.error('❌ Error avanzando tras asignar', err);
+            this.assignError[det.idOrdenDetalle] = 'No se pudo avanzar al estado Reparación';
+            this.assigning.delete(det.idOrdenDetalle);
+          },
+        });
+      },
+      error: (err) => {
+        console.error('❌ Error asignando reparador', err);
+        this.assignError[det.idOrdenDetalle] = 'No se pudo asignar el reparador';
+        this.assigning.delete(det.idOrdenDetalle);
+      },
+    });
+  }
+
+  assignNormal(det: OrdenSeguimientoDetalle) {
+    const usuario = this.selectedNormal[det.idOrdenDetalle];
+    if (!usuario) return;
+
+    this.assignError[det.idOrdenDetalle] = '';
+    this.assigning.add(det.idOrdenDetalle);
+
+    this.service.assignNormal(det.idOrden, det.idOrdenDetalle, usuario).subscribe({
+      next: () => {
+        this.assignedNormal.set(det.idOrdenDetalle, usuario);
+        this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe({
+          next: () => this.load(),
+          error: (err) => {
+            console.error('❌ Error avanzando tras asignar normal', err);
+            this.assignError[det.idOrdenDetalle] = 'No se pudo avanzar al siguiente estado';
+            this.assigning.delete(det.idOrdenDetalle);
+          },
+        });
+      },
+      error: (err) => {
+        console.error('❌ Error asignando usuario normal', err);
+        this.assignError[det.idOrdenDetalle] = 'No se pudo asignar el usuario';
+        this.assigning.delete(det.idOrdenDetalle);
+      },
+    });
+  }
+
   getPossibleStates(detId: number): ProductoTipoEstado[] {
     return this.possibleStatesMap.get(detId) || [];
   }
@@ -105,6 +207,18 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit {
     const states = this.getPossibleStates(detId);
     if (states.length === 0) return true;
     return this.isCurrent(detId, states[states.length - 1]?.estado);
+  }
+
+  getAssignedReparador(detId: number): string | undefined {
+    return this.assignedReparador.get(detId);
+  }
+
+  getAssignedNormal(detId: number): string | undefined {
+    return this.assignedNormal.get(detId);
+  }
+
+  isAssigning(detId: number): boolean {
+    return this.assigning.has(detId);
   }
 
   goBack() {

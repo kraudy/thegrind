@@ -25,4 +25,9 @@ public class UsuarioController {
     return usuarioRepository.getUsuariosReparacion();
   }
 
+  @GetMapping("/normal")
+  public List<UsuarioDTO> getNormal() {
+    return usuarioRepository.getUsuariosNormal();
+  }
+
 }

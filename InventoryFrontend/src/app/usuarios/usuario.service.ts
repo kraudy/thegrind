@@ -15,4 +15,8 @@ export class UsuarioService {
   getReparadores(): Observable<Usuario[]> {
     return this.http.get<Usuario[]>(`${this.apiUrl}/repara`);
   }
+
+  getNormales(): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(`${this.apiUrl}/normal`);
+  }
 }
