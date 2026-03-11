@@ -16,7 +16,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "Orden", uniqueConstraints = {}) // si necesitas constraints adicionales aquí
+@Table(name = "Orden", uniqueConstraints = {})
 public class Orden {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

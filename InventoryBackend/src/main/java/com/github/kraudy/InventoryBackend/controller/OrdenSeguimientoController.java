@@ -8,16 +8,20 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoPK;
+import com.github.kraudy.InventoryBackend.model.OrdenTrabajoPK;
 import com.github.kraudy.InventoryBackend.dto.EstadosPorDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosDTO;
+import com.github.kraudy.InventoryBackend.model.Orden;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
+import com.github.kraudy.InventoryBackend.model.OrdenTrabajo;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoHistorico;
 import com.github.kraudy.InventoryBackend.model.ProductoTipoEstado;
 import com.github.kraudy.InventoryBackend.model.ProductoTipoEstadoPK;
 import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoHistoricoRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoRepository;
+import com.github.kraudy.InventoryBackend.repository.OrdenTrabajoRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoTipoEstadoRepository;
 
@@ -41,6 +45,9 @@ public class OrdenSeguimientoController {
 
   @Autowired
   private OrdenSeguimientoHistoricoRepository ordenSeguimientoHistoricoRepository;
+
+  @Autowired
+  private OrdenTrabajoRepository ordenTrabajoRepository;
 
   @GetMapping
   public List<OrdenSeguimiento> getAll() {
@@ -243,6 +250,18 @@ public class OrdenSeguimientoController {
 
     // Guardamos el historico
     ordenSeguimientoHistoricoRepository.save(historico);
+
+    // Validamos si se esta asignando el trabajo antes de avanzar a reparacion
+    if (productoTipoEstadoSiguiente.getEstado().equals("Reparacion")) {
+      if (!ordenTrabajoRepository.detalleEstaAsignado(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoSiguiente.getEstado())){
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se puede avanzar a reparacion sin asignar detalle a reparador");
+      }
+      //OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoSiguiente.getEstado());
+      //OrdenTrabajo ordenTrabajo = ordenTrabajoRepository.findById(ordenTrabajoPK).
+      //  orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No se puede avanzar a reparacion sin asignar detalle a reparador"));
+      
+
+    }
 
     // Validamos si todos los detalles estan listos para marcar orden como lista
     if (productoTipoEstadoSiguiente.getEstado().equals("Listo")) {

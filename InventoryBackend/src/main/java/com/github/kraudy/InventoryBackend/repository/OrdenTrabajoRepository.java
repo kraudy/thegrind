@@ -1,5 +1,6 @@
 package com.github.kraudy.InventoryBackend.repository;
 
+import com.github.kraudy.InventoryBackend.dto.UsuarioDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajo;
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajoPK;
 
@@ -13,4 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 
-public interface OrdenTrabajoRepository extends JpaRepository<OrdenTrabajo, OrdenTrabajoPK> {}
+public interface OrdenTrabajoRepository extends JpaRepository<OrdenTrabajo, OrdenTrabajoPK> {
+  @Query(value = """
+    SELECT COUNT(*) = 1
+    FROM orden_trabajo trabajo
+    WHERE trabajo.id_orden = :idOrden
+      AND trabajo.id_orden_detalle = :idOrdenDetalle
+      AND trabajo.estado = :estado
+    """, nativeQuery = true)
+  boolean detalleEstaAsignado(Long idOrden, Long idOrdenDetalle, String estado);
+
+}
