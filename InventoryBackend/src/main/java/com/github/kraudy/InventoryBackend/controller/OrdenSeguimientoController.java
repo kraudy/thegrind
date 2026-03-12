@@ -170,13 +170,19 @@ public class OrdenSeguimientoController {
     // Se le resta uno para obtener el estado anterior
     ProductoTipoEstadoPK productoTipoEstadoPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 1);
 
-    ProductoTipoEstado productoTipoEstado = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
+    ProductoTipoEstado productoTipoEstadoPrevio = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
       orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
 
     // Si el estado era listo, se marca orden como repartida otra vez
     if (ordenSeguimientoActual.getEstado().equals("Listo")) {
       // Se marca orden como repartida
       ordenRepository.updateEstado(ordenSeguimientoActual.getIdOrden(), "Repartida");
+    }
+
+    // Si el estado era Reparacion, Normal, Enmarcado, Pegado, se elimina orden de trabajo asociada
+    if (List.of("Reparacion", "Normal", "Enmarcado", "Pegado").contains(ordenSeguimientoActual.getEstado())) {
+      OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
+      ordenTrabajoRepository.deleteById(ordenTrabajoPK);
     }
 
     OrdenSeguimientoHistorico historico = new OrdenSeguimientoHistorico();
@@ -189,8 +195,8 @@ public class OrdenSeguimientoController {
 
     ordenSeguimientoActual.setSeguimientoPor("adminTestregresa");
     // Se actualiza estado nuevo, secuencia y usuario que finaliza estado previo
-    ordenSeguimientoActual.setEstado(productoTipoEstado.getEstado());
-    ordenSeguimientoActual.setSecuencia(productoTipoEstado.getSecuencia());
+    ordenSeguimientoActual.setEstado(productoTipoEstadoPrevio.getEstado());
+    ordenSeguimientoActual.setSecuencia(productoTipoEstadoPrevio.getSecuencia());
 
     // Actualizamos el estado actual
     ordenSeguimientoActual = ordenSeguimientoRepository.save(ordenSeguimientoActual);

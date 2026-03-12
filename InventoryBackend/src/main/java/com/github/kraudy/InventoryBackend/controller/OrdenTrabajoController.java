@@ -65,7 +65,7 @@ public class OrdenTrabajoController {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cantidad inválida");
       }
 
-      trabajo.setCantidadTrabajada(cantidadTrabajada + trabajo.getCantidadTrabajada());
+      trabajo.setCantidadTrabajada(cantidadTrabajada);
       if (trabajo.getCantidadTrabajada() > trabajo.getCantidadAsignada()) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La cantidad trabajada no puede exceder la cantidad asignada");
       }
@@ -99,19 +99,6 @@ public class OrdenTrabajoController {
           @PathVariable Long idOrdenDetalle,
           @PathVariable String normal) {
 
-    OrdenTrabajo trabajoReparacion = new OrdenTrabajo();
-    
-    return trabajoReparacion;
-  }
-  
-  // Avanzar detalle
-  //  al siguiente estado
-  @PostMapping("/asignar-reparacion/{idOrden}/{idOrdenDetalle}/{reparador}")
-  public OrdenTrabajo asignarReparacion(
-          @PathVariable Long idOrden,
-          @PathVariable Long idOrdenDetalle,
-          @PathVariable String reparador) {
-            
     // Obtencion de detalle de orden
     OrdenDetallePK pk = new OrdenDetallePK(idOrden, idOrdenDetalle);
 
@@ -130,23 +117,88 @@ public class OrdenTrabajoController {
     ProductoTipoEstado productoTipoEstadoSiguiente = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
       orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Siguiente estado no encontrado"));
 
-    if (!productoTipoEstadoSiguiente.getEstado().equals("Reparacion")) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El siguiente estado no es de reparacion");
+    if (!productoTipoEstadoSiguiente.getEstado().equals("Normal")) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El siguiente estado no es normal");
     }
 
-    if (!usuarioRepository.usuarioEsReparador(reparador)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario no es un reparador");
+    if (!usuarioRepository.usuarioEsNormal(normal)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario no es normal");
     }
   
-      //TODO: Maybe i could call avanzar direclty from here, we'll see
+    OrdenTrabajo trabajoNormal = new OrdenTrabajo();
+
+    trabajoNormal.setIdOrden(idOrden);
+    trabajoNormal.setIdOrdenDetalle(idOrdenDetalle);
+    trabajoNormal.setEstado(productoTipoEstadoSiguiente.getEstado());
+    trabajoNormal.setSecuencia(productoTipoEstadoSiguiente.getSecuencia());
+    trabajoNormal.setIdProducto(detalleReparacion.getIdProducto());
+    // Por ahora le ponomes la cantidad del detalle.
+    trabajoNormal.setCantidadAsignada(detalleReparacion.getCantidad());
+
+    // Inicialmente, toda la cantidad esta sin trabajar, a medida que el reparador vaya avanzando en el trabajo, se iran actualizando estos campos
+    trabajoNormal.setCantidadTrabajada(0);
+    trabajoNormal.setCantidadNoTrabajada(detalleReparacion.getCantidad());
+
+    trabajoNormal.setComentario("");
+    trabajoNormal.setFechaTrabajo(LocalDate.now());
+
+    trabajoNormal.setTrabajador(normal);
+    trabajoNormal.setRol("normal");
+
+    // pendiente por ahora
+    //trabajoNormal.setIdSeguimiento();
+
+    return ordenTrabajoRepository.save(trabajoNormal); 
+  }
+  
+  // Asigna trabajo
+  @PostMapping("/asignar-reparacion/{idOrden}/{idOrdenDetalle}/{reparador}")
+  public OrdenTrabajo asignarReparacion(
+          @PathVariable Long idOrden,
+          @PathVariable Long idOrdenDetalle,
+          @PathVariable String reparador) {
+            
+    // Obtencion de detalle de orden
+    OrdenDetalle detalleReparacion = ordenDetalleRepository.findById(new OrdenDetallePK(idOrden, idOrdenDetalle)).
+          orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Detalle no encontrado"));
+
+    // Obtencion de seguimiento del detalle
+    OrdenSeguimiento ordenSeguimientoActual = ordenSeguimientoRepository.findById(new OrdenSeguimientoPK(idOrden, idOrdenDetalle)).
+          orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El detalle no se encuentra en seguimiento"));
+   
+    // Obtenemos el siguiente estado
+    ProductoTipoEstadoPK productoTipoEstadoPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() + 1);
+    
+    ProductoTipoEstado productoTipoEstadoSiguiente = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
+      orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Siguiente estado no encontrado"));
+
+    //TODO: Es necesario Enmarcado?
+    // tambien se podria validar con el estado actual: Repartir, Impresion pero este podria permitir otros estados como las Ampliaciones que pasan directo a Listo
+    if (!List.of("Reparacion", "Normal", "Enmarcado", "Pegado").contains(productoTipoEstadoSiguiente.getEstado())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El siguiente estado del producto no es valido para asignar trabajo");
+    }
+
     OrdenTrabajo trabajoReparacion = new OrdenTrabajo();
+
+    if (productoTipoEstadoSiguiente.getEstado().equals("Reparacion")) {
+      if (!usuarioRepository.usuarioEsReparador(reparador)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario no es un reparador");
+      }
+      trabajoReparacion.setRol("repara");
+    }
+
+    if (productoTipoEstadoSiguiente.getEstado().equals("Normal")) {
+      if (!usuarioRepository.usuarioEsNormal(reparador)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario no es normal");
+      }
+      trabajoReparacion.setRol("normal");
+    }
 
     trabajoReparacion.setIdOrden(idOrden);
     trabajoReparacion.setIdOrdenDetalle(idOrdenDetalle);
     trabajoReparacion.setEstado(productoTipoEstadoSiguiente.getEstado());
     trabajoReparacion.setSecuencia(productoTipoEstadoSiguiente.getSecuencia());
     trabajoReparacion.setTrabajador(reparador);
-    trabajoReparacion.setRol("repara");
     trabajoReparacion.setIdProducto(detalleReparacion.getIdProducto());
     // Por ahora le ponomes la cantidad del detalle.
     trabajoReparacion.setCantidadAsignada(detalleReparacion.getCantidad());

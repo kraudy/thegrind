@@ -1,6 +1,11 @@
+#server:
+#  error:
+#    include-message: always   # this makes your custom messages visible
+#    include-binding-errors: always
+
 spring:
   application:
-    name: InventoryBackend'
+    name: InventoryBackend
 
   datasource:
     url: jdbc:postgresql://localhost:5432/inventorydb
