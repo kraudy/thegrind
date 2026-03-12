@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 public interface UsuarioRepository extends JpaRepository<Usuario, String> {
 
   /* Obtiene listado de usuarios por rol */
-  
+
   @Query(value = """
     SELECT
         usr.usuario
@@ -52,5 +52,14 @@ public interface UsuarioRepository extends JpaRepository<Usuario, String> {
       and usr.usuario = :usuario
     """, nativeQuery = true)
   boolean usuarioEsNormal(String usuario);
+
+  @Query(value = """
+    SELECT COUNT(*) = 1
+    FROM usuario usr
+    JOIN usuario_rol usrRol ON usr.usuario = usrRol.usuario
+    WHERE usrRol.rol = 'pega' 
+      and usr.usuario = :usuario
+    """, nativeQuery = true)
+  boolean usuarioEsPegador(String usuario);
 }
 

@@ -142,7 +142,7 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit {
     this.assignError[det.idOrdenDetalle] = '';
     this.assigning.add(det.idOrdenDetalle);
 
-    this.service.assignReparacion(det.idOrden, det.idOrdenDetalle, reparador).subscribe({
+    this.service.assignTrabajo(det.idOrden, det.idOrdenDetalle, reparador).subscribe({
       next: () => {
         this.assignedReparador.set(det.idOrdenDetalle, reparador);
         this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe({
@@ -169,7 +169,8 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit {
     this.assignError[det.idOrdenDetalle] = '';
     this.assigning.add(det.idOrdenDetalle);
 
-    this.service.assignNormal(det.idOrden, det.idOrdenDetalle, usuario).subscribe({
+    // Ambos usan el mismo servicio
+    this.service.assignTrabajo(det.idOrden, det.idOrdenDetalle, usuario).subscribe({
       next: () => {
         this.assignedNormal.set(det.idOrdenDetalle, usuario);
         this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe({

@@ -78,16 +78,12 @@ export class OrdenSeguimientoService {
     return this.http.post<OrdenSeguimientoDetalle>(`${this.apiUrl}/regresar/${idOrden}/${idOrdenDetalle}`, {});
   }
 
-  assignReparacion(idOrden: number, idOrdenDetalle: number, reparador: string): Observable<Usuario> {
-    return this.http.post<Usuario>(`/api/ordenes-trabajo/asignar-reparacion/${idOrden}/${idOrdenDetalle}/${encodeURIComponent(reparador)}`, {});
+  assignTrabajo(idOrden: number, idOrdenDetalle: number, trabajador: string): Observable<Usuario> {
+    return this.http.post<Usuario>(`/api/ordenes-trabajo/asignar-trabajo/${idOrden}/${idOrdenDetalle}/${encodeURIComponent(trabajador)}`, {});
   }
 
   getReparador(idOrden: number, idOrdenDetalle: number): Observable<Usuario | null> {
     return this.http.get<Usuario | null>(`/api/ordenes-trabajo/obtener-reparador/${idOrden}/${idOrdenDetalle}`);
-  }
-
-  assignNormal(idOrden: number, idOrdenDetalle: number, usuario: string): Observable<Usuario> {
-    return this.http.post<Usuario>(`/api/ordenes-trabajo/asignar-normal/${idOrden}/${idOrdenDetalle}/${encodeURIComponent(usuario)}`, {});
   }
 
   getNormal(idOrden: number, idOrdenDetalle: number): Observable<Usuario | null> {
