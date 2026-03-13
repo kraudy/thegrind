@@ -195,7 +195,7 @@ public class OrdenSeguimientoController {
     historico.setUsuarioCreacion(ordenSeguimientoActual.getSeguimientoPor());
 
     ordenSeguimientoActual.setSeguimientoPor("adminTestregresa");
-    // Se actualiza estado nuevo, secuencia y usuario que finaliza estado previo
+    // Se actualiza estado previo, secuencia y usuario que finaliza estado previo
     ordenSeguimientoActual.setEstado(productoTipoEstadoPrevio.getEstado());
     ordenSeguimientoActual.setSecuencia(productoTipoEstadoPrevio.getSecuencia());
 

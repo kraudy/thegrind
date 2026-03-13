@@ -74,12 +74,12 @@ public class OrdenTrabajoController {
       orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
 
     // Se valida estado anterior y siguiente. Esto es conveniente para filtrar otros productos que puedan tener algun estado en comun pero que son de otro flujo.
-    if (!List.of("Pegado").contains(productoTipoEstadoSiguiente.getEstado())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El siguiente estado del producto no es valido para progreso de trabajo");
+    if (!List.of("Pegado", "Enmarcado").contains(productoTipoEstadoSiguiente.getEstado())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El siguiente estado del producto no es valido para progreso de trabajo: " + productoTipoEstadoSiguiente.getEstado());
     }
 
     if (!List.of("Reparacion", "Normal").contains(productoTipoEstadoAnterior.getEstado())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El estado anterior del producto no es valido para progreso de trabajo");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El estado anterior del producto no es valido para progreso de trabajo: " + productoTipoEstadoAnterior.getEstado());
     }
 
     // estado anterior por ahora deberia ser "Reparacion" o "Normal"
@@ -88,11 +88,12 @@ public class OrdenTrabajoController {
     OrdenTrabajo trabajo = ordenTrabajoRepository.findById(pk)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay trabajo asignado para este estado"));
 
-    if (cantidadTrabajada <= 0 || cantidadTrabajada > trabajo.getCantidadAsignada()) {
+    if (cantidadTrabajada <= 0 || cantidadTrabajada + trabajo.getCantidadTrabajada() > trabajo.getCantidadAsignada()) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cantidad trabajada inválida: "  + cantidadTrabajada);
     }
 
-    trabajo.setCantidadTrabajada(cantidadTrabajada);
+    // Agrega progreso al trabajo actual
+    trabajo.setCantidadTrabajada(trabajo.getCantidadTrabajada() + cantidadTrabajada);
 
     trabajo.setCantidadNoTrabajada(trabajo.getCantidadAsignada() - trabajo.getCantidadTrabajada());
 

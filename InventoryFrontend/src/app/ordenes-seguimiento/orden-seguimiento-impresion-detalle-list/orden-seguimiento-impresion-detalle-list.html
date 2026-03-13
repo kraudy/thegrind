@@ -28,6 +28,11 @@
       <div>
         <span class="text-2xl font-bold">#{{ det.idOrdenDetalle }} - {{ det.nombreProducto }} - {{ det.cantidad }} unidades</span>
         <p class="text-gray-500 mt-1">{{ det.tipoProducto }} / {{ det.subTipoProducto }}</p>
+        <div class="mt-2 flex gap-4 text-sm">
+          <span class="text-green-600 font-medium">Impresas: {{ det.cantidadTrabajada }}</span>
+          <span class="text-orange-600 font-medium">Pendientes: {{ det.cantidadPendiente }}</span>
+          <span *ngIf="det.trabajador" class="text-blue-600 font-medium">Trabajador: {{ det.trabajador }}</span>
+        </div>
       </div>
       <span class="px-5 py-2 bg-indigo-100 text-indigo-700 rounded-2xl text-sm font-medium">
         {{ det.estadoActual || 'Sin estado' }}
@@ -66,10 +71,55 @@
         </div>
       </div>
 
+      <!-- Progress Input -->
+      <div *ngIf="det.estadoActual === 'Impresion'" class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+        <h3 class="text-lg font-semibold text-blue-800 mb-3">Agregar Progreso de Impresión</h3>
+        <div class="flex gap-4 items-center">
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-blue-700 mb-1">Cantidad a agregar:</label>
+            <input type="number" 
+                   min="1" 
+                   [max]="det.cantidadPendiente"
+                   [(ngModel)]="progressInputs[det.idOrdenDetalle]"
+                   class="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   placeholder="Ingrese cantidad">
+          </div>
+          <div class="flex gap-2">
+            <button (click)="addProgress(det)"
+                    [disabled]="!(progressInputs[det.idOrdenDetalle] > 0)"
+                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-medium rounded-lg transition">
+              Agregar Progreso
+            </button>
+            <button (click)="checkAndAdvance(det)"
+                    [disabled]="det.cantidadPendiente > 0 || !det.permiteMover"
+                    class="px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white font-medium rounded-lg transition">
+              Avanzar Estado
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advance Confirmation Dialog -->
+      <div *ngIf="showAdvanceDialog[det.idOrdenDetalle]" class="mt-4 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
+        <p class="text-yellow-800 font-medium mb-3">
+          Se imprimieron {{ det.cantidadTrabajada }} de {{ det.cantidad }}, ¿desea avanzar al siguiente estado?
+        </p>
+        <div class="flex gap-2">
+          <button (click)="confirmAdvance(det); showAdvanceDialog[det.idOrdenDetalle] = false"
+                  class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg">
+            Sí, avanzar
+          </button>
+          <button (click)="showAdvanceDialog[det.idOrdenDetalle] = false"
+                  class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg">
+            Cancelar
+          </button>
+        </div>
+      </div>
+
       <!-- Botón Avanzar -->
-      <div class="flex justify-end">
+      <div *ngIf="det.estadoActual === 'Normal' || det.estadoActual === 'Reparacion'" class="flex justify-end">
         <button (click)="advanceDetail(det)"
-                [disabled]="isLastState(det.idOrdenDetalle)"
+                [disabled]="!det.permiteMover"
                 class="px-10 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white font-semibold rounded-2xl flex items-center gap-3 transition">
           Avanzar al siguiente estado
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">

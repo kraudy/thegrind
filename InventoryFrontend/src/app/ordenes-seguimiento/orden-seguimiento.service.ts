@@ -90,4 +90,8 @@ export class OrdenSeguimientoService {
   getNormal(idOrden: number, idOrdenDetalle: number): Observable<Usuario | null> {
     return this.http.get<Usuario | null>(`/api/ordenes-trabajo/obtener-normal/${idOrden}/${idOrdenDetalle}`);
   }
+
+  progresoTrabajo(idOrden: number, idOrdenDetalle: number, cantidadTrabajada: number): Observable<any> {
+    return this.http.post(`/api/ordenes-trabajo/progreso-trabajo/${idOrden}/${idOrdenDetalle}/${cantidadTrabajada}`, {});
+  }
 }

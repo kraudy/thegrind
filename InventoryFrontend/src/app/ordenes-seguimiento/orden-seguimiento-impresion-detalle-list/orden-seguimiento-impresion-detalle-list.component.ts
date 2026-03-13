@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimientoDetalleImpresion } from '../orden-seguimiento-detalle-impresion.model';
@@ -10,7 +11,7 @@ import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-e
 @Component({
   selector: 'app-orden-seguimiento-impresion-detalle-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './orden-seguimiento-impresion-detalle-list.html',
   styleUrls: ['./orden-seguimiento-impresion-detalle-list.css'],
 })
@@ -23,6 +24,10 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
   historyMap = new Map<number, any[]>();
   currentStateMap = new Map<number, string>();
   isOrderCompleted = false;
+
+  // Progress tracking
+  progressInputs: { [key: number]: number } = {};
+  showAdvanceDialog: { [key: number]: boolean } = {};
 
   constructor(
     private route: ActivatedRoute,
@@ -42,6 +47,18 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
       next: (data) => {
         this.detalles = data || [];
         this.loadStepperDataForAll();
+        
+        // Check for automatic advancement
+        this.detalles.forEach(det => {
+          if (det.cantidadPendiente <= 0 && det.permiteMover) {
+            // Automatically advance if no pending work and movement is allowed
+            this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
+              // Reload after advancement
+              this.load();
+            });
+          }
+        });
+        
         this.cd.detectChanges();
       },
       error: (err) => console.error('❌ Error cargando detalle de impresión', err),
@@ -94,13 +111,50 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
     return this.currentStateMap.get(detId) === estado;
   }
 
-  isLastState(detId: number): boolean {
-    const states = this.getPossibleStates(detId);
-    if (states.length === 0) return true;
-    return this.isCurrent(detId, states[states.length - 1]?.estado);
-  }
-
   goBack() {
     this.router.navigate(['/ordenes-seguimiento-impresion']);
+  }
+
+  // Progress methods
+  addProgress(det: OrdenSeguimientoDetalleImpresion) {
+    const progressAmount = this.progressInputs[det.idOrdenDetalle] || 0;
+    if (progressAmount <= 0) {
+      alert('Ingrese una cantidad válida para agregar progreso.');
+      return;
+    }
+
+    this.ordenSeguimientoService.progresoTrabajo(det.idOrden, det.idOrdenDetalle, progressAmount).subscribe({
+      next: () => {
+        // Reset input
+        this.progressInputs[det.idOrdenDetalle] = 0;
+        // Reload data
+        this.load();
+        // Note: Automatic advancement will be checked after load completes
+      },
+      error: (err) => {
+        console.error('Error adding progress:', err);
+        alert('Error al agregar progreso. Verifique la cantidad.');
+      }
+    });
+  }
+
+  confirmAdvance(det: OrdenSeguimientoDetalleImpresion) {
+    const printed = det.cantidadTrabajada;
+    const total = det.cantidad;
+    const message = `Se imprimieron ${printed} de ${total}, ¿desea avanzar?`;
+    
+    if (confirm(message)) {
+      this.advanceDetail(det);
+    }
+  }
+
+  checkAndAdvance(det: OrdenSeguimientoDetalleImpresion) {
+    // If no pending work, automatically advance
+    if (det.cantidadPendiente <= 0) {
+      this.advanceDetail(det);
+    } else {
+      // Show advance dialog
+      this.showAdvanceDialog[det.idOrdenDetalle] = true;
+    }
   }
 }
