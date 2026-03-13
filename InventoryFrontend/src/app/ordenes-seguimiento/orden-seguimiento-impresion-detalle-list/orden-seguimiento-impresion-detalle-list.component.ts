@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
-import { OrdenSeguimientoDetalle } from '../orden-seguimiento-detalle.model';
+import { OrdenSeguimientoDetalleImpresion } from '../orden-seguimiento-detalle-impresion.model';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
 
 @Component({
@@ -16,7 +16,7 @@ import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-e
 })
 export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
   idOrden!: number;
-  detalles: OrdenSeguimientoDetalle[] = [];
+  detalles: OrdenSeguimientoDetalleImpresion[] = [];
   clienteNombre = 'Cargando...';
 
   possibleStatesMap = new Map<number, ProductoTipoEstado[]>();
@@ -74,7 +74,7 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
     }
   }
 
-  advanceDetail(det: OrdenSeguimientoDetalle) {
+  advanceDetail(det: OrdenSeguimientoDetalleImpresion) {
     this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
       this.load();
     });

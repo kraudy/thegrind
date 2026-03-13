@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { OrdenSeguimientoDetalle } from './orden-seguimiento-detalle.model';
+import { OrdenSeguimientoDetalleImpresion } from './orden-seguimiento-detalle-impresion.model';
 import { ProductoTipoEstado } from '../productos-tipo-estados/producto-tipo-estado.model';
 import { OrdenSeguimiento } from './orden-seguimiento.model';
 import { EstadosPorDetalleDTO } from './estados-por-detalle.model';
@@ -22,8 +23,8 @@ export class OrdenSeguimientoService {
     return this.http.get<OrdenSeguimiento[]>(`${this.apiUrl}/para-impresion`);
   }
 
-  getOrdenDetalleParaImpresion(idOrden: number): Observable<OrdenSeguimientoDetalle[]> {
-    return this.http.get<OrdenSeguimientoDetalle[]>(`${this.apiUrl}/para-impresion/${idOrden}`);
+  getOrdenDetalleParaImpresion(idOrden: number): Observable<OrdenSeguimientoDetalleImpresion[]> {
+    return this.http.get<OrdenSeguimientoDetalleImpresion[]>(`${this.apiUrl}/para-impresion/${idOrden}`);
   }
 
   /* Seguimiento para preparacion */

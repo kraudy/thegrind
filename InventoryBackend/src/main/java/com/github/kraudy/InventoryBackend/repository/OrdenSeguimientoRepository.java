@@ -5,7 +5,7 @@ import com.github.kraudy.InventoryBackend.dto.OrdenDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleDTO;
-
+import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleImpresionDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoPK;
 
@@ -86,21 +86,27 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
         seg.tipo,
         seg.sub_tipo,
         seg.estado AS estadoActual,
+        trabajo.trabajador AS trabajador,
+        trabajo.cantidad_trabajada AS cantidadTrabajada,
+        det.cantidad - COALESCE(trabajo.cantidad_trabajada, 0) AS cantidadPendiente,
         CASE 
-          WHEN seg.estado IN ('Normal', 'Reparacion','Impresion') THEN true 
+          WHEN seg.estado IN ('Normal', 'Reparacion', 'Impresion') THEN true 
           ELSE false 
         END AS permiteMover                                                 -- Solo permitir mover si el estado es Normal, Reparacion o Impresion
     FROM orden_seguimiento seg
     JOIN orden_detalle det ON det.id_orden = seg.id_orden
                         AND det.id_orden_detalle = seg.id_orden_detalle
     JOIN producto prod ON prod.id = det.id_producto
+    JOIN orden_trabajo trabajo ON trabajo.id_orden = seg.id_orden
+                        AND trabajo.id_orden_detalle = seg.id_orden_detalle
+                        AND trabajo.estado IN ('Normal', 'Reparacion') -- Solo considerar detalles que están asignados a un trabajador en estado Normal o Reparacion
     WHERE seg.id_orden = :idOrden
       AND seg.estado IN ('Normal', 'Reparacion','Impresion')  -- Solo mostrar detalles que están en estado Normal, Reparacion o Impresion
                                                               -- Por ahora estamos dejando solo los que les corresponden para impresion pero se podrian mostrar todos y marcar cuales se pueden mover a impresion
       AND seg.sub_tipo IN ('Normal', 'Reparacion') -- Solo mostrar detalles que son de tipo Normal o Reparacion porque son los unicos que se imprimen
     ORDER BY seg.id_orden_detalle ASC
     """, nativeQuery = true)
-  List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaImpresion(@Param("idOrden") Long idOrden);
+  List<OrdenSeguimientoDetalleImpresionDTO> getSeguimientoDeOrdenParaImpresion(@Param("idOrden") Long idOrden);
 
   /* Seguimiento para repartir */
 
