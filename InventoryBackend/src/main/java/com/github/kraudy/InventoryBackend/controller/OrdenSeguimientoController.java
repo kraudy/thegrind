@@ -186,9 +186,20 @@ public class OrdenSeguimientoController {
       ordenTrabajoRepository.deleteById(ordenTrabajoPK);
     }
 
+    if (List.of("Impresion").contains(ordenSeguimientoActual.getEstado())) {
+      OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
+      ordenTrabajoRepository.deleteById(ordenTrabajoPK);
+    }
+
     // Si la orden esta en estado Enmarcado o Pegado, se resetea el trabajo realizado del estado de reparacion o normal previo, para que vuelva a aparecer como tarea pendiente para el reparador
-    if (List.of("Enmarcado", "Pegado").contains(ordenSeguimientoActual.getEstado())) {
-      ProductoTipoEstadoPK productoTipoEstadoNormalReparacionPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 2);
+    if (List.of("Impresion", "Enmarcado", "Pegado").contains(ordenSeguimientoActual.getEstado())) {
+      ProductoTipoEstadoPK productoTipoEstadoNormalReparacionPK = null;
+      if (List.of("Impresion").contains(ordenSeguimientoActual.getEstado())) {
+        // Para las impresion la orden quedo en estado Normal o Reparacion por eso se le resta 1 a la secuencia
+        productoTipoEstadoNormalReparacionPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 1); 
+      } else {
+        productoTipoEstadoNormalReparacionPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 2);
+      }
 
       ProductoTipoEstado productoTipoEstadoNormalReparacion = productoTipoEstadoRepository.findById(productoTipoEstadoNormalReparacionPK).
         orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
