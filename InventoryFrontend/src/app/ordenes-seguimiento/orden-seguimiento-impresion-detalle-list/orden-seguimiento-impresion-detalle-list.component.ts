@@ -139,13 +139,7 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
   }
 
   confirmAdvance(det: OrdenSeguimientoDetalleImpresion) {
-    const printed = det.cantidadTrabajada;
-    const total = det.cantidad;
-    const message = `Se imprimieron ${printed} de ${total}, ¿desea avanzar?`;
-    
-    if (confirm(message)) {
-      this.advanceDetail(det);
-    }
+    this.advanceDetail(det);
   }
 
   checkAndAdvance(det: OrdenSeguimientoDetalleImpresion) {
