@@ -30,4 +30,9 @@ public class UsuarioController {
     return usuarioRepository.getUsuariosNormal();
   }
 
+  @GetMapping("/pegadores")
+  public List<UsuarioDTO> getPegadores() {
+    return usuarioRepository.getUsuariosPegadores();
+  }
+
 }

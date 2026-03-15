@@ -33,6 +33,16 @@ public interface UsuarioRepository extends JpaRepository<Usuario, String> {
     """, nativeQuery = true)
   List<UsuarioDTO> getUsuariosNormal();
 
+  @Query(value = """
+    SELECT
+        usr.usuario
+
+    FROM usuario usr
+    JOIN usuario_rol usrRol ON usr.usuario = usrRol.usuario
+    WHERE usrRol.rol = 'pega'
+    """, nativeQuery = true)
+  List<UsuarioDTO> getUsuariosPegadores();
+
   /* Valida roles */
 
   @Query(value = """

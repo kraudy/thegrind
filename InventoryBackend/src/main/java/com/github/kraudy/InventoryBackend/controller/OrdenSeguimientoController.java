@@ -181,9 +181,25 @@ public class OrdenSeguimientoController {
     }
 
     // Si el estado era Reparacion, Normal, Enmarcado, Pegado, se elimina orden de trabajo asociada
-    if (List.of("Reparacion", "Normal", "Enmarcado", "Pegado").contains(ordenSeguimientoActual.getEstado())) {
+    if (List.of("Reparacion", "Normal").contains(ordenSeguimientoActual.getEstado())) {
       OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
       ordenTrabajoRepository.deleteById(ordenTrabajoPK);
+    }
+
+    // Si la orden esta en estado Enmarcado o Pegado, se resetea el trabajo realizado del estado de reparacion o normal previo, para que vuelva a aparecer como tarea pendiente para el reparador
+    if (List.of("Enmarcado", "Pegado").contains(ordenSeguimientoActual.getEstado())) {
+      ProductoTipoEstadoPK productoTipoEstadoNormalReparacionPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 2);
+
+      ProductoTipoEstado productoTipoEstadoNormalReparacion = productoTipoEstadoRepository.findById(productoTipoEstadoNormalReparacionPK).
+        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
+
+      OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoNormalReparacion.getEstado());
+      OrdenTrabajo trabajo = ordenTrabajoRepository.findById(ordenTrabajoPK)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay trabajo asignado para este estado"));
+      // Se resetea trabajo realizado
+      trabajo.setCantidadTrabajada(0);
+      trabajo.setCantidadNoTrabajada(trabajo.getCantidadAsignada());
+      ordenTrabajoRepository.save(trabajo);
     }
 
     OrdenSeguimientoHistorico historico = new OrdenSeguimientoHistorico();
@@ -263,11 +279,6 @@ public class OrdenSeguimientoController {
       if (!ordenTrabajoRepository.detalleEstaAsignado(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoSiguiente.getEstado())){
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se puede avanzar a reparacion sin asignar detalle a reparador");
       }
-      //OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoSiguiente.getEstado());
-      //OrdenTrabajo ordenTrabajo = ordenTrabajoRepository.findById(ordenTrabajoPK).
-      //  orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No se puede avanzar a reparacion sin asignar detalle a reparador"));
-      
-
     }
 
     // Validamos si todos los detalles estan listos para marcar orden como lista

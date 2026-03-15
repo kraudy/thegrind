@@ -171,6 +171,7 @@ public class OrdenTrabajoController {
     }
 
     if (productoTipoEstadoSiguiente.getEstado().equals("Pegado")) {
+      //TODO: Por ahora, pasar "Pegador" desde el FE
       if (!usuarioRepository.usuarioEsPegador(trabajador)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario no es pega");
       }
