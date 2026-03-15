@@ -52,10 +52,7 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
         this.detalles.forEach(det => {
           if (det.cantidadPendiente <= 0 && det.permiteMover) {
             // Automatically advance if no pending work and movement is allowed
-            this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
-              // Reload after advancement
-              this.load();
-            });
+            this.advanceDetail(det);
           }
         });
         
@@ -92,9 +89,39 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
   }
 
   advanceDetail(det: OrdenSeguimientoDetalleImpresion) {
-    this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
-      this.load();
-    });
+    if (det.tipoProducto === 'Retablos') {
+      // Assign pegador first, then advance
+      this.ordenSeguimientoService.getPegadores().subscribe({
+        next: (pegadores) => {
+          if (pegadores && pegadores.length > 0) {
+            const pegador = pegadores[0]; // Take first pegador
+            this.ordenSeguimientoService.assignTrabajo(det.idOrden, det.idOrdenDetalle, pegador.usuario).subscribe({
+              next: () => {
+                // Assignment successful, now advance
+                this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
+                  this.load();
+                });
+              },
+              error: (err) => {
+                console.error('Error assigning pegador:', err);
+                alert('Error al asignar pegador. No se puede avanzar.');
+              }
+            });
+          } else {
+            alert('No hay pegadores disponibles. No se puede avanzar.');
+          }
+        },
+        error: (err) => {
+          console.error('Error getting pegadores:', err);
+          alert('Error al obtener pegadores. No se puede avanzar.');
+        }
+      });
+    } else {
+      // Normal advancement
+      this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
+        this.load();
+      });
+    }
   }
 
   getPossibleStates(detId: number): ProductoTipoEstado[] {

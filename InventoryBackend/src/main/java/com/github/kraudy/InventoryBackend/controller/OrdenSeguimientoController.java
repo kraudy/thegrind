@@ -191,6 +191,13 @@ public class OrdenSeguimientoController {
       ordenTrabajoRepository.deleteById(ordenTrabajoPK);
     }
 
+    // Si el estado es pegado, se elimina el trabajo asignado que corresponde a lo que se imprimio
+    if (List.of("Pegado").contains(ordenSeguimientoActual.getEstado())) {
+      OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
+      ordenTrabajoRepository.deleteById(ordenTrabajoPK);
+    }
+
+    /* La logica aqui es que si estaba en Enmarcado o Pegado, se debe resetear el trabajo realizado del estado de reparacion o normal previo proque se tienen que imprimir otra vez */
     // Si la orden esta en estado Enmarcado o Pegado, se resetea el trabajo realizado del estado de reparacion o normal previo, para que vuelva a aparecer como tarea pendiente para el reparador
     if (List.of("Impresion", "Enmarcado", "Pegado").contains(ordenSeguimientoActual.getEstado())) {
       ProductoTipoEstadoPK productoTipoEstadoNormalReparacionPK = null;
@@ -292,12 +299,22 @@ public class OrdenSeguimientoController {
       }
     }
 
+    // Pegado es diferente porque actualmente se le asigan todo lo que se imprime y segun esto se le paga. El alistado sera una validacion no restrictiva.
+    if (productoTipoEstadoSiguiente.getEstado().equals("Pegado")) {
+      if (!ordenTrabajoRepository.detalleEstaAsignado(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoSiguiente.getEstado())){
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se puede avanzar a pegado sin asignar detalle a pegador");
+      }
+    }
+
     // Validamos si todos los detalles estan listos para marcar orden como lista
     if (productoTipoEstadoSiguiente.getEstado().equals("Listo")) {
       if (ordenSeguimientoRepository.estanTodosLosDetallesListos(ordenSeguimientoActual.getIdOrden())){
         // Se marca orden como lista
         ordenRepository.updateEstado(ordenSeguimientoActual.getIdOrden(), productoTipoEstadoSiguiente.getEstado());
       }
+      //if (ordenSeguimientoActual.getTipo().equals("Retablos")){
+      //  //TODO:
+      //}
     }
 
     // Validamos si todos los detalles estan entregados para marcar orden como entregada

@@ -74,10 +74,12 @@ public class OrdenTrabajoController {
       orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
 
     // Se valida estado anterior y siguiente. Esto es conveniente para filtrar otros productos que puedan tener algun estado en comun pero que son de otro flujo.
-    if (!List.of("Pegado", "Enmarcado").contains(productoTipoEstadoSiguiente.getEstado())) {
+    // Se agrega listo para incluir a las ampliaciones
+    if (!List.of("Pegado", "Enmarcado", "Listo").contains(productoTipoEstadoSiguiente.getEstado())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El siguiente estado del producto no es valido para progreso de trabajo: " + productoTipoEstadoSiguiente.getEstado());
     }
 
+    //TODO: validar si es necesario meter Impresion aqui
     if (!List.of("Reparacion", "Normal").contains(productoTipoEstadoAnterior.getEstado())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El estado anterior del producto no es valido para progreso de trabajo: " + productoTipoEstadoAnterior.getEstado());
     }
@@ -143,9 +145,9 @@ public class OrdenTrabajoController {
           orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El detalle no se encuentra en seguimiento"));
    
     // Obtenemos el siguiente estado
-    ProductoTipoEstadoPK productoTipoEstadoPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() + 1);
+    ProductoTipoEstadoPK productoTipoEstadoSiguientePK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() + 1);
     
-    ProductoTipoEstado productoTipoEstadoSiguiente = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
+    ProductoTipoEstado productoTipoEstadoSiguiente = productoTipoEstadoRepository.findById(productoTipoEstadoSiguientePK).
       orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Siguiente estado no encontrado"));
 
     //TODO: Es necesario Enmarcado?
@@ -154,20 +156,20 @@ public class OrdenTrabajoController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El siguiente estado del producto no es valido para asignar trabajo");
     }
 
-    OrdenTrabajo trabajoReparacion = new OrdenTrabajo();
+    OrdenTrabajo trabajo = new OrdenTrabajo();
 
     if (productoTipoEstadoSiguiente.getEstado().equals("Reparacion")) {
       if (!usuarioRepository.usuarioEsReparador(trabajador)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario no es un reparador");
       }
-      trabajoReparacion.setRol("repara");
+      trabajo.setRol("repara");
     }
 
     if (productoTipoEstadoSiguiente.getEstado().equals("Normal")) {
       if (!usuarioRepository.usuarioEsNormal(trabajador)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario no es normal");
       }
-      trabajoReparacion.setRol("normal");
+      trabajo.setRol("normal");
     }
 
     if (productoTipoEstadoSiguiente.getEstado().equals("Pegado")) {
@@ -175,30 +177,45 @@ public class OrdenTrabajoController {
       if (!usuarioRepository.usuarioEsPegador(trabajador)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario no es pega");
       }
-      trabajoReparacion.setRol("pega");
+      ProductoTipoEstadoPK productoTipoEstadoAnteriorPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 1);
+
+      ProductoTipoEstado productoTipoEstadoAnterior = productoTipoEstadoRepository.findById(productoTipoEstadoAnteriorPK).
+        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado para asignar pegado"));
+
+      OrdenTrabajoPK pk = new OrdenTrabajoPK(idOrden, idOrdenDetalle, productoTipoEstadoAnterior.getEstado());
+
+      OrdenTrabajo trabajoNormalReparacion = ordenTrabajoRepository.findById(pk)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay trabajo asignado para este estado. No se puede asignar a pegado"));
+
+      // Para el pegado se le asigna la cantidad trabajada en el estado anterior, que equivale a la cantidad impresa.
+      trabajo.setRol("pega");
+      trabajo.setCantidadAsignada(trabajoNormalReparacion.getCantidadTrabajada());
+      trabajo.setCantidadTrabajada(0);
+      trabajo.setCantidadNoTrabajada(trabajoNormalReparacion.getCantidadTrabajada());
+    } else {
+      // Por ahora le ponomes la cantidad del detalle.
+      trabajo.setCantidadAsignada(detalleReparacion.getCantidad());
+      // Inicialmente, toda la cantidad esta sin trabajar, a medida que vaya avanzando en el trabajo, se iran actualizando estos campos
+      trabajo.setCantidadTrabajada(0);
+      trabajo.setCantidadNoTrabajada(detalleReparacion.getCantidad());
     }
 
-    trabajoReparacion.setIdOrden(idOrden);
-    trabajoReparacion.setIdOrdenDetalle(idOrdenDetalle);
-    trabajoReparacion.setEstado(productoTipoEstadoSiguiente.getEstado());
-    trabajoReparacion.setSecuencia(productoTipoEstadoSiguiente.getSecuencia());
-    trabajoReparacion.setTrabajador(trabajador);
-    trabajoReparacion.setIdProducto(detalleReparacion.getIdProducto());
-    // Por ahora le ponomes la cantidad del detalle.
-    trabajoReparacion.setCantidadAsignada(detalleReparacion.getCantidad());
+    trabajo.setIdOrden(idOrden);
+    trabajo.setIdOrdenDetalle(idOrdenDetalle);
+    trabajo.setEstado(productoTipoEstadoSiguiente.getEstado());
+    trabajo.setSecuencia(productoTipoEstadoSiguiente.getSecuencia());
+    trabajo.setTrabajador(trabajador);
+    trabajo.setIdProducto(detalleReparacion.getIdProducto());
+    
 
-    // Inicialmente, toda la cantidad esta sin trabajar, a medida que vaya avanzando en el trabajo, se iran actualizando estos campos
-    trabajoReparacion.setCantidadTrabajada(0);
-    trabajoReparacion.setCantidadNoTrabajada(detalleReparacion.getCantidad());
-
-    trabajoReparacion.setComentario("");
+    trabajo.setComentario("");
     // Misma fecha de la orden
-    trabajoReparacion.setFechaTrabajo(ordenCalendario.getFecha());
+    trabajo.setFechaTrabajo(ordenCalendario.getFecha());
 
     // pendiente por ahora
-    //trabajoReparacion.setIdSeguimiento();
+    //trabajo.setIdSeguimiento();
 
-    return ordenTrabajoRepository.save(trabajoReparacion);
+    return ordenTrabajoRepository.save(trabajo);
 
   }
 }
