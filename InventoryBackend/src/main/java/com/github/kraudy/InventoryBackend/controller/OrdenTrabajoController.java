@@ -84,6 +84,11 @@ public class OrdenTrabajoController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El estado anterior del producto no es valido para progreso de trabajo: " + productoTipoEstadoAnterior.getEstado());
     }
 
+    //if (ordenSeguimientoActual.getTipo().equals("Retablos") && productoTipoEstadoSiguiente.getEstado().equals("Listo")) {
+    //  //TODO: Poner cantidad trabajada i gual a la cantidad entregada en el pegado
+    //  cantidadTrabajada = 
+    //}
+
     // estado anterior por ahora deberia ser "Reparacion" o "Normal"
     OrdenTrabajoPK pk = new OrdenTrabajoPK(idOrden, idOrdenDetalle, productoTipoEstadoAnterior.getEstado());
 

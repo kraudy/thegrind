@@ -6,6 +6,7 @@ import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleImpresionDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetallePreparacionDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoPK;
 
@@ -97,9 +98,11 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     JOIN orden_detalle det ON det.id_orden = seg.id_orden
                         AND det.id_orden_detalle = seg.id_orden_detalle
     JOIN producto prod ON prod.id = det.id_producto
-    JOIN orden_trabajo trabajo ON trabajo.id_orden = seg.id_orden
+    -- Lo tenia en INNER pero lo deje en LEFT, el avance de seguimiento deberia asegurarlo
+    LEFT JOIN orden_trabajo trabajo ON trabajo.id_orden = seg.id_orden
                         AND trabajo.id_orden_detalle = seg.id_orden_detalle
                         AND trabajo.estado IN ('Normal', 'Reparacion') -- Solo considerar detalles que están asignados a un trabajador en estado Normal o Reparacion
+
     WHERE seg.id_orden = :idOrden
       AND seg.estado IN ('Normal', 'Reparacion','Impresion')  -- Solo mostrar detalles que están en estado Normal, Reparacion o Impresion
                                                               -- Por ahora estamos dejando solo los que les corresponden para impresion pero se podrian mostrar todos y marcar cuales se pueden mover a impresion
@@ -236,19 +239,41 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
         seg.tipo,
         seg.sub_tipo,
         seg.estado AS estadoActual,
+        -- Aqui usar el estadoActual que debe referirse a Enmarcado o Pegado.
+        COALESCE(trabajoActual.trabajador, '') AS trabajadorActual,
+        COALESCE(trabajoActual.cantidad_asignada, 0) AS cantidadAsignadaActual,
+        COALESCE(trabajoActual.cantidad_trabajada, 0) AS cantidadTrabajadaActual,
+
+        COALESCE(trabajoPrevio.estado, '') AS estadoPrevio,
+        COALESCE(trabajoPrevio.trabajador, '') AS trabajadorPrevio,
+        COALESCE(trabajoPrevio.cantidad_asignada, 0) AS cantidadAsignadaPrevio,
+        COALESCE(trabajoPrevio.cantidad_trabajada, 0) AS cantidadTrabajadaPrevio,
+
         CASE 
           WHEN seg.estado IN ('Enmarcado', 'Pegado') THEN true 
           ELSE false 
         END AS permiteMover                                                 -- Solo permitir mover si el estado es Enmarcado o Pegado
+
     FROM orden_seguimiento seg
     JOIN orden_detalle det ON det.id_orden = seg.id_orden                   -- Necesitamos el deatalle para mostrar el producto y la cantidad
                         AND det.id_orden_detalle = seg.id_orden_detalle
     JOIN producto prod ON prod.id = det.id_producto
+
+    LEFT JOIN orden_trabajo trabajoPrevio 
+                         ON trabajoPrevio.id_orden = seg.id_orden
+                        AND trabajoPrevio.id_orden_detalle = seg.id_orden_detalle
+                        AND trabajoPrevio.estado IN ('Normal', 'Reparacion') -- Lo ocupamos para obtener la cantidad trabajada previamente
+
+    LEFT JOIN orden_trabajo trabajoActual 
+                         ON trabajoActual.id_orden = seg.id_orden
+                        AND trabajoActual.id_orden_detalle = seg.id_orden_detalle
+                        AND trabajoActual.estado IN ('Pegado', 'Enmarcado') -- Lo ocupamos para obtener la cantidad trabajada actualmente
+
     WHERE seg.id_orden = :idOrden
       AND seg.estado NOT IN ('Listo', 'Entregado') -- Mostrar detalles anteriores a preparacion pero que no estén listos o entregados
     ORDER BY seg.id_orden_detalle ASC 
     """, nativeQuery = true)
-  List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaPreparacion(@Param("idOrden") Long idOrden);
+  List<OrdenSeguimientoDetallePreparacionDTO> getSeguimientoDeOrdenParaPreparacion(@Param("idOrden") Long idOrden);
 
   /* Seguimiento para entrega */
 

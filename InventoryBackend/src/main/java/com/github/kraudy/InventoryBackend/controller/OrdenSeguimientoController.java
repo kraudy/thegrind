@@ -13,6 +13,7 @@ import com.github.kraudy.InventoryBackend.dto.EstadosPorDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleImpresionDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetallePreparacionDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosDTO;
 import com.github.kraudy.InventoryBackend.model.Orden;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
@@ -97,7 +98,7 @@ public class OrdenSeguimientoController {
   }
 
   @GetMapping("/para-preparacion/{idOrden}")
-  public List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaPreparacion(@PathVariable Long idOrden) {
+  public List<OrdenSeguimientoDetallePreparacionDTO> getSeguimientoDeOrdenParaPreparacion(@PathVariable Long idOrden) {
     return ordenSeguimientoRepository.getSeguimientoDeOrdenParaPreparacion(idOrden);
   }
 
