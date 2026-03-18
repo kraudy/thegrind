@@ -75,7 +75,7 @@ export class OrdenSeguimientoPreparacionDetalleListComponent implements OnInit {
   }
 
   advanceDetail(det: OrdenSeguimientoDetallePreparacion) {
-    if (det.estadoActual === 'Pegado') {
+    if (det.estadoActual === 'Pegado' || det.estadoActual === 'Enmarcado') {
       // Add progress with cantidadAsignadaActual before advancing
       this.service.progresoTrabajo(det.idOrden, det.idOrdenDetalle, det.cantidadAsignadaActual).subscribe({
         next: () => {
@@ -85,7 +85,7 @@ export class OrdenSeguimientoPreparacionDetalleListComponent implements OnInit {
           });
         },
         error: (err) => {
-          console.error('Error adding progress for Pegado state:', err);
+          console.error('Error adding progress for Pegado/Enmarcado state:', err);
           alert('Error al agregar progreso. No se puede avanzar.');
         }
       });

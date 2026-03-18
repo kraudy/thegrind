@@ -197,6 +197,10 @@ public class OrdenSeguimientoController {
       OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
       ordenTrabajoRepository.deleteById(ordenTrabajoPK);
     }
+    if (List.of("Enmarcado").contains(ordenSeguimientoActual.getEstado())) {
+      OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
+      ordenTrabajoRepository.deleteById(ordenTrabajoPK);
+    }
 
     /* La logica aqui es que si estaba en Enmarcado o Pegado, se debe resetear el trabajo realizado del estado de reparacion o normal previo proque se tienen que imprimir otra vez */
     // Si la orden esta en estado Enmarcado o Pegado, se resetea el trabajo realizado del estado de reparacion o normal previo, para que vuelva a aparecer como tarea pendiente para el reparador

@@ -116,6 +116,19 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
           alert('Error al obtener pegadores. No se puede avanzar.');
         }
       });
+    } else if (det.tipoProducto === 'Molduras') {
+        this.ordenSeguimientoService.assignTrabajo(det.idOrden, det.idOrdenDetalle, "alistador").subscribe({
+            next: () => {
+              // Assignment successful, now advance
+              this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
+                this.load();
+              });
+            },
+            error: (err) => {
+              console.error('Error assigning alistador:', err);
+              alert('Error al asignar alistador. No se puede avanzar.');
+            }
+          });
     } else {
       // Normal advancement
       this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {

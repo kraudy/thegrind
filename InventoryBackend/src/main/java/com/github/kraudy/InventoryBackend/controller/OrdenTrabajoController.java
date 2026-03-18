@@ -185,23 +185,29 @@ public class OrdenTrabajoController {
       trabajo.setRol("normal");
     }
 
-    if (productoTipoEstadoSiguiente.getEstado().equals("Pegado")) {
+    if (productoTipoEstadoSiguiente.getEstado().equals("Pegado") || productoTipoEstadoSiguiente.getEstado().equals("Enmarcado")) {
       //TODO: Por ahora, pasar "Pegador" desde el FE
-      if (!usuarioRepository.usuarioEsPegador(trabajador)) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario no es pega");
+      if (ordenSeguimientoActual.getTipo().equals("Retablos")) {
+        if (!usuarioRepository.usuarioEsPegador(trabajador)) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario no es pegador");
+        }
       }
       ProductoTipoEstadoPK productoTipoEstadoAnteriorPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 1);
 
       ProductoTipoEstado productoTipoEstadoAnterior = productoTipoEstadoRepository.findById(productoTipoEstadoAnteriorPK).
-        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado para asignar pegado"));
+        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado para asignar pegado/enmarcado"));
 
       OrdenTrabajoPK pk = new OrdenTrabajoPK(idOrden, idOrdenDetalle, productoTipoEstadoAnterior.getEstado());
 
       OrdenTrabajo trabajoNormalReparacion = ordenTrabajoRepository.findById(pk)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay trabajo asignado para este estado. No se puede asignar a pegado"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay trabajo asignado para este estado. No se puede asignar a pegado/enmarcado"));
 
       // Para el pegado se le asigna la cantidad trabajada en el estado anterior, que equivale a la cantidad impresa.
-      trabajo.setRol("pega");
+      if (ordenSeguimientoActual.getTipo().equals("Retablos")) {
+        trabajo.setRol("pega");
+      } else { // Deberia ser Molduras
+        trabajo.setRol("alista");
+      }
       trabajo.setCantidadAsignada(trabajoNormalReparacion.getCantidadTrabajada());
       trabajo.setCantidadTrabajada(0);
       trabajo.setCantidadNoTrabajada(trabajoNormalReparacion.getCantidadTrabajada());
