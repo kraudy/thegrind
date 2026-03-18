@@ -200,10 +200,12 @@ public class OrdenSeguimientoController {
 
     /* La logica aqui es que si estaba en Enmarcado o Pegado, se debe resetear el trabajo realizado del estado de reparacion o normal previo proque se tienen que imprimir otra vez */
     // Si la orden esta en estado Enmarcado o Pegado, se resetea el trabajo realizado del estado de reparacion o normal previo, para que vuelva a aparecer como tarea pendiente para el reparador
-    if (List.of("Impresion", "Enmarcado", "Pegado").contains(ordenSeguimientoActual.getEstado())) {
+    if (List.of("Impresion", "Enmarcado", "Pegado", "Listo").contains(ordenSeguimientoActual.getEstado())) {
       ProductoTipoEstadoPK productoTipoEstadoNormalReparacionPK = null;
-      if (List.of("Impresion").contains(ordenSeguimientoActual.getEstado())) {
+      // Aqui lo tengo que filtrar por el tipo debido a que las ampliaciones cuando estan listas se les debe restar 2
+      if (List.of("Impresion").contains(ordenSeguimientoActual.getEstado()) || (List.of("Listo").contains(ordenSeguimientoActual.getEstado()) && List.of("Retablos", "Molduras").contains(ordenSeguimientoActual.getTipo()))) {
         // Para las impresion la orden quedo en estado Normal o Reparacion por eso se le resta 1 a la secuencia
+        // Igual para la lista porque el estado anterior puede ser Pegado, Enmarcado o Normal, Reparacion.
         productoTipoEstadoNormalReparacionPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 1); 
       } else {
         productoTipoEstadoNormalReparacionPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 2);

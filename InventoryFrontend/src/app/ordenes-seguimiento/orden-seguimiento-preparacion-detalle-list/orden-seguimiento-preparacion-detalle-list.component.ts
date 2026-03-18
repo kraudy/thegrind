@@ -75,9 +75,26 @@ export class OrdenSeguimientoPreparacionDetalleListComponent implements OnInit {
   }
 
   advanceDetail(det: OrdenSeguimientoDetallePreparacion) {
-    this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
-      this.load();
-    });
+    if (det.estadoActual === 'Pegado') {
+      // Add progress with cantidadAsignadaActual before advancing
+      this.service.progresoTrabajo(det.idOrden, det.idOrdenDetalle, det.cantidadAsignadaActual).subscribe({
+        next: () => {
+          // Progress added successfully, now advance
+          this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
+            this.load();
+          });
+        },
+        error: (err) => {
+          console.error('Error adding progress for Pegado state:', err);
+          alert('Error al agregar progreso. No se puede avanzar.');
+        }
+      });
+    } else {
+      // Normal advancement for other states
+      this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
+        this.load();
+      });
+    }
   }
 
   getPossibleStates(detId: number): ProductoTipoEstado[] {

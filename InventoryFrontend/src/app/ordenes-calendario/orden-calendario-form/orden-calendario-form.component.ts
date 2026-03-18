@@ -28,7 +28,7 @@ export class OrdenCalendarioFormComponent implements OnInit {
     private router: Router,
     private ordenService: OrdenService,
     private calendarioService: OrdenCalendarioService,
-    private cd: ChangeDetectorRef   // ← ¡Esto era lo que faltaba!
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {

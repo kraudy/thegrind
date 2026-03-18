@@ -80,7 +80,7 @@ public class OrdenTrabajoController {
     }
 
     //TODO: validar si es necesario meter Impresion aqui
-    if (!List.of("Reparacion", "Normal").contains(productoTipoEstadoAnterior.getEstado())) {
+    if (!List.of("Reparacion", "Normal", "Impresion").contains(productoTipoEstadoAnterior.getEstado())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El estado anterior del producto no es valido para progreso de trabajo: " + productoTipoEstadoAnterior.getEstado());
     }
 
@@ -90,10 +90,18 @@ public class OrdenTrabajoController {
     //}
 
     // estado anterior por ahora deberia ser "Reparacion" o "Normal"
-    OrdenTrabajoPK pk = new OrdenTrabajoPK(idOrden, idOrdenDetalle, productoTipoEstadoAnterior.getEstado());
+    String estado = "";
+    if (ordenSeguimientoActual.getEstado().equals("Pegado")) {
+      estado = "Pegado";
+    } else if (ordenSeguimientoActual.getEstado().equals("Enmarcado")) {
+      estado = "Enmarcado";
+    } else {
+      estado = productoTipoEstadoAnterior.getEstado();
+    }
+    OrdenTrabajoPK trabajoPK = new OrdenTrabajoPK(idOrden, idOrdenDetalle, estado);
 
-    OrdenTrabajo trabajo = ordenTrabajoRepository.findById(pk)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay trabajo asignado para este estado"));
+    OrdenTrabajo trabajo = ordenTrabajoRepository.findById(trabajoPK)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay trabajo asignado para este estado: " + trabajoPK.toString()));
 
     if (cantidadTrabajada <= 0 || cantidadTrabajada + trabajo.getCantidadTrabajada() > trabajo.getCantidadAsignada()) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cantidad trabajada inválida: "  + cantidadTrabajada);
