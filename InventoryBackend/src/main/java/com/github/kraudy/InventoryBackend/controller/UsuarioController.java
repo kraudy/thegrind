@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.github.kraudy.InventoryBackend.dto.UsuarioDTO;
+import com.github.kraudy.InventoryBackend.dto.UsuarioTrabajoDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoPK;
 import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
@@ -21,12 +22,12 @@ public class UsuarioController {
   private UsuarioRepository usuarioRepository;
 
   @GetMapping("/repara")
-  public List<UsuarioDTO> getReparadores() {
+  public List<UsuarioTrabajoDTO> getReparadores() {
     return usuarioRepository.getUsuariosReparacion();
   }
 
   @GetMapping("/normal")
-  public List<UsuarioDTO> getNormal() {
+  public List<UsuarioTrabajoDTO> getNormal() {
     return usuarioRepository.getUsuariosNormal();
   }
 

@@ -89,6 +89,16 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
   }
 
   advanceDetail(det: OrdenSeguimientoDetalleImpresion) {
+    if (det.estadoActual === 'Normal' || det.estadoActual === 'Reparacion') {
+      // Normal advancement
+      this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
+        this.load();
+      });
+      return;
+    }
+
+
+    // Impresion logic
     if (det.tipoProducto === 'Retablos') {
       // Assign pegador first, then advance
       this.ordenSeguimientoService.getPegadores().subscribe({
@@ -118,19 +128,19 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
       });
     } else if (det.tipoProducto === 'Molduras') {
         this.ordenSeguimientoService.assignTrabajo(det.idOrden, det.idOrdenDetalle, "alistador").subscribe({
-            next: () => {
-              // Assignment successful, now advance
-              this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
-                this.load();
-              });
-            },
-            error: (err) => {
-              console.error('Error assigning alistador:', err);
-              alert('Error al asignar alistador. No se puede avanzar.');
-            }
-          });
-    } else {
-      // Normal advancement
+          next: () => {
+            // Assignment successful, now advance
+            this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
+              this.load();
+            });
+          },
+          error: (err) => {
+            console.error('Error assigning alistador:', err);
+            alert('Error al asignar alistador. No se puede avanzar.');
+          }
+        });
+    } else if (det.tipoProducto === 'Ampliaciones') {
+      // Assignment successful, now advance
       this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
         this.load();
       });
@@ -158,7 +168,7 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
   // Progress methods
   addProgress(det: OrdenSeguimientoDetalleImpresion) {
     const progressAmount = this.progressInputs[det.idOrdenDetalle] || 0;
-    if (progressAmount <= 0) {
+    if (progressAmount <= 0 || progressAmount > det.cantidad) {
       alert('Ingrese una cantidad válida para agregar progreso.');
       return;
     }
@@ -184,6 +194,7 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
 
   checkAndAdvance(det: OrdenSeguimientoDetalleImpresion) {
     // If no pending work, automatically advance
+    console.log('Cantidad pendiente: ', det.cantidadPendiente);
     if (det.cantidadPendiente <= 0) {
       this.advanceDetail(det);
     } else {

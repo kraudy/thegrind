@@ -1,6 +1,7 @@
 package com.github.kraudy.InventoryBackend.repository;
 
 import com.github.kraudy.InventoryBackend.dto.UsuarioDTO;
+import com.github.kraudy.InventoryBackend.dto.UsuarioTrabajoDTO;
 import com.github.kraudy.InventoryBackend.model.Usuario;
 
 import java.util.List;
@@ -15,23 +16,35 @@ public interface UsuarioRepository extends JpaRepository<Usuario, String> {
 
   @Query(value = """
     SELECT
-        usr.usuario
+        usr.usuario,
+        SUM(COALESCE(ordTrab.cantidad_asignada,0)) as cantidadAsignada,
+        SUM(COALESCE(ordTrab.cantidad_trabajada,0)) as cantidadTrabajada
 
     FROM usuario usr
     JOIN usuario_rol usrRol ON usr.usuario = usrRol.usuario
+    LEFT JOIN orden_trabajo ordTrab  -- Permite mostrar reparadores sin trabajos asignados
+      ON usr.usuario = ordTrab.trabajador AND ordTrab.estado = 'Reparacion'
+
     WHERE usrRol.rol = 'repara'
+    GROUP BY usr.usuario
     """, nativeQuery = true)
-  List<UsuarioDTO> getUsuariosReparacion();
+  List<UsuarioTrabajoDTO> getUsuariosReparacion();
 
   @Query(value = """
     SELECT
-        usr.usuario
+        usr.usuario,
+        SUM(COALESCE(ordTrab.cantidad_asignada,0)) as cantidadAsignada,
+        SUM(COALESCE(ordTrab.cantidad_trabajada,0)) as cantidadTrabajada
 
     FROM usuario usr
     JOIN usuario_rol usrRol ON usr.usuario = usrRol.usuario
+    LEFT JOIN orden_trabajo ordTrab  -- Permite mostrar normales sin trabajos asignados
+      ON usr.usuario = ordTrab.trabajador AND ordTrab.estado = 'Normal'
+
     WHERE usrRol.rol = 'normal'
+    GROUP BY usr.usuario
     """, nativeQuery = true)
-  List<UsuarioDTO> getUsuariosNormal();
+  List<UsuarioTrabajoDTO> getUsuariosNormal();
 
   @Query(value = """
     SELECT

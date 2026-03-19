@@ -8,6 +8,7 @@ import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimientoDetalle } from '../orden-seguimiento-detalle.model';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
 import { Usuario } from '../../usuarios/usuario.model';
+import { UsuarioTrabajo } from '../../usuarios/usuario-trabajo.model';
 import { UsuarioService } from '../../usuarios/usuario.service';
 
 @Component({
@@ -27,8 +28,8 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit {
   currentStateMap = new Map<number, string>();
   isOrderCompleted = false;
 
-  reparadores: Usuario[] = [];
-  normales: Usuario[] = [];
+  reparadores: UsuarioTrabajo[] = [];
+  normales: UsuarioTrabajo[] = [];
   selectedReparador: Record<number, string> = {};
   selectedNormal: Record<number, string> = {};
   assignedReparador = new Map<number, string>();

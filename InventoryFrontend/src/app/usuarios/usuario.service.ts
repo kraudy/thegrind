@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { Usuario } from './usuario.model';
+import { UsuarioTrabajo } from './usuario-trabajo.model';
 
 @Injectable({
   providedIn: 'root',
@@ -12,11 +13,11 @@ export class UsuarioService {
 
   constructor(private http: HttpClient) {}
 
-  getReparadores(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(`${this.apiUrl}/repara`);
+  getReparadores(): Observable<UsuarioTrabajo[]> {
+    return this.http.get<UsuarioTrabajo[]>(`${this.apiUrl}/repara`);
   }
 
-  getNormales(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(`${this.apiUrl}/normal`);
+  getNormales(): Observable<UsuarioTrabajo[]> {
+    return this.http.get<UsuarioTrabajo[]>(`${this.apiUrl}/normal`);
   }
 }
