@@ -137,8 +137,13 @@ public class OrdenTrabajoController {
 
     return ordenTrabajoRepository.getNormal(idOrden, idOrdenDetalle);
   }
-  
-  // Asigna trabajo
+
+  /**
+   * Asigna el trabajo inicial a un estado
+   * Este permite saber cuanto trabajo tiene un usuario en un estado determinado.
+   * Posteriormente, el progreso de dicho trabajo se acualiza con /progreso-trabajo
+   * Una vez se ha completado total o parcialmente, debe avanzarse al siguiente estado con OrdenSeguimientoController.advanceState
+  */
   @PostMapping("/asignar-trabajo/{idOrden}/{idOrdenDetalle}/{trabajador}")
   public OrdenTrabajo asignarTrabajo(
           @PathVariable Long idOrden,
@@ -165,8 +170,8 @@ public class OrdenTrabajoController {
 
     //TODO: Es necesario Enmarcado?
     // tambien se podria validar con el estado actual: Repartir, Impresion pero este podria permitir otros estados como las Ampliaciones que pasan directo a Listo
-    if (!List.of("Reparacion", "Normal", "Enmarcado", "Pegado").contains(productoTipoEstadoSiguiente.getEstado())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El siguiente estado del producto no es valido para asignar trabajo");
+    if (!List.of("Reparacion", "Normal", "Enmarcado", "Pegado", "Entregado").contains(productoTipoEstadoSiguiente.getEstado())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El siguiente estado del producto no es valido para asignar trabajo: " + productoTipoEstadoSiguiente.getEstado());
     }
 
     OrdenTrabajo trabajo = new OrdenTrabajo();
@@ -183,6 +188,13 @@ public class OrdenTrabajoController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario no es normal");
       }
       trabajo.setRol("normal");
+    }
+
+    if (productoTipoEstadoSiguiente.getEstado().equals("Entregado")) {
+      if (!usuarioRepository.usuarioEntrega(trabajador)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario no es entregador");
+      }
+      trabajo.setRol("entrega");
     }
 
     if (productoTipoEstadoSiguiente.getEstado().equals("Pegado") || productoTipoEstadoSiguiente.getEstado().equals("Enmarcado")) {
@@ -211,7 +223,26 @@ public class OrdenTrabajoController {
       trabajo.setCantidadAsignada(trabajoNormalReparacion.getCantidadTrabajada());
       trabajo.setCantidadTrabajada(0);
       trabajo.setCantidadNoTrabajada(trabajoNormalReparacion.getCantidadTrabajada());
-    } else {
+    } else if (productoTipoEstadoSiguiente.getEstado().equals("Entregado")) {
+      ProductoTipoEstadoPK productoTipoEstadoAnteriorPK = null;
+      if (ordenSeguimientoActual.getTipo().equals("Ampliaciones")) {
+        productoTipoEstadoAnteriorPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 2);
+      } else {
+        productoTipoEstadoAnteriorPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 1);
+      }
+
+      ProductoTipoEstado productoTipoEstadoAnterior = productoTipoEstadoRepository.findById(productoTipoEstadoAnteriorPK).
+        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado para asignar a entrega"));
+
+      OrdenTrabajoPK pk = new OrdenTrabajoPK(idOrden, idOrdenDetalle, productoTipoEstadoAnterior.getEstado());
+
+      OrdenTrabajo trabajoNormalReparacionEnmarcadoPegado = ordenTrabajoRepository.findById(pk)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay trabajo asignado para este estado. No se puede asignar a entregar"));
+      trabajo.setCantidadAsignada(trabajoNormalReparacionEnmarcadoPegado.getCantidadTrabajada());
+      trabajo.setCantidadTrabajada(0);
+      trabajo.setCantidadNoTrabajada(trabajoNormalReparacionEnmarcadoPegado.getCantidadTrabajada());
+    }
+      else {
       // Por ahora le ponomes la cantidad del detalle.
       trabajo.setCantidadAsignada(detalleReparacion.getCantidad());
       // Inicialmente, toda la cantidad esta sin trabajar, a medida que vaya avanzando en el trabajo, se iran actualizando estos campos

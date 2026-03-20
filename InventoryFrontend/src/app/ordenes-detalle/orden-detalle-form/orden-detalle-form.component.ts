@@ -26,6 +26,7 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
   @Output() ordenDetalleSaved = new EventEmitter<void>();
 
   isEdit = false;
+  clienteNombre: string = '';
 
   constructor(
     private ordenDetalleService: OrdenDetalleService,
@@ -56,6 +57,9 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
 
   ngOnInit(): void {
     const params = this.route.snapshot.paramMap;
+    const queryParams = this.route.snapshot.queryParams;
+
+    this.clienteNombre = queryParams['clienteNombre'] || '';
 
     const ordenIdStr = params.get('ordenId');
     if (!ordenIdStr) {

@@ -84,5 +84,16 @@ public interface UsuarioRepository extends JpaRepository<Usuario, String> {
       and usr.usuario = :usuario
     """, nativeQuery = true)
   boolean usuarioEsPegador(String usuario);
+
+
+  @Query(value = """
+    SELECT COUNT(*) = 1
+    FROM usuario usr
+    JOIN usuario_rol usrRol ON usr.usuario = usrRol.usuario
+    WHERE usrRol.rol = 'entrega' 
+      and usr.usuario = :usuario
+    """, nativeQuery = true)
+  boolean usuarioEntrega(String usuario);
+
 }
 

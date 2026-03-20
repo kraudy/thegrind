@@ -79,22 +79,33 @@ export class OrdenSeguimientoPreparacionDetalleListComponent implements OnInit {
       // Add progress with cantidadAsignadaActual before advancing
       this.service.progresoTrabajo(det.idOrden, det.idOrdenDetalle, det.cantidadAsignadaActual).subscribe({
         next: () => {
-          // Progress added successfully, now advance
-          this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
-            this.load();
-          });
+          console.log('Progress ' + det.cantidadAsignadaActual + ' added successfully for Pegado/Enmarcado state');
         },
         error: (err) => {
           console.error('Error adding progress for Pegado/Enmarcado state:', err);
           alert('Error al agregar progreso. No se puede avanzar.');
+          return; // Stop further execution to prevent advancing if progress update fails
         }
       });
-    } else {
-      // Normal advancement for other states
-      this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
-        this.load();
-      });
     }
+    // Normal advancement for other states
+    this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
+      this.load();
+    });
+
+    // Luego de avanzar el estado a Listo, se asgina el trabajo realizdo a Entregado para que el alistador lo pueda entregar.
+    //TODO: Change usuario for logging later
+    this.service.assignTrabajo(det.idOrden, det.idOrdenDetalle, 'alistador').subscribe({
+      next: () => {
+        console.log('Trabajo ' + det.idOrden + ' ' + det.idOrdenDetalle + ' asignado exitosamente al alistador');
+      },
+      error: (err) => {
+        console.error('Error assigning alistador:', err);
+        alert('Error al asignar alistador. No se puede avanzar.');
+        return; // Stop further execution to prevent advancing if assignment fails
+        //TODO: Deberia resetear el progreso si hay error al asignar?
+      }
+    });
   }
 
   getPossibleStates(detId: number): ProductoTipoEstado[] {

@@ -1,10 +1,11 @@
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-  <div class="flex justify-between items-center mb-8">
+  <div class="text-center mb-8">
     <h1 class="text-4xl font-bold text-gray-900">
       {{ isEdit ? 'Editar Detalle de Orden' : 'Agregar Detalle a Orden #' + formOrdenDetalle.idOrden }}
     </h1>
+    <h2 class="text-2xl font-semibold text-gray-700 mt-2">{{ clienteNombre }}</h2>
     <button (click)="goBack()"
-            class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-md transition">
+            class="mt-4 inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-md transition">
       Volver
     </button>
   </div>

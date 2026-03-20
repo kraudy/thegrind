@@ -140,9 +140,23 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
           }
         });
     } else if (det.tipoProducto === 'Ampliaciones') {
-      // Assignment successful, now advance
-      this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
-        this.load();
+      this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe({
+        next: () => {
+          this.load();
+          this.ordenSeguimientoService.assignTrabajo(det.idOrden, det.idOrdenDetalle, "entregador").subscribe({
+              next: () => {
+                console.log('Ampliacion asignada exitosamente a entregador');
+              },
+              error: (err) => {
+                console.error('Error assigning entregador:', err);
+                alert('Error al asignar entregador. No se puede avanzar.');
+              }
+          });
+        },
+        error: (err) => {
+          console.error('Error avanzand estado');
+          alert('Error al avanzar estado');
+        }
       });
     }
   }

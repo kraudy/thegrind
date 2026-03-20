@@ -49,6 +49,11 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit {
     this.idOrden = Number(this.route.snapshot.paramMap.get('idOrden'));
     this.clienteNombre = String(this.route.snapshot.paramMap.get('clienteNombre'));
 
+    this.load();
+  }
+
+  load() {
+    // Esto nos permite mostrar la cantidad actualizada 
     this.usuarioService.getReparadores().subscribe({
       next: (users) => (this.reparadores = users || []),
       error: (err) => console.error('❌ Error cargando reparadores', err),
@@ -59,12 +64,6 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit {
       error: (err) => console.error('❌ Error cargando usuarios normales', err),
     });
 
-    this.load();
-  }
-
-
-
-  load() {
     this.service.getOrdenDetalleParaRepartir(this.idOrden).subscribe({
       next: (data) => {
         this.detalles = data || [];
