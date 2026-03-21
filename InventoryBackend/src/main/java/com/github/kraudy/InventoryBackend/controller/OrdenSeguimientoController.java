@@ -197,8 +197,20 @@ public class OrdenSeguimientoController {
       OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
       ordenTrabajoRepository.deleteById(ordenTrabajoPK);
     }
+    
     if (List.of("Enmarcado").contains(ordenSeguimientoActual.getEstado())) {
       OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
+      ordenTrabajoRepository.deleteById(ordenTrabajoPK);
+    }
+
+    // Elimina el trabajo asignado a "Entregado"
+    if (List.of("Listo").contains(ordenSeguimientoActual.getEstado())) {
+      ProductoTipoEstadoPK productoTipoEstadoSiguientePK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() + 1);
+
+      ProductoTipoEstado productoTipoEstadoSiguiente = productoTipoEstadoRepository.findById(productoTipoEstadoSiguientePK).
+        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado siguiente a Listo no encontrado"));
+
+      OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoSiguiente.getEstado());
       ordenTrabajoRepository.deleteById(ordenTrabajoPK);
     }
 

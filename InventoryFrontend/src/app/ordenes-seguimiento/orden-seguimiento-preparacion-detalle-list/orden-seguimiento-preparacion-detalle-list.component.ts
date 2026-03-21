@@ -88,22 +88,25 @@ export class OrdenSeguimientoPreparacionDetalleListComponent implements OnInit {
         }
       });
     }
-    // Normal advancement for other states
-    this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
-      this.load();
-    });
 
-    // Luego de avanzar el estado a Listo, se asgina el trabajo realizdo a Entregado para que el alistador lo pueda entregar.
     //TODO: Change usuario for logging later
-    this.service.assignTrabajo(det.idOrden, det.idOrdenDetalle, 'alistador').subscribe({
+    this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe({
       next: () => {
-        console.log('Trabajo ' + det.idOrden + ' ' + det.idOrdenDetalle + ' asignado exitosamente al alistador');
+        this.load();
+        this.service.assignTrabajo(det.idOrden, det.idOrdenDetalle, "entregador").subscribe({
+          next: () => {
+            console.log('Trabajo ' + det.idOrden + ' ' + det.idOrdenDetalle + ' ' + det.tipoProducto + ' ' + det.subTipoProducto + ' asignado exitosamente al entregador');
+          },
+          //TODO: Deberia resetear el progreso si hay error al asignar?
+          error: (err) => {
+            console.error('Error assigning entregador:', err);
+            alert('Error al asignar entregador. No se puede avanzar.');
+          }
+        });
       },
       error: (err) => {
-        console.error('Error assigning alistador:', err);
-        alert('Error al asignar alistador. No se puede avanzar.');
-        return; // Stop further execution to prevent advancing if assignment fails
-        //TODO: Deberia resetear el progreso si hay error al asignar?
+        console.error('Error avanzando estado:', err);
+        alert('Error al avanzar estado');
       }
     });
   }
