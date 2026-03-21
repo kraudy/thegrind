@@ -9,6 +9,7 @@ import { OrdenSeguimiento } from './orden-seguimiento.model';
 import { EstadosPorDetalleDTO } from './estados-por-detalle.model';
 import { Usuario } from '../usuarios/usuario.model';
 import { OrdenSeguimientoDetallePreparacion } from './orden-seguimiento-detalle-preparacion.model';
+import { OrdenSeguimientoDetalleEntrega } from './orden-seguimiento-detalle-entrega.model';
 
 
 @Injectable({
@@ -42,8 +43,8 @@ export class OrdenSeguimientoService {
     return this.http.get<OrdenSeguimiento[]>(`${this.apiUrl}/para-entrega`);
   }
 
-  getOrdenDetalleParaEntrega(idOrden: number): Observable<OrdenSeguimientoDetalle[]> {
-    return this.http.get<OrdenSeguimientoDetalle[]>(`${this.apiUrl}/para-entrega/${idOrden}`);
+  getOrdenDetalleParaEntrega(idOrden: number): Observable<OrdenSeguimientoDetalleEntrega[]> {
+    return this.http.get<OrdenSeguimientoDetalleEntrega[]>(`${this.apiUrl}/para-entrega/${idOrden}`);
   }
 
   /* Seguimiento para repartir */

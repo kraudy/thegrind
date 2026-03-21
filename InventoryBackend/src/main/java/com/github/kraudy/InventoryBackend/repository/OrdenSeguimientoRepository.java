@@ -5,6 +5,7 @@ import com.github.kraudy.InventoryBackend.dto.OrdenDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleEntregaDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleImpresionDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetallePreparacionDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
@@ -309,6 +310,16 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
         seg.tipo,
         seg.sub_tipo,
         seg.estado AS estadoActual,
+        -- Aqui usar el estadoActual es Listo.
+        COALESCE(trabajoActual.trabajador, '') AS trabajadorActual,
+        COALESCE(trabajoActual.cantidad_asignada, 0) AS cantidadAsignadaActual,
+        COALESCE(trabajoActual.cantidad_trabajada, 0) AS cantidadTrabajadaActual,
+
+        COALESCE(trabajoPrevio.estado, '') AS estadoPrevio,
+        COALESCE(trabajoPrevio.trabajador, '') AS trabajadorPrevio,
+        COALESCE(trabajoPrevio.cantidad_asignada, 0) AS cantidadAsignadaPrevio,
+        COALESCE(trabajoPrevio.cantidad_trabajada, 0) AS cantidadTrabajadaPrevio,
+
         CASE 
           WHEN seg.estado IN ('Listo') THEN true 
           ELSE false 
@@ -318,11 +329,22 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     JOIN orden_detalle det ON det.id_orden = seg.id_orden                   -- Necesitamos el deatalle para mostrar el producto y la cantidad
                         AND det.id_orden_detalle = seg.id_orden_detalle
     JOIN producto prod ON prod.id = det.id_producto
+
+    LEFT JOIN orden_trabajo trabajoPrevio 
+                         ON trabajoPrevio.id_orden = seg.id_orden
+                        AND trabajoPrevio.id_orden_detalle = seg.id_orden_detalle
+                        AND trabajoPrevio.estado IN ('Normal', 'Reparacion') -- Lo ocupamos para obtener la cantidad trabajada previamente
+
+    LEFT JOIN orden_trabajo trabajoActual 
+                         ON trabajoActual.id_orden = seg.id_orden
+                        AND trabajoActual.id_orden_detalle = seg.id_orden_detalle
+                        AND trabajoActual.estado IN ('Pegado', 'Enmarcado') -- Lo ocupamos para obtener la cantidad trabajada actualmente
+
     WHERE seg.id_orden = :idOrden
                                                                             -- por ahora mostramos todos los estados
     ORDER BY seg.id_orden_detalle ASC
     """, nativeQuery = true)
-  List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaEntrega(@Param("idOrden") Long idOrden);
+  List<OrdenSeguimientoDetalleEntregaDTO> getSeguimientoDeOrdenParaEntrega(@Param("idOrden") Long idOrden);
 
   /* Monitoreo general de todas las ordenes del dia en todos los estados*/
 
