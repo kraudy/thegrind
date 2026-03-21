@@ -41,7 +41,7 @@
         <!-- Estado Previo -->
         <div class="bg-gray-50 rounded-xl p-6">
           <h3 class="text-lg font-semibold text-gray-800 mb-4">Estado Previo</h3>
-          <div class="space-y-2">
+          <div class="grid grid-cols-2 gap-4">
             <div class="flex justify-between">
               <span class="text-gray-600">Estado:</span>
               <span class="font-medium">{{ det.estadoPrevio || 'N/A' }}</span>
@@ -64,7 +64,7 @@
         <!-- Estado Actual -->
         <div *ngIf="det.permiteMover" class="bg-blue-50 rounded-xl p-6">
           <h3 class="text-lg font-semibold text-gray-800 mb-4">Estado Actual</h3>
-          <div class="space-y-2">
+          <div class="grid grid-cols-2 gap-4">
             <div class="flex justify-between">
               <span class="text-gray-600">Estado:</span>
               <span class="font-medium">{{ det.estadoActual || 'N/A' }}</span>
