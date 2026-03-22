@@ -76,6 +76,28 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit {
   }
 
   advanceDetail(det: OrdenSeguimientoDetalleEntrega) {
+    let cantidad =  0;
+    if (det.tipoProducto === 'Molduras' || det.tipoProducto === 'Retables') {
+      cantidad = det.cantidadTrabajadaActual;
+    } else {
+      cantidad = det.cantidadTrabajadaPrevio;
+    }
+
+    this.service.progresoTrabajo(det.idOrden, det.idOrdenDetalle, cantidad).subscribe({
+      next: () => {
+        // Reset input
+        //this.progressInputs[det.idOrdenDetalle] = 0;
+        // Reload data
+        this.load();
+        // Note: Automatic advancement will be checked after load completes
+      },
+      error: (err) => {
+        console.error('Error adding progress:', err);
+        alert('Error al agregar progreso. Verifique la cantidad.');
+        return;
+      }
+    });
+
     this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
       this.load();
     });

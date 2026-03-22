@@ -75,19 +75,14 @@ public class OrdenTrabajoController {
 
     // Se valida estado anterior y siguiente. Esto es conveniente para filtrar otros productos que puedan tener algun estado en comun pero que son de otro flujo.
     // Se agrega listo para incluir a las ampliaciones
-    if (!List.of("Pegado", "Enmarcado", "Listo").contains(productoTipoEstadoSiguiente.getEstado())) {
+    if (!List.of("Pegado", "Enmarcado", "Listo", "Entregado").contains(productoTipoEstadoSiguiente.getEstado())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El siguiente estado del producto no es valido para progreso de trabajo: " + productoTipoEstadoSiguiente.getEstado());
     }
 
-    //TODO: validar si es necesario meter Impresion aqui
-    if (!List.of("Reparacion", "Normal", "Impresion").contains(productoTipoEstadoAnterior.getEstado())) {
+    //TODO: validar si esta validacion es necesaria
+    if (!List.of("Reparacion", "Normal", "Impresion", "Enmarcado", "Pegado").contains(productoTipoEstadoAnterior.getEstado())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El estado anterior del producto no es valido para progreso de trabajo: " + productoTipoEstadoAnterior.getEstado());
     }
-
-    //if (ordenSeguimientoActual.getTipo().equals("Retablos") && productoTipoEstadoSiguiente.getEstado().equals("Listo")) {
-    //  //TODO: Poner cantidad trabajada i gual a la cantidad entregada en el pegado
-    //  cantidadTrabajada = 
-    //}
 
     // estado anterior por ahora deberia ser "Reparacion" o "Normal"
     String estado = "";
@@ -95,6 +90,8 @@ public class OrdenTrabajoController {
       estado = "Pegado";
     } else if (ordenSeguimientoActual.getEstado().equals("Enmarcado")) {
       estado = "Enmarcado";
+    } else if (ordenSeguimientoActual.getEstado().equals("Listo")) {
+      estado = "Entregado";
     } else {
       estado = productoTipoEstadoAnterior.getEstado();
     }
