@@ -95,5 +95,13 @@ public interface UsuarioRepository extends JpaRepository<Usuario, String> {
     """, nativeQuery = true)
   boolean usuarioEntrega(String usuario);
 
+  /* NEW: Returns list of roles for a user (native query) */
+  @Query(value = """
+    SELECT usrRol.rol
+    FROM usuario_rol usrRol
+    WHERE usrRol.usuario = :usuario
+    """, nativeQuery = true)
+  List<String> getRolesByUsuario(@Param("usuario") String usuario);
+
 }
 

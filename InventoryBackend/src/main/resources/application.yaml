@@ -21,3 +21,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+jwt:
+  secret: superSecretKeyForInventoryApp2026MakeItAtLeast256BitsLongForHS512
+  expiration-ms: 86400000   # 24 hours
