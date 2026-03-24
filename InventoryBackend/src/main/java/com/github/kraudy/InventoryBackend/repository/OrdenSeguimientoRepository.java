@@ -2,7 +2,7 @@ package com.github.kraudy.InventoryBackend.repository;
 
 import com.github.kraudy.InventoryBackend.dto.EstadosPorDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenDTO;
-import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosGeneralDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleEntregaDTO;
@@ -348,6 +348,9 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
 
   /* Monitoreo general de todas las ordenes del dia en todos los estados*/
 
+  //TODO: Valorar obtener el detalle en cada CTE de forma que en el FE se pueda mostrar a la izquierda la informacion de la orden y a la derecha, tarjetas
+  // de los detalles en sus dieferentes estados y que al darle click pueda mostrar la vista correspondiente
+  //TODO: Lo otro, es que no se si necesito hacer todo esto porque orden_seguimiento ya tiene toda la informacion y solo toma en cuenta ordenes ya repartidas
   @Query(value = """
   WITH 
   cal AS (
@@ -373,8 +376,14 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     FROM orden_seguimiento seg
     JOIN cal ON cal.id_orden = seg.id_orden
 
-    WHERE seg.estado IN ('Normal', 'Reparacion','Impresion', 'Enmarcado', 'Pegado') 
+    WHERE seg.estado IN ('Repartida', 'Normal', 'Reparacion','Impresion', 'Enmarcado', 'Pegado', 'Listo', 'Entregado') 
     GROUP BY seg.id_orden, seg.estado
+  ),
+  repartidas AS (
+    SELECT id_orden
+    FROM seg
+    WHERE estado = 'Repartida'
+    GROUP BY id_orden
   ),
   normales AS (
     SELECT id_orden
@@ -405,6 +414,18 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     FROM seg
     WHERE estado = 'Pegado'
     GROUP BY id_orden
+  ),
+  listo AS (
+    SELECT id_orden 
+    FROM seg
+    WHERE estado = 'Listo'
+    GROUP BY id_orden
+  ),
+  entregado AS (
+    SELECT id_orden 
+    FROM seg
+    WHERE estado = 'Entregado'
+    GROUP BY id_orden
   )
   SELECT
     cal.id_orden,
@@ -413,24 +434,29 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     cal.creada_por AS creadaPor,
     cal.fecha_vencimiento AS fechaVencimiento,
     (fecha_vencimiento - current_timestamp)::text AS tiempoRestante,
+    CASE WHEN repartidas.id_orden IS NOT NULL THEN true ELSE false END AS tieneRepartidas,
     CASE WHEN normales.id_orden IS NOT NULL THEN true ELSE false END AS tieneNormales,
     CASE WHEN reparacion.id_orden IS NOT NULL THEN true ELSE false END AS tieneReparacion,
     CASE WHEN impresion.id_orden IS NOT NULL THEN true ELSE false END AS tieneImpresion,
     CASE WHEN enmarcado.id_orden IS NOT NULL THEN true ELSE false END AS tieneEnmarcado,
-    CASE WHEN pegado.id_orden IS NOT NULL THEN true ELSE false END AS tienePegado
+    CASE WHEN pegado.id_orden IS NOT NULL THEN true ELSE false END AS tienePegado,
+    CASE WHEN listo.id_orden IS NOT NULL THEN true ELSE false END AS tieneListo,
+    CASE WHEN entregado.id_orden IS NOT NULL THEN true ELSE false END AS tieneEntregado
 
   FROM cal
 
+  LEFT JOIN repartidas ON repartidas.id_orden = cal.id_orden
   LEFT JOIN normales ON normales.id_orden = cal.id_orden
   LEFT JOIN reparacion ON reparacion.id_orden = cal.id_orden
   LEFT JOIN impresion ON impresion.id_orden = cal.id_orden
   LEFT JOIN enmarcado ON enmarcado.id_orden = cal.id_orden
   LEFT JOIN pegado ON pegado.id_orden = cal.id_orden
-
+  LEFT JOIN listo ON listo.id_orden = cal.id_orden
+  LEFT JOIN entregado ON entregado.id_orden = cal.id_orden
   
   ORDER BY cal.id_cliente, cal.id_orden ASC
   """, nativeQuery = true)
-  List<OrdenSeguimientoEstadosDTO> getOrdenesPorEstadosSeguimiento();
+  List<OrdenSeguimientoEstadosGeneralDTO> getOrdenesPorEstadosSeguimiento();
 
 
   @Modifying

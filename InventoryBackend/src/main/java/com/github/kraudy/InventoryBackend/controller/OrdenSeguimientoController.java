@@ -15,7 +15,7 @@ import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleEntregaDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleImpresionDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetallePreparacionDTO;
-import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosGeneralDTO;
 import com.github.kraudy.InventoryBackend.model.Orden;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajo;
@@ -77,7 +77,7 @@ public class OrdenSeguimientoController {
 
   /* Retorna lista de ordenes de hoy con detalles en estados de seguimiento para vista de seguimiento general */
   @GetMapping("/por-estados")
-  public List<OrdenSeguimientoEstadosDTO> getOrdenesPorEstadosSeguimiento() {
+  public List<OrdenSeguimientoEstadosGeneralDTO> getOrdenesPorEstadosSeguimiento() {
     return ordenSeguimientoRepository.getOrdenesPorEstadosSeguimiento();
   }
 

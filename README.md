@@ -120,6 +120,7 @@ ng generate component ordenes-calendario/orden-calendario-form
 ng generate service ordenes-calendario/orden-calendario
 
 ng generate component ordenes-seguimiento/orden-seguimiento-list
+
 ng generate component ordenes-seguimiento/orden-seguimiento-impresion-list
 ng generate component ordenes-seguimiento/orden-seguimiento-impresion-detalle-list
 
@@ -131,6 +132,9 @@ ng generate component ordenes-seguimiento/orden-seguimiento-entrega-detalle-list
 
 ng generate component ordenes-seguimiento/orden-seguimiento-repartir-list
 ng generate component ordenes-seguimiento/orden-seguimiento-repartir-detalle-list
+
+#ng generate component ordenes-seguimiento/orden-seguimiento-general-list
+#ng generate component ordenes-seguimiento/orden-seguimiento-general-detalle-list
 
 ng generate service ordenes-seguimiento/orden-seguimiento
 
