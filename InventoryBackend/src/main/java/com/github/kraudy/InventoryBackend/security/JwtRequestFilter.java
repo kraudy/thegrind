@@ -27,26 +27,34 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain) throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
-        if (!StringUtils.hasText(header) || !header.startsWith("Bearer ")) {
-            chain.doFilter(request, response);
-            return;
+        String token = null;
+
+        if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
+            token = header.substring(7);
         }
 
-        String token = header.substring(7);
-        if (jwtService.validateToken(token)) {
+        if (token != null && jwtService.validateToken(token)) {
             String username = jwtService.getUsernameFromToken(token);
+
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            System.out.println("✅ JWT validated for user: " + username); // debug
+        } else if (token != null) {
+            System.out.println("❌ Invalid JWT token received");
         }
+
         chain.doFilter(request, response);
     }
 }

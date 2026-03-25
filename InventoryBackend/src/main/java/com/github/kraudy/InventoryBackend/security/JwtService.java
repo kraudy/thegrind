@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 
@@ -19,7 +20,9 @@ public class JwtService {
     private long expirationMs;
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        // FIXED: Use explicit UTF-8 → prevents platform-dependent encoding issues
+        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(String username, List<String> roles) {
@@ -55,6 +58,8 @@ public class JwtService {
             Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token);
             return true;
         } catch (Exception e) {
+            // For debugging only - remove or comment in production
+            System.err.println("JWT validation failed: " + e.getMessage());
             return false;
         }
     }

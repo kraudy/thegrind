@@ -39,8 +39,10 @@ import { ProductoPrecioFormComponent } from './productos-precios/producto-precio
 import { OrdenSeguimientoImpresionDetalleListComponent } from './ordenes-seguimiento/orden-seguimiento-impresion-detalle-list/orden-seguimiento-impresion-detalle-list.component';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent }, 
-  { path: 'login', component: LoginComponent },
+  //{ path: '', component: HomeComponent }, 
+  { path: 'home', component: HomeComponent }, 
+  //{ path: 'login', component: LoginComponent },
+  { path: '', component: LoginComponent },
 
   { path: 'productos', component: ProductoListComponent },
   { path: 'productos/new', component: ProductoFormComponent },

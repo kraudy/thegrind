@@ -30,6 +30,6 @@ export class HomeComponent implements OnInit {
 
   logout() {
     this.authService.logout();           // clear token & roles
-    this.router.navigate(['/login']);    // redirect to login
+    this.router.navigate(['']);    // redirect to login
   }
 }

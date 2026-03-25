@@ -27,7 +27,7 @@ export class LoginComponent {
 
     this.authService.login(this.usuario, this.password).subscribe({
       next: () => {
-        this.router.navigate(['/']);   // go to home
+        this.router.navigate(['/home']);   // go to home
       },
       error: (err: HttpErrorResponse) => {
         console.error('Login error:', err); // optional for debugging
