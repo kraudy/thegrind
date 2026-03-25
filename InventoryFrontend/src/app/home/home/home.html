@@ -1,21 +1,25 @@
-<!-- home.component.html -->
 <div class="min-h-screen bg-gray-50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <!-- Título principal -->
-    <div class="text-center mb-16">
-      <h1 class="text-5xl font-bold text-gray-900 mb-4">
-        Sistema de Gestión
-      </h1>
-      <p class="text-xl text-gray-600">
-        Panel de administración
-      </p>
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-16">
+      <div class="text-center flex-1">
+        <h1 class="text-5xl font-bold text-gray-900 mb-4">Sistema de Gestión</h1>
+        <p class="text-xl text-gray-600">Panel de administración</p>
+      </div>
+
+      <!-- Logout button -->
+      <button (click)="logout()"
+              class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-sm font-medium">
+        Cerrar Sesión
+      </button>
     </div>
 
     <!-- Grid de tarjetas -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
 
-      <!-- Clientes -->
-      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+      <!-- Clientes - ADMIN ONLY -->
+      <div *ngIf="hasAccess('admin')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
         <div class="mb-8">
           <div class="w-20 h-20 mx-auto bg-indigo-100 rounded-full flex items-center justify-center">
             <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,19 +30,13 @@
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Clientes</h2>
         <p class="text-gray-600 mb-8">Crear y gestionar información de los clientes</p>
         <div class="space-y-4">
-          <a routerLink="clientes/new"
-             class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
-            Crear Nuevo Cliente
-          </a>
-          <a routerLink="clientes"
-             class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">
-            Ver Lista de Clientes
-          </a>
+          <a routerLink="clientes/new" class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">Crear Nuevo Cliente</a>
+          <a routerLink="clientes" class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">Ver Lista de Clientes</a>
         </div>
       </div>
 
-      <!-- Órdenes -->
-      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+      <!-- Órdenes - ADMIN ONLY -->
+      <div *ngIf="hasAccess('admin')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
         <div class="mb-8">
           <div class="w-20 h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center">
             <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,19 +47,13 @@
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Órdenes</h2>
         <p class="text-gray-600 mb-8">Registra y administra órdenes de los clientes</p>
         <div class="space-y-4">
-          <a routerLink="/ordenes/new"
-             class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
-            Crear Nueva Orden
-          </a>
-          <a routerLink="/ordenes"
-             class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">
-            Ver Lista de Órdenes
-          </a>
+          <a routerLink="/ordenes/new" class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">Crear Nueva Orden</a>
+          <a routerLink="/ordenes" class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">Ver Lista de Órdenes</a>
         </div>
       </div>
 
-      <!-- Productos -->
-      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+      <!-- Productos - ADMIN ONLY -->
+      <div *ngIf="hasAccess('admin')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
         <div class="mb-8">
           <div class="w-20 h-20 mx-auto bg-purple-100 rounded-full flex items-center justify-center">
             <svg class="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,19 +64,13 @@
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Productos</h2>
         <p class="text-gray-600 mb-8">Administra catálogo de productos</p>
         <div class="space-y-4">
-          <a routerLink="/productos/new"
-             class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
-            Crear Nuevo Producto
-          </a>
-          <a routerLink="/productos"
-             class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">
-            Ver Catálogo de Productos
-          </a>
+          <a routerLink="/productos/new" class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">Crear Nuevo Producto</a>
+          <a routerLink="/productos" class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">Ver Catálogo de Productos</a>
         </div>
       </div>
 
-      <!-- Tipos de Productos -->
-      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+      <!-- Tipos de Productos - ADMIN ONLY -->
+      <div *ngIf="hasAccess('admin')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
         <div class="mb-8">
           <div class="w-20 h-20 mx-auto bg-blue-100 rounded-full flex items-center justify-center">
             <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,19 +82,13 @@
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Tipos de Productos</h2>
         <p class="text-gray-600 mb-8">Administrar tipos de productos</p>
         <div class="space-y-4">
-          <a routerLink="/productos-tipos/new"
-             class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
-            Crear Nuevo Tipo
-          </a>
-          <a routerLink="/productos-tipos"
-             class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">
-            Ver Tipos de Productos
-          </a>
+          <a routerLink="/productos-tipos/new" class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">Crear Nuevo Tipo</a>
+          <a routerLink="/productos-tipos" class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">Ver Tipos de Productos</a>
         </div>
       </div>
 
-      <!-- Precios de Productos -->
-      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+      <!-- Precios de Productos - ADMIN ONLY -->
+      <div *ngIf="hasAccess('admin')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
         <div class="mb-8">
           <div class="w-20 h-20 mx-auto bg-orange-100 rounded-full flex items-center justify-center">
             <svg class="w-10 h-10 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,95 +99,57 @@
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Precios de Productos</h2>
         <p class="text-gray-600 mb-8">Gestionar precios de productos</p>
         <div class="space-y-4">
-          <a routerLink="/productos-precios/new"
-             class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
-            Crear Nuevo Precio
-          </a>
-          <a routerLink="/productos-precios"
-             class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">
-            Ver Lista de Precios
-          </a>
+          <a routerLink="/productos-precios/new" class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">Crear Nuevo Precio</a>
+          <a routerLink="/productos-precios" class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">Ver Lista de Precios</a>
         </div>
       </div>
 
-      <!-- Repartir Ordenes -->
-      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+      <!-- Agendar Ordenes - ADMIN + REPARTE -->
+      <div *ngIf="hasAccess('reparte')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
         <div class="mb-8">
           <div class="w-20 h-20 mx-auto bg-amber-100 rounded-full flex items-center justify-center">
             <svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2"/>
             </svg>
           </div>
         </div>
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Agendar Ordenes</h2>
         <p class="text-gray-600 mb-8">Agendar y visualizar la carga de trabajo de las próximas semanas</p>
         <div class="space-y-4">
-          <a routerLink="/ordenes-calendario"
-            class="block px-8 py-4 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
-            Ver Calendario (2 semanas)
-          </a>
+          <a routerLink="/ordenes-calendario" class="block px-8 py-4 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">Ver Calendario (2 semanas)</a>
         </div>
       </div>
 
-      <!-- Órdenes para Impresión -->
-      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+      <!-- Órdenes para Impresión - ADMIN + IMprime -->
+      <div *ngIf="hasAccess('imprime')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
         <div class="text-5xl mb-4">🖨️</div>
         <h2 class="text-2xl font-bold text-gray-900 mb-3">Órdenes para Impresión</h2>
-        <p class="text-gray-600 mb-6">
-          Revisa las órdenes próximas a vencer y prepara la impresión de producción.
-        </p>
-        <a
-          routerLink="/ordenes-seguimiento-impresion"
-          class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition"
-        >
-          Ver Lista
-        </a>
+        <p class="text-gray-600 mb-6">Revisa las órdenes próximas a vencer y prepara la impresión de producción.</p>
+        <a routerLink="/ordenes-seguimiento-impresion" class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition">Ver Lista</a>
       </div>
 
-      <!-- Órdenes para Preparación -->
-      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+      <!-- Órdenes para Preparación - ADMIN + ALISTA -->
+      <div *ngIf="hasAccess('alista')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
         <div class="text-5xl mb-4">📦</div>
         <h2 class="text-2xl font-bold text-gray-900 mb-3">Órdenes para Preparación</h2>
-        <p class="text-gray-600 mb-6">
-          Gestiona las órdenes que requieren preparación antes del envío.
-        </p>
-        <a
-          routerLink="/ordenes-seguimiento-preparacion"
-          class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition"
-        >
-          Ver Lista
-        </a>
+        <p class="text-gray-600 mb-6">Gestiona las órdenes que requieren preparación antes del envío.</p>
+        <a routerLink="/ordenes-seguimiento-preparacion" class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition">Ver Lista</a>
       </div>
 
-      <!-- Órdenes para Entrega -->
-      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+      <!-- Órdenes para Entrega - ADMIN + ENTREGA -->
+      <div *ngIf="hasAccess('entrega')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
         <div class="text-5xl mb-4">🚚</div>
         <h2 class="text-2xl font-bold text-gray-900 mb-3">Órdenes para Entrega</h2>
-        <p class="text-gray-600 mb-6">
-          Revisa las órdenes listas para ser entregadas a los clientes.
-        </p>
-        <a
-          routerLink="/ordenes-seguimiento-entrega"
-          class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg shadow-md transition"
-        >
-          Ver Lista
-        </a>
+        <p class="text-gray-600 mb-6">Revisa las órdenes listas para ser entregadas a los clientes.</p>
+        <a routerLink="/ordenes-seguimiento-entrega" class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg shadow-md transition">Ver Lista</a>
       </div>
 
-      <!-- Órdenes para Repartir -->
-      <div class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+      <!-- Órdenes para Repartir - ADMIN + REPARTE -->
+      <div *ngIf="hasAccess('reparte')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
         <div class="text-5xl mb-4">🚴</div>
         <h2 class="text-2xl font-bold text-gray-900 mb-3">Órdenes para Repartir</h2>
-        <p class="text-gray-600 mb-6">
-          Gestiona las órdenes para ser repartidas.
-        </p>
-        <a
-          routerLink="/ordenes-seguimiento-repartir"
-          class="inline-flex items-center px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg shadow-md transition"
-        >
-          Ver Lista
-        </a>
+        <p class="text-gray-600 mb-6">Gestiona las órdenes para ser repartidas.</p>
+        <a routerLink="/ordenes-seguimiento-repartir" class="inline-flex items-center px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg shadow-md transition">Ver Lista</a>
       </div>
 
     </div>

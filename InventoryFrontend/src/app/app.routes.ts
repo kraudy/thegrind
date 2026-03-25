@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 
+import { LoginComponent } from './auth/auth/login.component';
 import { HomeComponent } from './home/home/home.component';
 
 import { ProductoListComponent } from './productos/producto-list/producto-list.component';
@@ -39,6 +40,7 @@ import { OrdenSeguimientoImpresionDetalleListComponent } from './ordenes-seguimi
 
 export const routes: Routes = [
   { path: '', component: HomeComponent }, 
+  { path: 'login', component: LoginComponent },
 
   { path: 'productos', component: ProductoListComponent },
   { path: 'productos/new', component: ProductoFormComponent },
@@ -83,5 +85,10 @@ export const routes: Routes = [
 
   { path: 'clientes', component: ClienteListComponent },
   { path: 'clientes/new', component: ClienteFormComponent },
-  { path: 'clientes/:id/edit', component: ClienteFormComponent }
+  { path: 'clientes/:id/edit', component: ClienteFormComponent },
+
+
+
+  // Catch-all → must be LAST
+  { path: '**', redirectTo: 'login' }
 ];
