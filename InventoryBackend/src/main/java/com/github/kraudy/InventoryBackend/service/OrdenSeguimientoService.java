@@ -43,9 +43,9 @@ public class OrdenSeguimientoService {
         ProductoTipoEstado previo = productoTipoEstadoRepository.findById(prevPk)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
 
-        // === Business rules for reversing ===
-        if (actual.getEstado().equals(EstadoSeguimientoEnum.LISTO.toString())) {
-            ordenRepository.updateEstado(actual.getIdOrden(), "Repartida");
+        // Si el estado era listo, se marca orden como repartida otra vez
+        if (EstadoSeguimientoEnum.fromString(actual.getEstado()).equals(EstadoSeguimientoEnum.LISTO)) {
+          ordenRepository.updateEstado(actual.getIdOrden(), "Repartida");
         }
 
         // Delete associated OrdenTrabajo when going back
@@ -118,7 +118,8 @@ public class OrdenSeguimientoService {
                 EstadoSeguimientoEnum.PEGADO,
                 EstadoSeguimientoEnum.ENMARCADO
         );
-
+        
+        // Si el estado era Reparacion, Normal, Impresion, Enmarcado, Pegado, se elimina orden de trabajo asociada
         if (statesToDelete.contains(EstadoSeguimientoEnum.fromString(actual.getEstado()))) {
             OrdenTrabajoPK trabajoPk = new OrdenTrabajoPK(
                     actual.getIdOrden(), actual.getIdOrdenDetalle(), actual.getEstado());
@@ -136,32 +137,34 @@ public class OrdenSeguimientoService {
     }
 
     private void resetPreviousTrabajoIfNeeded(OrdenSeguimiento actual) {
-        if (List.of(EstadoSeguimientoEnum.IMPRESION, EstadoSeguimientoEnum.ENMARCADO,
+        if (!List.of(EstadoSeguimientoEnum.IMPRESION, EstadoSeguimientoEnum.ENMARCADO,
                 EstadoSeguimientoEnum.PEGADO, EstadoSeguimientoEnum.LISTO,
                 EstadoSeguimientoEnum.ENTREGADO).contains(EstadoSeguimientoEnum.fromString(actual.getEstado()))) {
-
-            int seq = switch (EstadoSeguimientoEnum.fromString(actual.getEstado())) {
-                case IMPRESION, LISTO -> actual.getSecuencia() - 1;
-                case ENTREGADO -> actual.getSecuencia();
-                default -> actual.getSecuencia() - 2;
-            };
-
-            ProductoTipoEstadoPK resetPk = new ProductoTipoEstadoPK(
-                    actual.getTipo(), actual.getSubTipo(), seq);
-
-            ProductoTipoEstado resetEstado = productoTipoEstadoRepository.findById(resetPk)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
-
-            OrdenTrabajoPK trabajoPk = new OrdenTrabajoPK(
-                    actual.getIdOrden(), actual.getIdOrdenDetalle(), resetEstado.getEstado());
-
-            OrdenTrabajo trabajo = ordenTrabajoRepository.findById(trabajoPk)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay trabajo asignado para este estado"));
-
-            trabajo.setCantidadTrabajada(0);
-            trabajo.setCantidadNoTrabajada(trabajo.getCantidadAsignada());
-            ordenTrabajoRepository.save(trabajo);
+            // El trabajo no requiere resetearse
+            return;
         }
+
+        int seq = switch (EstadoSeguimientoEnum.fromString(actual.getEstado())) {
+            case IMPRESION, LISTO -> actual.getSecuencia() - 1;
+            case ENTREGADO -> actual.getSecuencia();
+            default -> actual.getSecuencia() - 2;
+        };
+
+        ProductoTipoEstadoPK resetPk = new ProductoTipoEstadoPK(
+                actual.getTipo(), actual.getSubTipo(), seq);
+
+        ProductoTipoEstado resetEstado = productoTipoEstadoRepository.findById(resetPk)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
+
+        OrdenTrabajoPK trabajoPk = new OrdenTrabajoPK(
+                actual.getIdOrden(), actual.getIdOrdenDetalle(), resetEstado.getEstado());
+
+        OrdenTrabajo trabajo = ordenTrabajoRepository.findById(trabajoPk)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay trabajo asignado para este estado"));
+
+        trabajo.setCantidadTrabajada(0);
+        trabajo.setCantidadNoTrabajada(trabajo.getCantidadAsignada());
+        ordenTrabajoRepository.save(trabajo);
     }
 
     private OrdenSeguimientoHistorico createHistorico(OrdenSeguimiento actual, String currentUser) {

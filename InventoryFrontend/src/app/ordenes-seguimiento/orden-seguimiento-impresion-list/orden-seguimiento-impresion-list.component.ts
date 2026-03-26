@@ -7,7 +7,7 @@ import { takeUntil } from 'rxjs/operators';
 
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimiento } from '../orden-seguimiento.model';
-import { NotificationService } from '../../shared/notification.service';   // ← NEW
+import { NotificationService } from '../../shared/notification.service';
 
 @Component({
   selector: 'app-orden-seguimiento-impresion-list',
@@ -27,7 +27,7 @@ export class OrdenSeguimientoImpresionListComponent implements OnInit, OnDestroy
   constructor(
     private ordenSeguimientoService: OrdenSeguimientoService,
     private router: Router,
-    private notificationService: NotificationService,   // ← NEW
+    private notificationService: NotificationService,
     private cd: ChangeDetectorRef
   ) {}
 
