@@ -3,6 +3,7 @@ package com.github.kraudy.InventoryBackend.repository;
 import com.github.kraudy.InventoryBackend.dto.OrdenCalendarioDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenCalendario;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -134,4 +135,6 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
       ORDER BY cal.fecha_trabajo ASC
       """, nativeQuery = true)
   List<OrdenCalendarioDTO> getOrdersInTwoWeeks();
+
+  List<OrdenCalendario> findByFechaBefore(LocalDate fecha);
 }
