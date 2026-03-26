@@ -1,13 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
+
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenCalendarioService } from '../../ordenes-calendario/orden-calendario.service';
 import { OrdenSeguimientoDetalle } from '../orden-seguimiento-detalle.model';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
 import { EstadosPorDetalleDTO } from '../estados-por-detalle.model';
+import { NotificationService } from '../../shared/notification.service';   // ← NEW
 
 @Component({
   selector: 'app-orden-seguimiento-list',
@@ -16,7 +20,10 @@ import { EstadosPorDetalleDTO } from '../estados-por-detalle.model';
   templateUrl: './orden-seguimiento-list.html',
   styleUrls: ['./orden-seguimiento-list.css'],
 })
-export class OrdenSeguimientoListComponent implements OnInit {
+export class OrdenSeguimientoListComponent implements OnInit, OnDestroy {
+
+  private destroy$ = new Subject<void>();
+
   idOrden!: number;
   detalles: OrdenSeguimientoDetalle[] = [];
   clienteNombre = 'Cargando...';
@@ -29,13 +36,31 @@ export class OrdenSeguimientoListComponent implements OnInit {
     private router: Router,
     private ordenSeguimientoService: OrdenSeguimientoService,
     private ordenCalendarioService: OrdenCalendarioService,
+    private notificationService: NotificationService,   // ← NEW
     private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    this.notificationService.connect();   // ← NEW (idempotent)
+
+    // Real-time refresh: listen only to "seguimiento" notifications
+    this.notificationService.refreshNeeded$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(view => {
+        if (view === 'seguimiento') {
+          console.log('🔄 Real-time refresh triggered for full seguimiento detail');
+          this.load();
+        }
+      });
+
     this.idOrden = Number(this.route.snapshot.paramMap.get('idOrden'));
     this.clienteNombre = String(this.route.snapshot.paramMap.get('clienteNombre'));
     this.load();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   load() {
@@ -86,7 +111,6 @@ export class OrdenSeguimientoListComponent implements OnInit {
     return this.currentStateMap.get(detId) === estado;
   }
 
-  // Nuevo helper seguro para el botón
   isFirstState(detId: number): boolean {
     const states = this.getPossibleStates(detId);
     if (states.length === 0) return true;
@@ -102,7 +126,7 @@ export class OrdenSeguimientoListComponent implements OnInit {
       this.ordenCalendarioService.delete(this.idOrden).subscribe({
         next: () => {
           alert('Orden eliminada del calendario exitosamente');
-          this.router.navigate(['/ordenes-calendario']); // Regresar al calendario después de eliminar
+          this.router.navigate(['/ordenes-calendario']);
         },
         error: (err) => {
           console.error('Error eliminando orden del calendario', err);

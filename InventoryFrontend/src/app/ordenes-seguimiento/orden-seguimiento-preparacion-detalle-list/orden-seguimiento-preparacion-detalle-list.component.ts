@@ -1,11 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 
+
+
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
 import { OrdenSeguimientoDetallePreparacion } from '../orden-seguimiento-detalle-preparacion.model';
+import { NotificationService } from '../../shared/notification.service';   // ← NEW
 
 @Component({
   selector: 'app-orden-seguimiento-preparacion-detalle-list',
@@ -14,7 +20,10 @@ import { OrdenSeguimientoDetallePreparacion } from '../orden-seguimiento-detalle
   templateUrl: './orden-seguimiento-preparacion-detalle-list.html',
   styleUrls: ['./orden-seguimiento-preparacion-detalle-list.css'],
 })
-export class OrdenSeguimientoPreparacionDetalleListComponent implements OnInit {
+export class OrdenSeguimientoPreparacionDetalleListComponent implements OnInit, OnDestroy {
+
+  private destroy$ = new Subject<void>();
+
   idOrden!: number;
   detalles: OrdenSeguimientoDetallePreparacion[] = [];
   clienteNombre = 'Cargando...';
@@ -28,13 +37,31 @@ export class OrdenSeguimientoPreparacionDetalleListComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private service: OrdenSeguimientoService,
+    private notificationService: NotificationService,   // ← NEW
     private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    this.notificationService.connect();
+
+    // Real-time refresh: listen only to "seguimiento" notifications
+    this.notificationService.refreshNeeded$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(view => {
+        if (view === 'seguimiento') {
+          console.log('🔄 Real-time refresh triggered for preparación detalle');
+          this.load();
+        }
+      });
+
     this.idOrden = Number(this.route.snapshot.paramMap.get('idOrden'));
     this.clienteNombre = String(this.route.snapshot.paramMap.get('clienteNombre'));
     this.load();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   load() {

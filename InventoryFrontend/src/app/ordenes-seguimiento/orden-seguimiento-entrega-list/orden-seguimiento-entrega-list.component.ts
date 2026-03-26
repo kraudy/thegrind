@@ -1,9 +1,13 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimiento } from '../orden-seguimiento.model';
+import { NotificationService } from '../../shared/notification.service';   // ← NEW
 
 @Component({
   selector: 'app-orden-seguimiento-entrega-list',
@@ -12,7 +16,10 @@ import { OrdenSeguimiento } from '../orden-seguimiento.model';
   templateUrl: './orden-seguimiento-entrega-list.html',
   styleUrls: ['./orden-seguimiento-entrega-list.css'],
 })
-export class OrdenSeguimientoEntregaListComponent implements OnInit {
+export class OrdenSeguimientoEntregaListComponent implements OnInit, OnDestroy {
+
+  private destroy$ = new Subject<void>();
+
   ordenes: OrdenSeguimiento[] = [];
   loading = false;
   errorMessage = '';
@@ -20,11 +27,29 @@ export class OrdenSeguimientoEntregaListComponent implements OnInit {
   constructor(
     private ordenSeguimientoService: OrdenSeguimientoService,
     private router: Router,
+    private notificationService: NotificationService,   // ← NEW
     private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.notificationService.connect();
+
+    // Real-time refresh
+    this.notificationService.refreshNeeded$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(view => {
+        if (view === 'seguimiento') {
+          console.log('🔄 Real-time refresh triggered for Entrega list');
+          this.loadOrdenesParaEntrega();
+        }
+      });
+
     this.loadOrdenesParaEntrega();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadOrdenesParaEntrega(): void {

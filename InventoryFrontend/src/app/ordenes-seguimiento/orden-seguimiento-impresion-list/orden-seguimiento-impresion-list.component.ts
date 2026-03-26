@@ -1,9 +1,13 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimiento } from '../orden-seguimiento.model';
+import { NotificationService } from '../../shared/notification.service';   // ← NEW
 
 @Component({
   selector: 'app-orden-seguimiento-impresion-list',
@@ -12,7 +16,10 @@ import { OrdenSeguimiento } from '../orden-seguimiento.model';
   templateUrl: './orden-seguimiento-impresion-list.html',
   styleUrls: ['./orden-seguimiento-impresion-list.css'],
 })
-export class OrdenSeguimientoImpresionListComponent implements OnInit {
+export class OrdenSeguimientoImpresionListComponent implements OnInit, OnDestroy {
+
+  private destroy$ = new Subject<void>();
+
   ordenes: OrdenSeguimiento[] = [];
   loading = false;
   errorMessage = '';
@@ -20,11 +27,29 @@ export class OrdenSeguimientoImpresionListComponent implements OnInit {
   constructor(
     private ordenSeguimientoService: OrdenSeguimientoService,
     private router: Router,
+    private notificationService: NotificationService,   // ← NEW
     private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.notificationService.connect();
+
+    // Real-time refresh
+    this.notificationService.refreshNeeded$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(view => {
+        if (view === 'seguimiento') {
+          console.log('🔄 Real-time refresh triggered for Impresión list');
+          this.loadOrdenesParaImpresion();
+        }
+      });
+
     this.loadOrdenesParaImpresion();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadOrdenesParaImpresion(): void {

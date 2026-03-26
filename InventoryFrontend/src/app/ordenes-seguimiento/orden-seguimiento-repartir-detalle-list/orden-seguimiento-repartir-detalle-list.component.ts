@@ -1,8 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
+
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimientoDetalle } from '../orden-seguimiento-detalle.model';
@@ -10,6 +13,7 @@ import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-e
 import { Usuario } from '../../usuarios/usuario.model';
 import { UsuarioTrabajo } from '../../usuarios/usuario-trabajo.model';
 import { UsuarioService } from '../../usuarios/usuario.service';
+import { NotificationService } from '../../shared/notification.service';
 
 @Component({
   selector: 'app-orden-seguimiento-repartir-detalle-list',
@@ -18,7 +22,10 @@ import { UsuarioService } from '../../usuarios/usuario.service';
   templateUrl: './orden-seguimiento-repartir-detalle-list.html',
   styleUrls: ['./orden-seguimiento-repartir-detalle-list.css'],
 })
-export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit {
+export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit, OnDestroy {
+
+  private destroy$ = new Subject<void>();
+
   idOrden!: number;
   detalles: OrdenSeguimientoDetalle[] = [];
   clienteNombre = 'Cargando...';
@@ -42,14 +49,31 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit {
     private router: Router,
     private service: OrdenSeguimientoService,
     private usuarioService: UsuarioService,
+    private notificationService: NotificationService,
     private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    this.notificationService.connect();
+
+    // Real-time refresh
+    this.notificationService.refreshNeeded$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(view => {
+        if (view === 'seguimiento') {
+          console.log('🔄 Real-time refresh triggered for repartir detail');
+          this.load();
+        }
+      });
+
     this.idOrden = Number(this.route.snapshot.paramMap.get('idOrden'));
     this.clienteNombre = String(this.route.snapshot.paramMap.get('clienteNombre'));
-
     this.load();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   load() {

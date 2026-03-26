@@ -1,12 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
+
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimientoDetalle } from '../orden-seguimiento-detalle.model';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
 import { OrdenSeguimientoDetalleEntrega } from '../orden-seguimiento-detalle-entrega.model';
+import { NotificationService } from '../../shared/notification.service'; 
 
 @Component({
   selector: 'app-orden-seguimiento-entrega-detalle-list',
@@ -15,7 +19,10 @@ import { OrdenSeguimientoDetalleEntrega } from '../orden-seguimiento-detalle-ent
   templateUrl: './orden-seguimiento-entrega-detalle-list.html',
   styleUrls: ['./orden-seguimiento-entrega-detalle-list.css'],
 })
-export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit {
+export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDestroy {
+
+  private destroy$ = new Subject<void>();
+
   idOrden!: number;
   detalles: OrdenSeguimientoDetalleEntrega[] = [];
   clienteNombre = 'Cargando...';
@@ -29,13 +36,31 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private service: OrdenSeguimientoService,
+    private notificationService: NotificationService, 
     private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    this.notificationService.connect();
+
+    // Real-time refresh
+    this.notificationService.refreshNeeded$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(view => {
+        if (view === 'seguimiento') {
+          console.log('🔄 Real-time refresh triggered for entrega detail');
+          this.load();
+        }
+      });
+
     this.idOrden = Number(this.route.snapshot.paramMap.get('idOrden'));
     this.clienteNombre = String(this.route.snapshot.paramMap.get('clienteNombre'));
     this.load();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   load() {

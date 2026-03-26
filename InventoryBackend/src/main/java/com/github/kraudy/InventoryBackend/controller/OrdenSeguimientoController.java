@@ -29,6 +29,9 @@ import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoTipoEstadoRepository;
 import com.github.kraudy.InventoryBackend.service.NotificationService;
 
+import com.github.kraudy.InventoryBackend.service.OrdenSeguimientoService;
+import lombok.RequiredArgsConstructor;
+
 import jakarta.websocket.server.PathParam;
 
 import java.time.Duration;
@@ -36,6 +39,7 @@ import java.time.Duration;
 @RestController
 @RequestMapping("/api/ordenes-seguimiento")
 @CrossOrigin(origins = "http://localhost:4200")
+@RequiredArgsConstructor
 public class OrdenSeguimientoController {
 
   @Autowired
@@ -56,6 +60,8 @@ public class OrdenSeguimientoController {
   // inject the service
   @Autowired
   private NotificationService notificationService;
+
+  private final OrdenSeguimientoService ordenSeguimientoService;
 
   @GetMapping
   public List<OrdenSeguimiento> getAll() {
@@ -159,127 +165,132 @@ public class OrdenSeguimientoController {
 
   /* Movimientos de estados */
 
-  // Regresar detalle al estado anterior
   @PostMapping("/regresar/{idOrden}/{idOrdenDetalle}")
-  public OrdenSeguimiento reverseState(
-          @PathVariable Long idOrden,
-          @PathVariable Long idOrdenDetalle) {
-
-    OrdenSeguimientoPK ordenSeguimientoPK = new OrdenSeguimientoPK(idOrden, idOrdenDetalle);
-
-    OrdenSeguimiento ordenSeguimientoActual = ordenSeguimientoRepository.findById(ordenSeguimientoPK).
-      orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El detalle no se encuentra en seguimiento"));
-
-    // Verificar si hay un estado anterior (secuencia - 1)
-    if (ordenSeguimientoActual.getSecuencia() <= 1) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No hay estado anterior disponible");
-    }
-
-    // Se le resta uno para obtener el estado anterior
-    ProductoTipoEstadoPK productoTipoEstadoPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 1);
-
-    ProductoTipoEstado productoTipoEstadoPrevio = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
-      orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
-
-    // Si el estado era listo, se marca orden como repartida otra vez
-    if (ordenSeguimientoActual.getEstado().equals("Listo")) {
-      // Se marca orden como repartida
-      ordenRepository.updateEstado(ordenSeguimientoActual.getIdOrden(), "Repartida");
-    }
-
-    // Si el estado era Reparacion, Normal, Enmarcado, Pegado, se elimina orden de trabajo asociada
-    if (List.of("Reparacion", "Normal").contains(ordenSeguimientoActual.getEstado())) {
-      OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
-      ordenTrabajoRepository.deleteById(ordenTrabajoPK);
-    }
-
-    if (List.of("Impresion").contains(ordenSeguimientoActual.getEstado())) {
-      OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
-      ordenTrabajoRepository.deleteById(ordenTrabajoPK);
-    }
-
-    // Si el estado es pegado, se elimina el trabajo asignado que corresponde a lo que se imprimio
-    if (List.of("Pegado").contains(ordenSeguimientoActual.getEstado())) {
-      OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
-      ordenTrabajoRepository.deleteById(ordenTrabajoPK);
-    }
-    
-    if (List.of("Enmarcado").contains(ordenSeguimientoActual.getEstado())) {
-      OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
-      ordenTrabajoRepository.deleteById(ordenTrabajoPK);
-    }
-
-    // Elimina el trabajo asignado a "Entregado"
-    if (List.of("Listo").contains(ordenSeguimientoActual.getEstado())) {
-      ProductoTipoEstadoPK productoTipoEstadoSiguientePK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() + 1);
-
-      ProductoTipoEstado productoTipoEstadoSiguiente = productoTipoEstadoRepository.findById(productoTipoEstadoSiguientePK).
-        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado siguiente a Listo no encontrado"));
-
-      OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoSiguiente.getEstado());
-      ordenTrabajoRepository.deleteById(ordenTrabajoPK);
-    }
-
-    /* La logica aqui es que si estaba en Enmarcado o Pegado, se debe resetear el trabajo realizado del estado de reparacion o normal previo proque se tienen que imprimir otra vez */
-    // Si la orden esta en estado Enmarcado o Pegado, se resetea el trabajo realizado del estado de reparacion o normal previo, para que vuelva a aparecer como tarea pendiente para el reparador
-    if (List.of("Impresion", "Enmarcado", "Pegado", "Listo", "Entregado").contains(ordenSeguimientoActual.getEstado())) {
-      ProductoTipoEstadoPK productoTipoEstadoNormalReparacionPK = null;
-      // Aqui lo tengo que filtrar por el tipo debido a que las ampliaciones cuando estan listas se les debe restar 2
-      if (List.of("Impresion").contains(ordenSeguimientoActual.getEstado()) || (List.of("Listo").contains(ordenSeguimientoActual.getEstado()) && List.of("Retablos", "Molduras").contains(ordenSeguimientoActual.getTipo()))) {
-        // Para las impresion la orden quedo en estado Normal o Reparacion por eso se le resta 1 a la secuencia
-        // Igual para la lista porque el estado anterior puede ser Pegado, Enmarcado o Normal, Reparacion.
-        productoTipoEstadoNormalReparacionPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 1); 
-      } else if (List.of("Entregado").contains(ordenSeguimientoActual.getEstado())) {
-        // Estado actual
-        productoTipoEstadoNormalReparacionPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia()); 
-      }
-        else {
-        productoTipoEstadoNormalReparacionPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 2);
-      }
-
-      ProductoTipoEstado productoTipoEstadoNormalReparacion = productoTipoEstadoRepository.findById(productoTipoEstadoNormalReparacionPK).
-        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
-
-      OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoNormalReparacion.getEstado());
-      OrdenTrabajo trabajo = ordenTrabajoRepository.findById(ordenTrabajoPK)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay trabajo asignado para este estado"));
-      // Se resetea trabajo realizado
-      trabajo.setCantidadTrabajada(0);
-      trabajo.setCantidadNoTrabajada(trabajo.getCantidadAsignada());
-      ordenTrabajoRepository.save(trabajo);
-    }
-
-    OrdenSeguimientoHistorico historico = new OrdenSeguimientoHistorico();
-    historico.setIdOrden(ordenSeguimientoActual.getIdOrden());
-    historico.setIdOrdenDetalle(ordenSeguimientoActual.getIdOrdenDetalle());
-    historico.setEstado(ordenSeguimientoActual.getEstado());
-
-    historico.setFechaCreacion(ordenSeguimientoActual.getFechaModificacion()); // Utilizamos la fecha de modificacion
-    historico.setUsuarioCreacion(ordenSeguimientoActual.getSeguimientoPor());
-
-    ordenSeguimientoActual.setSeguimientoPor("adminTestregresa");
-    // Se actualiza estado previo, secuencia y usuario que finaliza estado previo
-    ordenSeguimientoActual.setEstado(productoTipoEstadoPrevio.getEstado());
-    ordenSeguimientoActual.setSecuencia(productoTipoEstadoPrevio.getSecuencia());
-
-    // Actualizamos el estado actual
-    ordenSeguimientoActual = ordenSeguimientoRepository.save(ordenSeguimientoActual);
-
-    // Agregamos datos pendientes al historico
-    historico.setFechaFinalizacion(ordenSeguimientoActual.getFechaModificacion());
-    historico.setUsuarioFinalizacion(ordenSeguimientoActual.getSeguimientoPor());
-
-    historico.setDuracion(Duration.between(historico.getFechaCreacion(), historico.getFechaFinalizacion()).toMinutes());
-
-    // Guardamos el historico
-    ordenSeguimientoHistoricoRepository.save(historico);
-
-    // Enviar mensaje para actualizar.
-    //TODO: Valorar enviar el orden id y id detalle para que solo actualice si la orden esta en la vista y el detalle correspondiente.
-    notificationService.notifyOrdenesSeguimientoChanged();
-
-    return ordenSeguimientoActual;
+  public OrdenSeguimiento reverseState(@PathVariable Long idOrden, @PathVariable Long idOrdenDetalle) {
+      return ordenSeguimientoService.reverseState(idOrden, idOrdenDetalle);
   }
+
+  // Regresar detalle al estado anterior
+  //@PostMapping("/regresar/{idOrden}/{idOrdenDetalle}")
+  //public OrdenSeguimiento reverseState(
+  //        @PathVariable Long idOrden,
+  //        @PathVariable Long idOrdenDetalle) {
+//
+  //  OrdenSeguimientoPK ordenSeguimientoPK = new OrdenSeguimientoPK(idOrden, idOrdenDetalle);
+//
+  //  OrdenSeguimiento ordenSeguimientoActual = ordenSeguimientoRepository.findById(ordenSeguimientoPK).
+  //    orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El detalle no se encuentra en seguimiento"));
+//
+  //  // Verificar si hay un estado anterior (secuencia - 1)
+  //  if (ordenSeguimientoActual.getSecuencia() <= 1) {
+  //    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No hay estado anterior disponible");
+  //  }
+//
+  //  // Se le resta uno para obtener el estado anterior
+  //  ProductoTipoEstadoPK productoTipoEstadoPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 1);
+//
+  //  ProductoTipoEstado productoTipoEstadoPrevio = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
+  //    orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
+//
+  //  // Si el estado era listo, se marca orden como repartida otra vez
+  //  if (ordenSeguimientoActual.getEstado().equals("Listo")) {
+  //    // Se marca orden como repartida
+  //    ordenRepository.updateEstado(ordenSeguimientoActual.getIdOrden(), "Repartida");
+  //  }
+//
+  //  // Si el estado era Reparacion, Normal, Enmarcado, Pegado, se elimina orden de trabajo asociada
+  //  if (List.of("Reparacion", "Normal").contains(ordenSeguimientoActual.getEstado())) {
+  //    OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
+  //    ordenTrabajoRepository.deleteById(ordenTrabajoPK);
+  //  }
+//
+  //  if (List.of("Impresion").contains(ordenSeguimientoActual.getEstado())) {
+  //    OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
+  //    ordenTrabajoRepository.deleteById(ordenTrabajoPK);
+  //  }
+//
+  //  // Si el estado es pegado, se elimina el trabajo asignado que corresponde a lo que se imprimio
+  //  if (List.of("Pegado").contains(ordenSeguimientoActual.getEstado())) {
+  //    OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
+  //    ordenTrabajoRepository.deleteById(ordenTrabajoPK);
+  //  }
+  //  
+  //  if (List.of("Enmarcado").contains(ordenSeguimientoActual.getEstado())) {
+  //    OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), ordenSeguimientoActual.getEstado());
+  //    ordenTrabajoRepository.deleteById(ordenTrabajoPK);
+  //  }
+//
+  //  // Elimina el trabajo asignado a "Entregado"
+  //  if (List.of("Listo").contains(ordenSeguimientoActual.getEstado())) {
+  //    ProductoTipoEstadoPK productoTipoEstadoSiguientePK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() + 1);
+//
+  //    ProductoTipoEstado productoTipoEstadoSiguiente = productoTipoEstadoRepository.findById(productoTipoEstadoSiguientePK).
+  //      orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado siguiente a Listo no encontrado"));
+//
+  //    OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoSiguiente.getEstado());
+  //    ordenTrabajoRepository.deleteById(ordenTrabajoPK);
+  //  }
+//
+  //  /* La logica aqui es que si estaba en Enmarcado o Pegado, se debe resetear el trabajo realizado del estado de reparacion o normal previo proque se tienen que imprimir otra vez */
+  //  // Si la orden esta en estado Enmarcado o Pegado, se resetea el trabajo realizado del estado de reparacion o normal previo, para que vuelva a aparecer como tarea pendiente para el reparador
+  //  if (List.of("Impresion", "Enmarcado", "Pegado", "Listo", "Entregado").contains(ordenSeguimientoActual.getEstado())) {
+  //    ProductoTipoEstadoPK productoTipoEstadoNormalReparacionPK = null;
+  //    // Aqui lo tengo que filtrar por el tipo debido a que las ampliaciones cuando estan listas se les debe restar 2
+  //    if (List.of("Impresion").contains(ordenSeguimientoActual.getEstado()) || (List.of("Listo").contains(ordenSeguimientoActual.getEstado()) && List.of("Retablos", "Molduras").contains(ordenSeguimientoActual.getTipo()))) {
+  //      // Para las impresion la orden quedo en estado Normal o Reparacion por eso se le resta 1 a la secuencia
+  //      // Igual para la lista porque el estado anterior puede ser Pegado, Enmarcado o Normal, Reparacion.
+  //      productoTipoEstadoNormalReparacionPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 1); 
+  //    } else if (List.of("Entregado").contains(ordenSeguimientoActual.getEstado())) {
+  //      // Estado actual
+  //      productoTipoEstadoNormalReparacionPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia()); 
+  //    }
+  //      else {
+  //      productoTipoEstadoNormalReparacionPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 2);
+  //    }
+//
+  //    ProductoTipoEstado productoTipoEstadoNormalReparacion = productoTipoEstadoRepository.findById(productoTipoEstadoNormalReparacionPK).
+  //      orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
+//
+  //    OrdenTrabajoPK ordenTrabajoPK = new OrdenTrabajoPK(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoNormalReparacion.getEstado());
+  //    OrdenTrabajo trabajo = ordenTrabajoRepository.findById(ordenTrabajoPK)
+  //          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay trabajo asignado para este estado"));
+  //    // Se resetea trabajo realizado
+  //    trabajo.setCantidadTrabajada(0);
+  //    trabajo.setCantidadNoTrabajada(trabajo.getCantidadAsignada());
+  //    ordenTrabajoRepository.save(trabajo);
+  //  }
+//
+  //  OrdenSeguimientoHistorico historico = new OrdenSeguimientoHistorico();
+  //  historico.setIdOrden(ordenSeguimientoActual.getIdOrden());
+  //  historico.setIdOrdenDetalle(ordenSeguimientoActual.getIdOrdenDetalle());
+  //  historico.setEstado(ordenSeguimientoActual.getEstado());
+//
+  //  historico.setFechaCreacion(ordenSeguimientoActual.getFechaModificacion()); // Utilizamos la fecha de modificacion
+  //  historico.setUsuarioCreacion(ordenSeguimientoActual.getSeguimientoPor());
+//
+  //  ordenSeguimientoActual.setSeguimientoPor("adminTestregresa");
+  //  // Se actualiza estado previo, secuencia y usuario que finaliza estado previo
+  //  ordenSeguimientoActual.setEstado(productoTipoEstadoPrevio.getEstado());
+  //  ordenSeguimientoActual.setSecuencia(productoTipoEstadoPrevio.getSecuencia());
+//
+  //  // Actualizamos el estado actual
+  //  ordenSeguimientoActual = ordenSeguimientoRepository.save(ordenSeguimientoActual);
+//
+  //  // Agregamos datos pendientes al historico
+  //  historico.setFechaFinalizacion(ordenSeguimientoActual.getFechaModificacion());
+  //  historico.setUsuarioFinalizacion(ordenSeguimientoActual.getSeguimientoPor());
+//
+  //  historico.setDuracion(Duration.between(historico.getFechaCreacion(), historico.getFechaFinalizacion()).toMinutes());
+//
+  //  // Guardamos el historico
+  //  ordenSeguimientoHistoricoRepository.save(historico);
+//
+  //  // Enviar mensaje para actualizar.
+  //  //TODO: Valorar enviar el orden id y id detalle para que solo actualice si la orden esta en la vista y el detalle correspondiente.
+  //  notificationService.notifyOrdenesSeguimientoChanged();
+//
+  //  return ordenSeguimientoActual;
+  //}
 
   // Avanzar detalle al siguiente estado
   @PostMapping("/avanzar/{idOrden}/{idOrdenDetalle}")
