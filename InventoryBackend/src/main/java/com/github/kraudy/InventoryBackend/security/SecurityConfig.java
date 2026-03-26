@@ -38,8 +38,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()     // Login must be public
 
+                .requestMatchers("/ws/**").permitAll()           // Permiter acceso a WebSocket
+
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                
+
                 .anyRequest().authenticated()                    // Everything else requires valid JWT
                 //.anyRequest().permitAll()                    
             )
@@ -50,6 +52,7 @@ public class SecurityConfig {
         return http.build();
     }
 
+    //TODO: Implemeentar bcrypt para producción
     //@Bean
     //public PasswordEncoder passwordEncoder() {
     //    return new BCryptPasswordEncoder();

@@ -27,6 +27,7 @@ import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenTrabajoRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoTipoEstadoRepository;
+import com.github.kraudy.InventoryBackend.service.NotificationService;
 
 import jakarta.websocket.server.PathParam;
 
@@ -51,6 +52,10 @@ public class OrdenSeguimientoController {
 
   @Autowired
   private OrdenTrabajoRepository ordenTrabajoRepository;
+
+  // inject the service
+  @Autowired
+  private NotificationService notificationService;
 
   @GetMapping
   public List<OrdenSeguimiento> getAll() {
@@ -266,10 +271,12 @@ public class OrdenSeguimientoController {
 
     historico.setDuracion(Duration.between(historico.getFechaCreacion(), historico.getFechaFinalizacion()).toMinutes());
 
-
-
     // Guardamos el historico
     ordenSeguimientoHistoricoRepository.save(historico);
+
+    // Enviar mensaje para actualizar.
+    //TODO: Valorar enviar el orden id y id detalle para que solo actualice si la orden esta en la vista y el detalle correspondiente.
+    notificationService.notifyOrdenesSeguimientoChanged();
 
     return ordenSeguimientoActual;
   }
@@ -352,6 +359,10 @@ public class OrdenSeguimientoController {
     // Si todos los detalles llegaron al final → orden lista
     //TODO: Just add one to secuencia and do the get, then check if there is another and finish
     //checkAndMarkOrderAsReady(idOrden);
+
+    // Enviar mensaje para actualizar.
+    //TODO: Valorar enviar el orden id y id detalle para que solo actualice si la orden esta en la vista y el detalle correspondiente.
+    notificationService.notifyOrdenesSeguimientoChanged();
 
     return ordenSeguimientoActual;
   }

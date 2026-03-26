@@ -173,6 +173,16 @@ Create postcss.config.js file
 Update InventoryFrontend/src/styles.css
 ```
 
+Install STOMP
+```bash
+# Instala Tailwind y dependencias
+npm install @stomp/stompjs sockjs-client
+# check
+npm list sockjs-client
+# needed because it needs it for typescript or something
+npm install --save-dev @types/sockjs-client
+```
+
 Install nginx
 ```bash
 sudo apt install nginx

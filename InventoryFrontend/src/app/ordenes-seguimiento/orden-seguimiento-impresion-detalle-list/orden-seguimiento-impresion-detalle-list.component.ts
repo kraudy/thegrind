@@ -1,12 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimientoDetalleImpresion } from '../orden-seguimiento-detalle-impresion.model';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
+import { NotificationService } from '../../shared/notification.service';
 
 @Component({
   selector: 'app-orden-seguimiento-impresion-detalle-list',
@@ -15,7 +18,10 @@ import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-e
   templateUrl: './orden-seguimiento-impresion-detalle-list.html',
   styleUrls: ['./orden-seguimiento-impresion-detalle-list.css'],
 })
-export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
+export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, OnDestroy  {
+
+  private destroy$ = new Subject<void>();
+
   idOrden!: number;
   detalles: OrdenSeguimientoDetalleImpresion[] = [];
   clienteNombre = 'Cargando...';
@@ -33,13 +39,32 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private ordenSeguimientoService: OrdenSeguimientoService,
+    private notificationService: NotificationService,
     private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    this.notificationService.connect();   // still safe (idempotent now)
+
+    // ← CLEAN SIGNAL LOGIC: listen only to "seguimiento" refreshes
+    this.notificationService.refreshNeeded$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(view => {
+        if (view === 'seguimiento') {
+          console.log('🔄 Real-time refresh triggered for impresión detail');
+          this.load();
+        }
+      });
+    
     this.idOrden = Number(this.route.snapshot.paramMap.get('idOrden'));
     this.clienteNombre = String(this.route.snapshot.paramMap.get('clienteNombre'));
     this.load();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    // Optional: this.notificationService.disconnect();  ← only if this is the last component
   }
 
   load() {
