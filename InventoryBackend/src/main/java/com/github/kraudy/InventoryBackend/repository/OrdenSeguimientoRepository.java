@@ -352,109 +352,70 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
   // de los detalles en sus dieferentes estados y que al darle click pueda mostrar la vista correspondiente
   //TODO: Lo otro, es que no se si necesito hacer todo esto porque orden_seguimiento ya tiene toda la informacion y solo toma en cuenta ordenes ya repartidas
   @Query(value = """
-  WITH 
-  cal AS (
+    WITH seg AS (
+      SELECT 
+        seg.id_orden,
+        seg.estado,
+        COUNT(*) AS detalle_count
+      FROM orden_seguimiento seg
+      WHERE seg.estado IN ('Repartida', 'Normal', 'Reparacion', 'Impresion', 
+                          'Enmarcado', 'Pegado', 'Listo', 'Entregado')
+      GROUP BY seg.id_orden, seg.estado
+    ),
+    cal AS (
+      SELECT 
+        ord.id as id_orden,
+        ord.id_cliente,
+        CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
+        ord.estado as estadoOrden,
+        ord.creada_por,
+        ord.fecha_vencimiento,
+        (ord.fecha_vencimiento - CURRENT_TIMESTAMP)::text AS tiempoRestante
+      FROM orden ord
+      JOIN cliente cte ON cte.id = ord.id_cliente
+      LEFT JOIN orden_calendario cal ON ord.id = cal.id_orden
+      WHERE ord.estado != 'Entregado'          -- Only active orders
+    )
     SELECT
       cal.id_orden,
-      ord.id_cliente,
-      CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
-      ord.creada_por,
-      ord.fecha_vencimiento
+      cal.id_cliente AS idCliente,
+      cal.clienteNombre,
+      cal.estadoOrden,
+      cal.creada_por AS creadaPor,
+      cal.fecha_vencimiento AS fechaVencimiento,
+      cal.tiempoRestante,
 
-    FROM orden_calendario cal
+      -- Boolean flags (for quick UI badges)
+      CASE WHEN repartidas.id_orden IS NOT NULL THEN true ELSE false END AS tieneRepartidas,
+      CASE WHEN normales.id_orden IS NOT NULL THEN true ELSE false END AS tieneNormales,
+      CASE WHEN reparacion.id_orden IS NOT NULL THEN true ELSE false END AS tieneReparacion,
+      CASE WHEN impresion.id_orden IS NOT NULL THEN true ELSE false END AS tieneImpresion,
+      CASE WHEN enmarcado.id_orden IS NOT NULL THEN true ELSE false END AS tieneEnmarcado,
+      CASE WHEN pegado.id_orden IS NOT NULL THEN true ELSE false END AS tienePegado,
+      CASE WHEN listo.id_orden IS NOT NULL THEN true ELSE false END AS tieneListo,
+      CASE WHEN entregado.id_orden IS NOT NULL THEN true ELSE false END AS tieneEntregado,
 
-    JOIN orden ord ON ord.id = cal.id_orden
-    JOIN cliente cte ON cte.id = ord.id_cliente
-    WHERE cal.fecha = current_date                            -- No necesita group by porque solo hay un registro por orden
-      AND ord.estado = 'Repartida'                            -- Solo considerar ordenes que están en estado Repartida
-  ),
-  seg AS (
-    SELECT
-      seg.id_orden,
-      seg.estado 
-      
-    FROM orden_seguimiento seg
-    JOIN cal ON cal.id_orden = seg.id_orden
+      -- Counts (very useful for the UI)
+      COALESCE(repartidas.detalle_count, 0) AS countRepartidas,
+      COALESCE(normales.detalle_count, 0)   AS countNormales,
+      COALESCE(reparacion.detalle_count, 0) AS countReparacion,
+      COALESCE(impresion.detalle_count, 0)  AS countImpresion,
+      COALESCE(enmarcado.detalle_count, 0)  AS countEnmarcado,
+      COALESCE(pegado.detalle_count, 0)     AS countPegado,
+      COALESCE(listo.detalle_count, 0)      AS countListo,
+      COALESCE(entregado.detalle_count, 0)  AS countEntregado
 
-    WHERE seg.estado IN ('Repartida', 'Normal', 'Reparacion','Impresion', 'Enmarcado', 'Pegado', 'Listo', 'Entregado') 
-    GROUP BY seg.id_orden, seg.estado
-  ),
-  repartidas AS (
-    SELECT id_orden
-    FROM seg
-    WHERE estado = 'Repartida'
-    GROUP BY id_orden
-  ),
-  normales AS (
-    SELECT id_orden
-    FROM seg
-    WHERE estado = 'Normal'
-    GROUP BY id_orden
-  ),
-  reparacion AS (
-    SELECT id_orden
-    FROM seg
-    WHERE estado = 'Reparacion'
-    GROUP BY id_orden
-  ),
-  impresion AS (
-    SELECT id_orden 
-    FROM seg
-    WHERE estado = 'Impresion'
-    GROUP BY id_orden
-  ),
-  enmarcado AS (
-    SELECT id_orden 
-    FROM seg
-    WHERE estado = 'Enmarcado'
-    GROUP BY id_orden
-  ),
-  pegado AS (
-    SELECT id_orden 
-    FROM seg
-    WHERE estado = 'Pegado'
-    GROUP BY id_orden
-  ),
-  listo AS (
-    SELECT id_orden 
-    FROM seg
-    WHERE estado = 'Listo'
-    GROUP BY id_orden
-  ),
-  entregado AS (
-    SELECT id_orden 
-    FROM seg
-    WHERE estado = 'Entregado'
-    GROUP BY id_orden
-  )
-  SELECT
-    cal.id_orden,
-    cal.id_cliente AS idCliente,
-    cal.clienteNombre,
-    cal.creada_por AS creadaPor,
-    cal.fecha_vencimiento AS fechaVencimiento,
-    (fecha_vencimiento - current_timestamp)::text AS tiempoRestante,
-    CASE WHEN repartidas.id_orden IS NOT NULL THEN true ELSE false END AS tieneRepartidas,
-    CASE WHEN normales.id_orden IS NOT NULL THEN true ELSE false END AS tieneNormales,
-    CASE WHEN reparacion.id_orden IS NOT NULL THEN true ELSE false END AS tieneReparacion,
-    CASE WHEN impresion.id_orden IS NOT NULL THEN true ELSE false END AS tieneImpresion,
-    CASE WHEN enmarcado.id_orden IS NOT NULL THEN true ELSE false END AS tieneEnmarcado,
-    CASE WHEN pegado.id_orden IS NOT NULL THEN true ELSE false END AS tienePegado,
-    CASE WHEN listo.id_orden IS NOT NULL THEN true ELSE false END AS tieneListo,
-    CASE WHEN entregado.id_orden IS NOT NULL THEN true ELSE false END AS tieneEntregado
+    FROM cal
+    LEFT JOIN seg repartidas  ON repartidas.id_orden  = cal.id_orden AND repartidas.estado  = 'Repartida'
+    LEFT JOIN seg normales    ON normales.id_orden    = cal.id_orden AND normales.estado    = 'Normal'
+    LEFT JOIN seg reparacion  ON reparacion.id_orden  = cal.id_orden AND reparacion.estado  = 'Reparacion'
+    LEFT JOIN seg impresion   ON impresion.id_orden   = cal.id_orden AND impresion.estado   = 'Impresion'
+    LEFT JOIN seg enmarcado   ON enmarcado.id_orden   = cal.id_orden AND enmarcado.estado   = 'Enmarcado'
+    LEFT JOIN seg pegado      ON pegado.id_orden      = cal.id_orden AND pegado.estado      = 'Pegado'
+    LEFT JOIN seg listo       ON listo.id_orden       = cal.id_orden AND listo.estado       = 'Listo'
+    LEFT JOIN seg entregado   ON entregado.id_orden   = cal.id_orden AND entregado.estado   = 'Entregado'
 
-  FROM cal
-
-  LEFT JOIN repartidas ON repartidas.id_orden = cal.id_orden
-  LEFT JOIN normales ON normales.id_orden = cal.id_orden
-  LEFT JOIN reparacion ON reparacion.id_orden = cal.id_orden
-  LEFT JOIN impresion ON impresion.id_orden = cal.id_orden
-  LEFT JOIN enmarcado ON enmarcado.id_orden = cal.id_orden
-  LEFT JOIN pegado ON pegado.id_orden = cal.id_orden
-  LEFT JOIN listo ON listo.id_orden = cal.id_orden
-  LEFT JOIN entregado ON entregado.id_orden = cal.id_orden
-  
-  ORDER BY cal.id_cliente, cal.id_orden ASC
+    ORDER BY cal.clienteNombre, cal.fecha_vencimiento ASC
   """, nativeQuery = true)
   List<OrdenSeguimientoEstadosGeneralDTO> getOrdenesPorEstadosSeguimiento();
 

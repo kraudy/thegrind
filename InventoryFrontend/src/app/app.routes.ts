@@ -37,6 +37,7 @@ import { ProductoTipoFormComponent } from './productos-tipos/producto-tipo-form/
 import { ProductoPrecioListComponent } from './productos-precios/producto-precio-list/producto-precio-list.component';
 import { ProductoPrecioFormComponent } from './productos-precios/producto-precio-form/producto-precio-form.component';
 import { OrdenSeguimientoImpresionDetalleListComponent } from './ordenes-seguimiento/orden-seguimiento-impresion-detalle-list/orden-seguimiento-impresion-detalle-list.component';
+import { OrdenSeguimientoGeneralListComponent } from './ordenes-seguimiento/orden-seguimiento-general-list/orden-seguimiento-general-list.component';
 
 export const routes: Routes = [
   //{ path: '', component: HomeComponent }, 
@@ -89,7 +90,8 @@ export const routes: Routes = [
   { path: 'clientes/new', component: ClienteFormComponent },
   { path: 'clientes/:id/edit', component: ClienteFormComponent },
 
-
+  { path: 'ordenes-seguimiento/general', component: OrdenSeguimientoGeneralListComponent },
+  
 
   // Catch-all → must be LAST
   { path: '**', redirectTo: 'login' }

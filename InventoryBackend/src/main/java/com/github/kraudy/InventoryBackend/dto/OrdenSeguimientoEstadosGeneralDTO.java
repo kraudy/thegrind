@@ -6,9 +6,11 @@ public record OrdenSeguimientoEstadosGeneralDTO(
     Long id,
     Long idCliente,
     String clienteNombre,
+    String estadoOrden,
     String creadaPor,
     LocalDateTime fechaVencimiento,
     String tiempoRestante,
+
     boolean tieneRepartidas,
     boolean tieneNormales,
     boolean tieneReparacion,
@@ -16,5 +18,14 @@ public record OrdenSeguimientoEstadosGeneralDTO(
     boolean tieneEnmarcado,
     boolean tienePegado,
     boolean tieneListo,
-    boolean tieneEntregado
+    boolean tieneEntregado,
+
+    Long countRepartidas,
+    Long countNormales,
+    Long countReparacion,
+    Long countImpresion,
+    Long countEnmarcado,
+    Long countPegado,
+    Long countListo,
+    Long countEntregado
 ) {}

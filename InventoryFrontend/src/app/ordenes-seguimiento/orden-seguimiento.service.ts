@@ -10,6 +10,7 @@ import { EstadosPorDetalleDTO } from './estados-por-detalle.model';
 import { Usuario } from '../usuarios/usuario.model';
 import { OrdenSeguimientoDetallePreparacion } from './orden-seguimiento-detalle-preparacion.model';
 import { OrdenSeguimientoDetalleEntrega } from './orden-seguimiento-detalle-entrega.model';
+import { OrdenSeguimientoDetalleGeneral } from './orden-seguimiento-detalle-general.model';
 
 
 @Injectable({
@@ -19,6 +20,10 @@ export class OrdenSeguimientoService {
   private apiUrl = '/api/ordenes-seguimiento';
 
   constructor(private http: HttpClient) {}
+
+  getOrdenesSeguimientoGeneral(): Observable<OrdenSeguimientoDetalleGeneral[]> {
+    return this.http.get<OrdenSeguimientoDetalleGeneral[]>(`${this.apiUrl}/general`);
+  }
 
   /* Seguimiento para impresion */
   getOrdenesParaImpresion(): Observable<OrdenSeguimiento[]> {
