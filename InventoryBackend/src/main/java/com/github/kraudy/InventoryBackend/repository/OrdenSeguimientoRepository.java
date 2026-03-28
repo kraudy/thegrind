@@ -415,7 +415,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     LEFT JOIN seg listo       ON listo.id_orden       = cal.id_orden AND listo.estado       = 'Listo'
     LEFT JOIN seg entregado   ON entregado.id_orden   = cal.id_orden AND entregado.estado   = 'Entregado'
 
-    ORDER BY cal.clienteNombre, cal.fecha_vencimiento ASC
+    ORDER BY cal.id_cliente, cal.fecha_vencimiento ASC
   """, nativeQuery = true)
   List<OrdenSeguimientoEstadosGeneralDTO> getOrdenesPorEstadosSeguimiento();
 

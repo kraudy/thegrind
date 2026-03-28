@@ -1,12 +1,12 @@
 import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';   // still needed for other links if any
 
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
-import { OrdenSeguimientoDetalleGeneral } from '../orden-seguimiento-detalle-general.model'; 
+import { OrdenSeguimientoDetalleGeneral } from '../orden-seguimiento-detalle-general.model';
 import { NotificationService } from '../../shared/notification.service';
 
 @Component({
@@ -26,7 +26,6 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
 
   constructor(
     private ordenSeguimientoService: OrdenSeguimientoService,
-    private router: Router,
     private notificationService: NotificationService,
     private cd: ChangeDetectorRef
   ) {}
@@ -61,7 +60,7 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.cd.detectChanges();
       },
-      error: (err: any) => {                    // ← fixed implicit any
+      error: (err: any) => {
         console.error('[OrdenSeguimientoGeneralList] error loading data', err);
         this.ordenes = [];
         this.loading = false;
@@ -69,10 +68,6 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
         this.cd.detectChanges();
       },
     });
-  }
-
-  goToDetalle(orden: OrdenSeguimientoDetalleGeneral): void {
-    this.router.navigate(['/ordenes-seguimiento', orden.id, orden.clienteNombre]);
   }
 
   getTiempoRestanteClass(tiempoRestante: string): string {
