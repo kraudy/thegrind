@@ -21,6 +21,12 @@ export class OrdenDetalleService {
     return this.http.get<OrdenDetalle[]>(`${this.apiUrl}/por-orden/${idOrden}`);
   }
 
+  getPdf(idOrden: number): Observable<Blob> {
+  return this.http.get(`${this.apiUrl}/${idOrden}/pdf`, { 
+    responseType: 'blob' 
+  });
+}
+
   // Obtener un detalle específico por clave compuesta
   getById(idOrden: number, idOrdenDetalle: number): Observable<OrdenDetalle> {
     return this.http.get<OrdenDetalle>(

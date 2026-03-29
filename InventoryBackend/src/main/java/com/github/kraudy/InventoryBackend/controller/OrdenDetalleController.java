@@ -2,7 +2,9 @@ package com.github.kraudy.InventoryBackend.controller;
 
 import java.math.BigDecimal;
 
+import com.github.kraudy.InventoryBackend.dto.OrdenDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenDetalleDTO;
+import com.github.kraudy.InventoryBackend.model.Orden;
 import com.github.kraudy.InventoryBackend.model.OrdenDetalle;
 import com.github.kraudy.InventoryBackend.model.OrdenDetallePK;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecio;
@@ -13,9 +15,11 @@ import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoPrecioRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import org.springframework.http.*;
+import com.github.kraudy.InventoryBackend.service.OrdenPdfService;
 
 import java.util.List;
 
@@ -33,10 +37,35 @@ public class OrdenDetalleController {
   @Autowired
   private ProductoPrecioRepository productoPrecioRepository;
 
+  @Autowired
+  private OrdenPdfService ordenPdfService;
+
   // Obtener todos los detalles de una orden específica (recomendado para uso frecuente)
   @GetMapping("/por-orden/{idOrden}")
   public List<OrdenDetalleDTO> getByOrden(@PathVariable Long idOrden) {
     return ordenDetalleRepository.getAllOrdenDetalle(idOrden);
+  }
+
+  // must be BEFORE the general /{idOrden}/{idOrdenDetalle}
+  @GetMapping("/{idOrden}/pdf")
+  public ResponseEntity<byte[]> downloadPdf(@PathVariable Long idOrden) {
+      // Use your existing DTO query that already includes clienteNombre
+      OrdenDTO ordenDto = ordenRepository.getOrdenById(idOrden);
+      if (ordenDto == null) {
+          throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden no encontrada");
+      }
+
+      List<OrdenDetalleDTO> detalles = ordenDetalleRepository.getAllOrdenDetalle(idOrden);
+
+      byte[] pdfBytes = ordenPdfService.generateOrdenPdf(ordenDto, detalles);
+
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_PDF);
+      headers.setContentDisposition(ContentDisposition.builder("attachment")
+              .filename("orden-" + idOrden + ".pdf")
+              .build());
+
+      return ResponseEntity.ok().headers(headers).body(pdfBytes);
   }
 
   // Obtener un detalle específico por clave compuesta
@@ -48,7 +77,7 @@ public class OrdenDetalleController {
     OrdenDetallePK pk = new OrdenDetallePK(idOrden, idOrdenDetalle);
     return ordenDetalleRepository.findById(pk).orElse(null);
   }
-
+  
   // Crear un nuevo detalle
   @PostMapping("/{idOrden}/{idProducto}")
   public void create(

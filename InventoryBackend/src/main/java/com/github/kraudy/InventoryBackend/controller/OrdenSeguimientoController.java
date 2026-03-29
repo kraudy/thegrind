@@ -179,84 +179,93 @@ public class OrdenSeguimientoController {
           @PathVariable Long idOrden,
           @PathVariable Long idOrdenDetalle) {
 
-    OrdenSeguimientoPK ordenSeguimientoPK = new OrdenSeguimientoPK(idOrden, idOrdenDetalle);
-
-    OrdenSeguimiento ordenSeguimientoActual = ordenSeguimientoRepository.findById(ordenSeguimientoPK).
-      orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El detalle no se encuentra en seguimiento"));
-
-    // Se le suma uno para obtener el siguiente estado
-    ProductoTipoEstadoPK productoTipoEstadoPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() + 1);
-    
-    ProductoTipoEstado productoTipoEstadoSiguiente = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
-      orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Siguiente estado no encontrado"));
-
-    OrdenSeguimientoHistorico historico = new OrdenSeguimientoHistorico();
-    historico.setIdOrden(ordenSeguimientoActual.getIdOrden());
-    historico.setIdOrdenDetalle(ordenSeguimientoActual.getIdOrdenDetalle());
-    historico.setEstado(ordenSeguimientoActual.getEstado());
-
-    historico.setFechaCreacion(ordenSeguimientoActual.getFechaModificacion()); // Utilizamos la fecha de modificacion
-    historico.setUsuarioCreacion(ordenSeguimientoActual.getSeguimientoPor());
-
-    ordenSeguimientoActual.setSeguimientoPor("adminTestfinaliza");
-    // Se actualiza estado nuevo, secuencia y usuario que finaliza estado previo
-    ordenSeguimientoActual.setEstado(productoTipoEstadoSiguiente.getEstado());
-    ordenSeguimientoActual.setSecuencia(productoTipoEstadoSiguiente.getSecuencia());
-
-    // Actualizamos el estado actual
-    ordenSeguimientoActual = ordenSeguimientoRepository.save(ordenSeguimientoActual);
-
-    // Agregamos datos pendientes al historico
-    historico.setFechaFinalizacion(ordenSeguimientoActual.getFechaModificacion());
-    historico.setUsuarioFinalizacion(ordenSeguimientoActual.getSeguimientoPor());
-
-    historico.setDuracion(Duration.between(historico.getFechaCreacion(), historico.getFechaFinalizacion()).toMinutes());
-
-    // Guardamos el historico
-    ordenSeguimientoHistoricoRepository.save(historico);
-
-    // Validamos si se esta asignando el trabajo antes de avanzar a reparacion
-    if (productoTipoEstadoSiguiente.getEstado().equals("Reparacion")) {
-      if (!ordenTrabajoRepository.detalleEstaAsignado(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoSiguiente.getEstado())){
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se puede avanzar a reparacion sin asignar detalle a reparador");
-      }
-    }
-
-    // Pegado es diferente porque actualmente se le asigan todo lo que se imprime y segun esto se le paga. El alistado sera una validacion no restrictiva.
-    if (productoTipoEstadoSiguiente.getEstado().equals("Pegado")) {
-      if (!ordenTrabajoRepository.detalleEstaAsignado(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoSiguiente.getEstado())){
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se puede avanzar a pegado sin asignar detalle a pegador");
-      }
-    }
-
-    // Validamos si todos los detalles estan listos para marcar orden como lista
-    if (productoTipoEstadoSiguiente.getEstado().equals("Listo")) {
-      if (ordenSeguimientoRepository.estanTodosLosDetallesListos(ordenSeguimientoActual.getIdOrden())){
-        // Se marca orden como lista
-        ordenRepository.updateEstado(ordenSeguimientoActual.getIdOrden(), productoTipoEstadoSiguiente.getEstado());
-      }
-      //if (ordenSeguimientoActual.getTipo().equals("Retablos")){
-      //  //TODO:
-      //}
-    }
-
-    // Validamos si todos los detalles estan entregados para marcar orden como entregada
-    if (productoTipoEstadoSiguiente.getEstado().equals("Entregado")) {
-      if (ordenSeguimientoRepository.estanTodosLosDetallesEntregados(ordenSeguimientoActual.getIdOrden())){
-        // Se marca orden como entregada
-        ordenRepository.updateEstado(ordenSeguimientoActual.getIdOrden(), productoTipoEstadoSiguiente.getEstado());
-      }
-    }
-
-    // Si todos los detalles llegaron al final → orden lista
-    //TODO: Just add one to secuencia and do the get, then check if there is another and finish
-    //checkAndMarkOrderAsReady(idOrden);
-
-    // Enviar mensaje para actualizar.
-    //TODO: Valorar enviar el orden id y id detalle para que solo actualice si la orden esta en la vista y el detalle correspondiente.
-    notificationService.notifyOrdenesSeguimientoChanged();
-
-    return ordenSeguimientoActual;
+    return ordenSeguimientoService.advanceState(idOrden, idOrdenDetalle);
   }
+
+  // Avanzar detalle al siguiente estado
+  //@PostMapping("/avanzar/{idOrden}/{idOrdenDetalle}")
+  //public OrdenSeguimiento advanceStateOLDDDDDDDDDDDDDDDDDDDD(
+  //        @PathVariable Long idOrden,
+  //        @PathVariable Long idOrdenDetalle) {
+//
+  //  OrdenSeguimientoPK ordenSeguimientoPK = new OrdenSeguimientoPK(idOrden, idOrdenDetalle);
+//
+  //  OrdenSeguimiento ordenSeguimientoActual = ordenSeguimientoRepository.findById(ordenSeguimientoPK).
+  //    orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El detalle no se encuentra en seguimiento"));
+//
+  //  // Se le suma uno para obtener el siguiente estado
+  //  ProductoTipoEstadoPK productoTipoEstadoPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() + 1);
+  //  
+  //  ProductoTipoEstado productoTipoEstadoSiguiente = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
+  //    orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Siguiente estado no encontrado"));
+//
+  //  OrdenSeguimientoHistorico historico = new OrdenSeguimientoHistorico();
+  //  historico.setIdOrden(ordenSeguimientoActual.getIdOrden());
+  //  historico.setIdOrdenDetalle(ordenSeguimientoActual.getIdOrdenDetalle());
+  //  historico.setEstado(ordenSeguimientoActual.getEstado());
+//
+  //  historico.setFechaCreacion(ordenSeguimientoActual.getFechaModificacion()); // Utilizamos la fecha de modificacion
+  //  historico.setUsuarioCreacion(ordenSeguimientoActual.getSeguimientoPor());
+//
+  //  ordenSeguimientoActual.setSeguimientoPor("adminTestfinaliza");
+  //  // Se actualiza estado nuevo, secuencia y usuario que finaliza estado previo
+  //  ordenSeguimientoActual.setEstado(productoTipoEstadoSiguiente.getEstado());
+  //  ordenSeguimientoActual.setSecuencia(productoTipoEstadoSiguiente.getSecuencia());
+//
+  //  // Actualizamos el estado actual
+  //  ordenSeguimientoActual = ordenSeguimientoRepository.save(ordenSeguimientoActual);
+//
+  //  // Agregamos datos pendientes al historico
+  //  historico.setFechaFinalizacion(ordenSeguimientoActual.getFechaModificacion());
+  //  historico.setUsuarioFinalizacion(ordenSeguimientoActual.getSeguimientoPor());
+//
+  //  historico.setDuracion(Duration.between(historico.getFechaCreacion(), historico.getFechaFinalizacion()).toMinutes());
+//
+  //  // Guardamos el historico
+  //  ordenSeguimientoHistoricoRepository.save(historico);
+//
+  //  // Validamos si se esta asignando el trabajo antes de avanzar a reparacion
+  //  if (productoTipoEstadoSiguiente.getEstado().equals("Reparacion")) {
+  //    if (!ordenTrabajoRepository.detalleEstaAsignado(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoSiguiente.getEstado())){
+  //      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se puede avanzar a reparacion sin asignar detalle a reparador");
+  //    }
+  //  }
+//
+  //  // Pegado es diferente porque actualmente se le asigan todo lo que se imprime y segun esto se le paga. El alistado sera una validacion no restrictiva.
+  //  if (productoTipoEstadoSiguiente.getEstado().equals("Pegado")) {
+  //    if (!ordenTrabajoRepository.detalleEstaAsignado(ordenSeguimientoActual.getIdOrden(), ordenSeguimientoActual.getIdOrdenDetalle(), productoTipoEstadoSiguiente.getEstado())){
+  //      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se puede avanzar a pegado sin asignar detalle a pegador");
+  //    }
+  //  }
+//
+  //  // Validamos si todos los detalles estan listos para marcar orden como lista
+  //  if (productoTipoEstadoSiguiente.getEstado().equals("Listo")) {
+  //    if (ordenSeguimientoRepository.estanTodosLosDetallesListos(ordenSeguimientoActual.getIdOrden())){
+  //      // Se marca orden como lista
+  //      ordenRepository.updateEstado(ordenSeguimientoActual.getIdOrden(), productoTipoEstadoSiguiente.getEstado());
+  //    }
+  //    //if (ordenSeguimientoActual.getTipo().equals("Retablos")){
+  //    //  //TODO:
+  //    //}
+  //  }
+//
+  //  // Validamos si todos los detalles estan entregados para marcar orden como entregada
+  //  if (productoTipoEstadoSiguiente.getEstado().equals("Entregado")) {
+  //    if (ordenSeguimientoRepository.estanTodosLosDetallesEntregados(ordenSeguimientoActual.getIdOrden())){
+  //      // Se marca orden como entregada
+  //      ordenRepository.updateEstado(ordenSeguimientoActual.getIdOrden(), productoTipoEstadoSiguiente.getEstado());
+  //    }
+  //  }
+//
+  //  // Si todos los detalles llegaron al final → orden lista
+  //  //TODO: Just add one to secuencia and do the get, then check if there is another and finish
+  //  //checkAndMarkOrderAsReady(idOrden);
+//
+  //  // Enviar mensaje para actualizar.
+  //  //TODO: Valorar enviar el orden id y id detalle para que solo actualice si la orden esta en la vista y el detalle correspondiente.
+  //  notificationService.notifyOrdenesSeguimientoChanged();
+//
+  //  return ordenSeguimientoActual;
+  //}
 
 }

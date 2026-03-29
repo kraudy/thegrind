@@ -1,5 +1,5 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-  <!-- Título y botones (solo si hay orden específica) -->
+  <!-- Header -->
   <div class="relative flex justify-between items-center mb-8" *ngIf="orden">
     <!-- Botón Volver (izquierda) -->
     <button (click)="goBack()"
@@ -20,18 +20,18 @@
       Agregar Detalle
     </a>
 
-    <!-- Título perfectamente centrado -->
+    <!-- Título centrado -->
     <h1 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-bold text-gray-900 pointer-events-none">
       Detalles Orden #{{ orden.id }}
     </h1>
   </div>
 
-  <!-- Si no hay orden específica, título genérico -->
+  <!-- Título genérico cuando no hay orden específica -->
   <div class="mb-8" *ngIf="!orden">
     <h1 class="text-4xl font-bold text-gray-900">Detalles de Órdenes</h1>
   </div>
 
-  <!-- Resumen de la orden (solo si hay orden específica) -->
+  <!-- Resumen de la orden -->
   <div class="bg-white shadow-xl rounded-xl p-8 mb-12" *ngIf="orden">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div class="bg-gray-50 rounded-lg p-4">
@@ -116,16 +116,20 @@
         </tbody>
       </table>
 
-      <!-- Mensaje cuando no hay detalles -->
       <div *ngIf="ordenDetalles.length === 0" class="text-center py-12">
         <p class="text-gray-500 text-lg">No hay detalles de orden registrados aún.</p>
       </div>
+    </div>
 
-      <!-- Debug (opcional, igual que en el ejemplo de órdenes) -->
-      <div class="p-4 bg-gray-100 text-sm text-gray-800 mt-4">
-        <strong>Debug ordenDetalles:</strong>
-        <pre class="whitespace-pre-wrap">{{ ordenDetalles | json }}</pre>
-      </div>
+    <!-- Descargar PDF - Bottom Right Corner -->
+    <div class="flex justify-end p-6 border-t bg-gray-50" *ngIf="orden">
+      <button (click)="downloadPdf()"
+        class="inline-flex items-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-md transition transform hover:scale-105">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v-4m0 0l4 4m-4-4l4-4m12 0v4m0 0l-4-4m4 4l-4 4" />
+        </svg>
+        Descargar PDF
+      </button>
     </div>
   </div>
 </div>

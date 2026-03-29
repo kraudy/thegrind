@@ -99,6 +99,25 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
     });
   }
 
+  downloadPdf(): void {
+    if (!this.orden?.id) return;
+
+    this.ordenDetalleService.getPdf(this.orden.id).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `orden-${this.orden!.id}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error al descargar PDF', err);
+        alert('No se pudo generar el PDF. Revisa la consola.');
+      }
+    });
+  }
+
   deleteOrdenDetalle(idOrden: number, idOrdenDetalle: number): void {
     if (confirm('¿Seguro desea eliminar este detalle de orden?')) {
       this.ordenDetalleService.delete(idOrden, idOrdenDetalle).subscribe({
