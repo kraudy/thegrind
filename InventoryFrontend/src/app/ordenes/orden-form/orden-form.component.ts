@@ -90,6 +90,9 @@ export class OrdenFormComponent implements OnChanges, OnInit{
       next: (data) => {
         this.loadForm(data);
         this.isEdit = true;
+
+        this.loadClienteForDisplay();
+        
         console.log('[OrdenForm] loaded orden for edit', data);
         this.cd.detectChanges();
       },

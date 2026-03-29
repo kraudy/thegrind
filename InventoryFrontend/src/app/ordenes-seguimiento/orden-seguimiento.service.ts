@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -21,8 +21,20 @@ export class OrdenSeguimientoService {
 
   constructor(private http: HttpClient) {}
 
-  getOrdenesSeguimientoGeneral(): Observable<OrdenSeguimientoDetalleGeneral[]> {
-    return this.http.get<OrdenSeguimientoDetalleGeneral[]>(`${this.apiUrl}/general`);
+  getOrdenesSeguimientoGeneral(search: string = '', estadoOrden: string = ''): Observable<OrdenSeguimientoDetalleGeneral[]> {
+    let params = new HttpParams();
+
+    // Only send search if user actually typed something
+    if (search?.trim()) {
+      params = params.set('search', search.trim());
+    }
+
+    // Only send estadoOrden if a real filter is selected
+    if (estadoOrden) {
+      params = params.set('estadoOrden', estadoOrden);
+    }
+
+    return this.http.get<OrdenSeguimientoDetalleGeneral[]>(`${this.apiUrl}/general`, { params });
   }
 
   /* Seguimiento para impresion */

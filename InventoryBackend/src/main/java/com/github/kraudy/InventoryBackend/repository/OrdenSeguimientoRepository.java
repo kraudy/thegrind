@@ -415,9 +415,15 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     LEFT JOIN seg listo       ON listo.id_orden       = cal.id_orden AND listo.estado       = 'Listo'
     LEFT JOIN seg entregado   ON entregado.id_orden   = cal.id_orden AND entregado.estado   = 'Entregado'
 
+    WHERE (:search IS NULL OR 
+           CAST(cal.id_orden AS TEXT) ILIKE '%' || LOWER(:search) || '%' OR
+           LOWER(cal.clienteNombre) ILIKE '%' || LOWER(:search) || '%' OR
+           LOWER(cal.creada_por) ILIKE '%' || LOWER(:search) || '%')
+      AND (:estadoOrden IS NULL OR cal.estadoOrden = :estadoOrden)
+
     ORDER BY cal.id_cliente, cal.fecha_vencimiento ASC
   """, nativeQuery = true)
-  List<OrdenSeguimientoEstadosGeneralDTO> getOrdenesPorEstadosSeguimiento();
+  List<OrdenSeguimientoEstadosGeneralDTO> getOrdenesPorEstadosSeguimiento(@Param("search") String search, @Param("estadoOrden") String estadoOrden);
 
 
   @Modifying

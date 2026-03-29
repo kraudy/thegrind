@@ -1,4 +1,5 @@
 <div class="max-w-7xl mx-auto px-4 py-12">
+  <!-- Header -->
   <div class="relative flex justify-between items-center mb-8">
     <a routerLink="/home"
        class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-md transition transform hover:scale-105">
@@ -15,12 +16,67 @@
     </h1>
   </div>
 
+  <!-- Search + Filters -->
+  <div class="flex flex-wrap gap-4 items-center bg-white shadow rounded-2xl p-4 mb-8">
+    <!-- Search input -->
+    <div class="flex-1 min-w-[300px]">
+      <input 
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onFilterChange()"
+        placeholder="Buscar por orden, cliente o creada por..."
+        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+    </div>
+
+    <!-- State filters -->
+    <div class="flex items-center gap-2 flex-wrap">
+      <button 
+        (click)="selectedStateFilter = ''; onFilterChange()"
+        [class.bg-indigo-600]="selectedStateFilter === ''"
+        [class.text-white]="selectedStateFilter === ''"
+        class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
+        Todos
+      </button>
+      <button 
+        (click)="selectedStateFilter = 'Recibida'; onFilterChange()"
+        [class.bg-indigo-600]="selectedStateFilter === 'Recibida'"
+        [class.text-white]="selectedStateFilter === 'Recibida'"
+        class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
+        Recibida
+      </button>
+      <button 
+        (click)="selectedStateFilter = 'Repartida'; onFilterChange()"
+        [class.bg-indigo-600]="selectedStateFilter === 'Repartida'"
+        [class.text-white]="selectedStateFilter === 'Repartida'"
+        class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
+        Repartida
+      </button>
+      <button 
+        (click)="selectedStateFilter = 'Listo'; onFilterChange()"
+        [class.bg-indigo-600]="selectedStateFilter === 'Listo'"
+        [class.text-white]="selectedStateFilter === 'Listo'"
+        class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
+        Listo
+      </button>
+    </div>
+
+    <!-- Clear button -->
+    <button (click)="clearFilters()"
+            class="px-5 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors">
+      Limpiar filtros
+    </button>
+  </div>
+
+  <!-- Main content card -->
   <div class="bg-white shadow-xl rounded-xl overflow-hidden">
     <!-- Loading -->
-    <div *ngIf="loading" class="p-10 text-center text-gray-600">Cargando seguimiento general...</div>
+    <div *ngIf="loading" class="p-10 text-center text-gray-600">
+      Cargando seguimiento general...
+    </div>
 
     <!-- Error -->
-    <div *ngIf="!loading && errorMessage" class="p-6 bg-red-50 text-red-700 text-center font-medium">
+    <div *ngIf="!loading && errorMessage" 
+         class="p-6 bg-red-50 text-red-700 text-center font-medium">
       {{ errorMessage }}
     </div>
 

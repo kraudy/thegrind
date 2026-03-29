@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';   // still needed for other links if any
+import { RouterLink } from '@angular/router'; 
+import { FormsModule } from '@angular/forms';
 
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -12,7 +13,7 @@ import { NotificationService } from '../../shared/notification.service';
 @Component({
   selector: 'app-orden-seguimiento-general-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './orden-seguimiento-general-list.html',
   styleUrls: ['./orden-seguimiento-general-list.css'],
 })
@@ -23,6 +24,9 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
   ordenes: OrdenSeguimientoDetalleGeneral[] = [];
   loading = false;
   errorMessage = '';
+
+  searchTerm = '';
+  selectedStateFilter = ''; // '' = all, or 'Recibida' / 'Repartida' / 'Listo'
 
   constructor(
     private ordenSeguimientoService: OrdenSeguimientoService,
@@ -36,10 +40,7 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
     this.notificationService.refreshNeeded$
       .pipe(takeUntil(this.destroy$))
       .subscribe(view => {
-        if (view === 'seguimiento') {
-          console.log('🔄 Real-time refresh triggered for General Overview');
-          this.loadOrdenesGeneral();
-        }
+        if (view === 'seguimiento') this.loadOrdenesGeneral();
       });
 
     this.loadOrdenesGeneral();
@@ -54,20 +55,32 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.errorMessage = '';
 
-    this.ordenSeguimientoService.getOrdenesSeguimientoGeneral().subscribe({
-      next: (data) => {
-        this.ordenes = data || [];
-        this.loading = false;
-        this.cd.detectChanges();
-      },
-      error: (err: any) => {
-        console.error('[OrdenSeguimientoGeneralList] error loading data', err);
-        this.ordenes = [];
-        this.loading = false;
-        this.errorMessage = 'No se pudo cargar el seguimiento general.';
-        this.cd.detectChanges();
-      },
-    });
+    this.ordenSeguimientoService.getOrdenesSeguimientoGeneral(this.searchTerm, this.selectedStateFilter)
+      .subscribe({
+        next: (data) => {
+          this.ordenes = data || [];
+          this.loading = false;
+          this.cd.detectChanges();
+        },
+        error: (err: any) => {
+          console.error('[OrdenSeguimientoGeneralList] error', err);
+          this.ordenes = [];
+          this.loading = false;
+          this.errorMessage = 'No se pudo cargar el seguimiento general.';
+          this.cd.detectChanges();
+        }
+      });
+  }
+
+  // Called when user types or changes filter
+  onFilterChange() {
+    this.loadOrdenesGeneral();
+  }
+
+  clearFilters() {
+    this.searchTerm = '';
+    this.selectedStateFilter = '';
+    this.loadOrdenesGeneral();
   }
 
   getTiempoRestanteClass(tiempoRestante: string): string {

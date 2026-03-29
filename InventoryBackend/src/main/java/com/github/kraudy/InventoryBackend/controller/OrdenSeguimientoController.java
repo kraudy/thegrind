@@ -88,8 +88,10 @@ public class OrdenSeguimientoController {
 
   /* Retorna lista de ordenes de hoy con detalles en estados de seguimiento para vista de seguimiento general */
   @GetMapping("/general")
-  public List<OrdenSeguimientoEstadosGeneralDTO> getOrdenesPorEstadosSeguimiento() {
-    return ordenSeguimientoRepository.getOrdenesPorEstadosSeguimiento();
+  public List<OrdenSeguimientoEstadosGeneralDTO> getOrdenesSeguimientoGeneral(
+          @RequestParam(required = false) String search,
+          @RequestParam(required = false) String estadoOrden) {
+    return ordenSeguimientoRepository.getOrdenesPorEstadosSeguimiento(search, estadoOrden);
   }
 
   /* Retorna lista de ordenes de hoy con detalle en estados de espera de impresion */
