@@ -2,13 +2,17 @@ package com.github.kraudy.InventoryBackend.service;
 
 import com.github.kraudy.InventoryBackend.dto.OrdenDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenDetalleDTO;
-import com.lowagie.text.DocumentException;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.oned.Code128Writer;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.springframework.stereotype.Service;
-import org.xhtmlrenderer.pdf.ITextRenderer;
 
+import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -21,27 +25,83 @@ public class OrdenPdfService {
         <html>
         <head>
             <style>
-                @page { margin: 2cm; }
-                body { font-family: Arial, sans-serif; margin: 0; padding: 0; color: #222; line-height: 1.5; }
-                h1 { text-align: center; color: #1e3a8a; margin-bottom: 20px; font-size: 24px; }
-                .header { margin-bottom: 30px; }
-                .header p { margin: 4px 0; }
-                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-                th { background-color: #f8fafc; font-weight: bold; }
-                .total { text-align: right; font-size: 1.4em; font-weight: bold; margin-top: 30px; color: #1e3a8a; }
-                .footer { margin-top: 60px; text-align: center; font-size: 0.9em; color: #666; }
+                @page { margin: 2cm; size: A4; }
+                body { 
+                    font-family: Arial, sans-serif; 
+                    margin: 0; 
+                    padding: 0; 
+                    color: #222; 
+                    line-height: 1.6; 
+                }
+                h1 { 
+                    text-align: center; 
+                    color: #1e3a8a; 
+                    margin-bottom: 15px; 
+                    font-size: 32px; 
+                    font-weight: bold; 
+                }
+                
+                .header { 
+                    margin-bottom: 35px; 
+                    font-size: 16px; 
+                }
+                .header p { 
+                    margin: 6px 0; 
+                }
+                
+                table { 
+                    width: 100%; 
+                    border-collapse: collapse; 
+                    margin-top: 20px; 
+                }
+                th, td { 
+                    border: 1px solid #444; 
+                    padding: 10px; 
+                    text-align: left; 
+                }
+                th { 
+                    background-color: #f1f5f9; 
+                    font-weight: bold; 
+                }
+                
+                .total { 
+                    text-align: right; 
+                    font-size: 1.6em; 
+                    font-weight: bold; 
+                    margin: 35px 0 25px 0; 
+                    color: #1e3a8a; 
+                }
+                
+                .barcode-container { 
+                    text-align: center; 
+                    margin: 10px 0 35px 0; 
+                }
+                .barcode-container img { 
+                    max-width: 380px; 
+                    width: 100%; 
+                }
+                
+                .footer { 
+                    margin-top: 50px; 
+                    text-align: center; 
+                    font-size: 0.95em; 
+                    color: #666; 
+                }
             </style>
         </head>
         <body>
-            <h1>Orden de Trabajo #${id}</h1>
+            <h1>ORDEN DE TRABAJO #${id}</h1>
             
+            <!-- BARCODE - Directly below title -->
+            <div class="barcode-container">
+                <img src="data:image/png;base64,${barcode}" alt="Barcode"/>
+            </div>
+
             <div class="header">
                 <p><strong>Cliente:</strong> ${clienteNombre}</p>
-                <p><strong>Estado:</strong> ${estado}</p>
+                <p><strong>Creada por:</strong> ${creadaPor}</p>
                 <p><strong>Fecha de creación:</strong> ${fechaCreacion}</p>
                 <p><strong>Fecha de vencimiento:</strong> ${fechaVencimiento}</p>
-                <p><strong>Creada por:</strong> ${creadaPor}</p>
             </div>
 
             <table>
@@ -75,10 +135,12 @@ public class OrdenPdfService {
 
             String html = buildHtmlFromTemplate(orden, detalles);
 
-            ITextRenderer renderer = new ITextRenderer();
-            renderer.setDocumentFromString(html);
-            renderer.layout();
-            renderer.createPDF(baos);
+            PdfRendererBuilder builder = new PdfRendererBuilder()
+                    .withHtmlContent(html, null)
+                    .toStream(baos)
+                    .usePdfAConformance(PdfRendererBuilder.PdfAConformance.NONE);
+
+            builder.run();
 
             return baos.toByteArray();
 
@@ -87,9 +149,8 @@ public class OrdenPdfService {
         }
     }
 
-    private String buildHtmlFromTemplate(OrdenDTO orden, List<OrdenDetalleDTO> detalles) {
+    private String buildHtmlFromTemplate(OrdenDTO orden, List<OrdenDetalleDTO> detalles) throws Exception {
         StringBuilder rows = new StringBuilder();
-
         int linea = 1;
         for (OrdenDetalleDTO det : detalles) {
             rows.append(String.format("""
@@ -103,15 +164,26 @@ public class OrdenPdfService {
                 """, linea++, det.nombreProducto(), det.cantidad(), det.precioUnitario(), det.subtotal()));
         }
 
+        String barcodeBase64 = generateBarcodeBase64(String.valueOf(orden.id()));
+
         return PDF_TEMPLATE
                 .replace("${id}", String.valueOf(orden.id()))
                 .replace("${clienteNombre}", orden.clienteNombre() != null ? orden.clienteNombre() : "—")
-                .replace("${estado}", orden.estado() != null ? orden.estado() : "—")
+                .replace("${creadaPor}", orden.creadaPor() != null ? orden.creadaPor() : "—")
                 .replace("${fechaCreacion}", orden.fechaCreacion().format(DATE_FORMAT))
                 .replace("${fechaVencimiento}", orden.fechaVencimiento().format(DATE_FORMAT))
-                .replace("${creadaPor}", orden.creadaPor() != null ? orden.creadaPor() : "—")
                 .replace("${detalles}", rows.toString())
                 .replace("${totalMonto}", orden.totalMonto() != null ? orden.totalMonto().toString() : "0.00")
-                .replace("${fechaGeneracion}", java.time.LocalDateTime.now().format(DATE_FORMAT));
+                .replace("${fechaGeneracion}", java.time.LocalDateTime.now().format(DATE_FORMAT))
+                .replace("${barcode}", barcodeBase64);
+    }
+
+    private String generateBarcodeBase64(String text) throws Exception {
+        BitMatrix bitMatrix = new Code128Writer().encode(text, BarcodeFormat.CODE_128, 380, 90);
+        java.awt.image.BufferedImage image = MatrixToImageWriter.toBufferedImage(bitMatrix);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", baos);
+        return Base64.getEncoder().encodeToString(baos.toByteArray());
     }
 }
