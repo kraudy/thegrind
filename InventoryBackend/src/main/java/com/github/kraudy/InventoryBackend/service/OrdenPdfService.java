@@ -2,13 +2,12 @@ package com.github.kraudy.InventoryBackend.service;
 
 import com.github.kraudy.InventoryBackend.dto.OrdenDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenDetalleDTO;
-import com.lowagie.text.Document;
-import com.lowagie.text.html.simpleparser.HTMLWorker;
-import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.DocumentException;
 import org.springframework.stereotype.Service;
+import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import java.io.ByteArrayOutputStream;
-import java.io.StringReader;
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -22,14 +21,16 @@ public class OrdenPdfService {
         <html>
         <head>
             <style>
-                body { font-family: Arial, sans-serif; margin: 30px; color: #222; line-height: 1.5; }
-                h1 { text-align: center; color: #1e3a8a; margin-bottom: 10px; }
+                @page { margin: 2cm; }
+                body { font-family: Arial, sans-serif; margin: 0; padding: 0; color: #222; line-height: 1.5; }
+                h1 { text-align: center; color: #1e3a8a; margin-bottom: 20px; font-size: 24px; }
                 .header { margin-bottom: 30px; }
+                .header p { margin: 4px 0; }
                 table { width: 100%; border-collapse: collapse; margin-top: 20px; }
                 th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
                 th { background-color: #f8fafc; font-weight: bold; }
-                .total { text-align: right; font-size: 1.3em; font-weight: bold; margin-top: 20px; color: #1e3a8a; }
-                .footer { margin-top: 50px; text-align: center; font-size: 0.9em; color: #666; }
+                .total { text-align: right; font-size: 1.4em; font-weight: bold; margin-top: 30px; color: #1e3a8a; }
+                .footer { margin-top: 60px; text-align: center; font-size: 0.9em; color: #666; }
             </style>
         </head>
         <body>
@@ -59,7 +60,7 @@ public class OrdenPdfService {
             </table>
 
             <div class="total">
-                TOTAL: $${totalMonto}
+                TOTAL: C$${totalMonto}
             </div>
 
             <div class="footer">
@@ -72,16 +73,13 @@ public class OrdenPdfService {
     public byte[] generateOrdenPdf(OrdenDTO orden, List<OrdenDetalleDTO> detalles) {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 
-            Document document = new Document();
-            PdfWriter.getInstance(document, baos);
-            document.open();
-
             String html = buildHtmlFromTemplate(orden, detalles);
 
-            HTMLWorker htmlWorker = new HTMLWorker(document);
-            htmlWorker.parse(new StringReader(html));
+            ITextRenderer renderer = new ITextRenderer();
+            renderer.setDocumentFromString(html);
+            renderer.layout();
+            renderer.createPDF(baos);
 
-            document.close();
             return baos.toByteArray();
 
         } catch (Exception e) {
