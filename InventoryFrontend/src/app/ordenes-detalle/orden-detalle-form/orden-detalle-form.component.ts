@@ -46,7 +46,6 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     subtotal: 0
   };
 
-  // Búsqueda de productos (ahora con backend + debounce)
   searchProducto: string = '';
   productosFiltrados: Producto[] = [];
   private searchTerms = new Subject<string>();

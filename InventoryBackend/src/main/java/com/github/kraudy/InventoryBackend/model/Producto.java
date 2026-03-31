@@ -29,6 +29,12 @@ public class Producto {
   @Column(nullable = false, columnDefinition = "VARCHAR(25)")
   private String subTipoProducto;
 
+  @Column(nullable = false, columnDefinition = "VARCHAR(25)")
+  private String medidaProducto;
+
+  @Column(nullable = false, columnDefinition = "VARCHAR(25)")
+  private String modeloProducto;
+
   @Column(nullable = false, columnDefinition = "VARCHAR(100)")
   private String nombre;
 
@@ -65,4 +71,14 @@ public class Producto {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "subTipoProducto", referencedColumnName = "subTipo", nullable = false, insertable = false, updatable = false)
   private ProductoSubTipo productoSubTipo;
+
+  @JsonIgnore
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "medidaProducto", referencedColumnName = "medida", nullable = false, insertable = false, updatable = false)
+  private ProductoMedida productoMedida;
+
+  @JsonIgnore
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "modeloProducto", referencedColumnName = "modelo", nullable = false, insertable = false, updatable = false)
+  private ProductoModelo productoModelo;
 }

@@ -1,0 +1,38 @@
+package com.github.kraudy.InventoryBackend.model;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Entity
+@Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)  // good practice for natural keys
+@Table(name = "ProductoModelo") 
+public class ProductoModelo {
+  @Id
+  @EqualsAndHashCode.Include
+  @Column(nullable = false, columnDefinition = "VARCHAR(25)")
+  private String modelo;
+
+  //TODO: Agregar campo de codigo que se usara despues para formar el id del producto
+  @Column(nullable = false, columnDefinition = "VARCHAR(255)")
+  private String descripcion;
+
+  @CreationTimestamp  
+  @Column(updatable = false, nullable = false, columnDefinition = "TIMESTAMP")
+  private LocalDateTime fechaCreacion;
+ 
+  @UpdateTimestamp
+  @Column(nullable = false, columnDefinition = "TIMESTAMP")
+  private LocalDateTime fechaModificacion;
+
+}
