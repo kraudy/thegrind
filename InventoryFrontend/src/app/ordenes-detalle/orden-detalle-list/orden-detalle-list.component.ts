@@ -11,6 +11,7 @@ import { OrdenDetalle } from '../orden-detalle.model';
 import { Orden } from '../../ordenes/orden.model';
 import { OrdenService } from '../../ordenes/orden.service';
 
+import { OrdenPagoService } from '../../ordenes-pago/orden-pago.service'; 
 import { OrdenPago } from '../../ordenes-pago/orden-pago.model';
 
 @Component({
@@ -39,7 +40,8 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
 
   constructor(
       private ordenDetalleService: OrdenDetalleService,
-      private ordenService: OrdenService,      // ← Nuevo
+      private ordenPagoService: OrdenPagoService,
+      private ordenService: OrdenService,
       private route: ActivatedRoute,
       private router: Router,
       private cd: ChangeDetectorRef
@@ -116,7 +118,7 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
     });
 
     // 2. NEW: Load payments for this order
-    this.ordenDetalleService.getPagosByOrden(this.orden.id).subscribe({
+    this.ordenPagoService.getPagosByOrden(this.orden.id).subscribe({
       next: (pagos) => {
         this.pagos = pagos || [];
         console.log('[OrdenDetalleList] loaded payments:', this.pagos.length);
@@ -138,7 +140,7 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
   registrarAdelanto() {
     if (!this.orden?.id || this.nuevoPago.monto <= 0) return;
 
-    this.ordenDetalleService.registrarPago(this.orden.id, this.nuevoPago).subscribe({
+    this.ordenPagoService.registrarPago(this.orden.id, this.nuevoPago).subscribe({
       next: () => {
         this.showRegistrarAdelantoModal = false;
         this.loadOrdenesDetalles(); // refresh payments
