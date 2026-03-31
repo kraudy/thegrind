@@ -25,8 +25,11 @@ public class Orden {
   @Column(name = "id_cliente", updatable = false, nullable = false)
   private Long idCliente;
 
-  @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
+  @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(50)")
   private String creadaPor;
+
+  @Column(columnDefinition = "VARCHAR(50)")
+  private String modificadaPor;
 
   @Column(nullable = false, columnDefinition = "NUMERIC(12,4)")
   private BigDecimal totalMonto = BigDecimal.ZERO;

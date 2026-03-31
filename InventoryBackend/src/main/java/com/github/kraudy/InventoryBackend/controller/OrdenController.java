@@ -8,6 +8,7 @@ import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -41,30 +42,24 @@ public class OrdenController {
 
   @PostMapping
   public Orden create(@RequestBody Orden orden) {
-    setClienteFromIdCliente(orden); // ← resolve cliente
+    String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+    orden.setCreadaPor(currentUser);
+    
     return ordenRepository.save(orden);
   }
 
   @PutMapping("/{id}")
   public Orden update(@PathVariable Long id, @RequestBody Orden orden) {
+    String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
     orden.setId(id);
-    setClienteFromIdCliente(orden); // ← resolve cliente (in case it changed)
+    orden.setModificadaPor(currentUser);
+    
     return ordenRepository.save(orden);
   }
 
   @DeleteMapping("/{id}")
   public void delete(@PathVariable Long id) {
     ordenRepository.deleteById(id);
-  }
-
-  private void setClienteFromIdCliente(Orden orden) {
-    if (orden.getIdCliente() == null || orden.getIdCliente() <= 0) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "idCliente is required and must be > 0");
-    }
-    Cliente cliente = clienteRepository.findById(orden.getIdCliente())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente with id " + orden.getIdCliente() + " not found"));
-        
-    orden.setCliente(cliente);
   }
 
 }

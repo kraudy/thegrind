@@ -44,12 +44,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
 
   formOrden: Partial<Orden> = { 
     idCliente: 0,
-    creadaPor: '',
-    totalMonto: 0,
-    totalProductos: 0,
-    fechaVencimiento: null,
-    fechaPreparada: null,
-    fechaDespachada: null
+    fechaVencimiento: null
   };
 
   // Get minimum date for fechaVencimiento (current date/time)
@@ -147,12 +142,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
   resetForm(): void {
     this.formOrden = {
       idCliente: 0,
-      creadaPor: '',
-      totalMonto: 0,
-      totalProductos: 0,
-      fechaVencimiento: null,
-      fechaPreparada: null,
-      fechaDespachada: null
+      fechaVencimiento: null
     };
 
     // Reset autocomplete state
@@ -190,12 +180,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
   onSubmit(): void {
     const payload: Partial<Orden> = {
       idCliente: this.formOrden.idCliente,
-      creadaPor: this.formOrden.creadaPor ?? '',
-      totalMonto: this.formOrden.totalMonto ?? 0,
-      totalProductos: this.formOrden.totalProductos ?? 0,
-      fechaVencimiento: this.formOrden.fechaVencimiento,
-      fechaPreparada: this.formOrden.fechaPreparada ?? null,
-      fechaDespachada: this.formOrden.fechaDespachada ?? null
+      fechaVencimiento: this.formOrden.fechaVencimiento
     };
 
     if (this.isEdit && this.formOrden.id) {
