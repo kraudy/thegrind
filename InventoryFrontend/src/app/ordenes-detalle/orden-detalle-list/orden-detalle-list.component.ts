@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -14,6 +14,10 @@ import { OrdenService } from '../../ordenes/orden.service';
 import { OrdenPagoService } from '../../ordenes-pago/orden-pago.service'; 
 import { OrdenPago } from '../../ordenes-pago/orden-pago.model';
 
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { NotificationService } from '../../shared/notification.service';
+
 @Component({
   selector: 'app-orden-detalle-list',
   standalone: true,
@@ -21,7 +25,7 @@ import { OrdenPago } from '../../ordenes-pago/orden-pago.model';
   templateUrl: './orden-detalle-list.html',
   styleUrls: ['./orden-detalle-list.css'],
 })
-export class OrdenDetalleListComponent implements OnInit, OnChanges {
+export class OrdenDetalleListComponent implements OnInit, OnChanges, OnDestroy {
   @Input() orden?: Orden;
   ordenDetalles: OrdenDetalle[] = [];
 
@@ -38,9 +42,13 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
     notas: ''
   };
 
+  // Real-time WebSocket support
+  private destroy$ = new Subject<void>();
+
   constructor(
       private ordenDetalleService: OrdenDetalleService,
       private ordenPagoService: OrdenPagoService,
+      private notificationService: NotificationService,
       private ordenService: OrdenService,
       private route: ActivatedRoute,
       private router: Router,
@@ -48,6 +56,19 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnInit(): void {
+    this.notificationService.connect();
+
+    this.notificationService.refreshNeeded$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(view => {
+        if (view === 'pago') {           // ← triggered when any pago is approved/rejected/created elsewhere
+          console.log('🔄 Refresh triggered by WebSocket (pagos) in OrdenDetalleListComponent');
+          if (this.orden?.id) {
+            this.loadPagos();
+          }
+        }
+      });
+
     if (!this.orden) {
       this.loadOrdenFromRoute();
     } else {
@@ -56,10 +77,14 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    // Soporte para cuando se pasa [orden] como input (ej: en una vista padre)
     if (changes['orden'] && this.orden?.id) {
       this.loadOrdenesDetalles();
     }
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private loadOrdenFromRoute(): void {
@@ -93,18 +118,18 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
   loadOrdenesDetalles(): void {
     if (!this.orden?.id) {
       this.ordenDetalles = [];
-      this.pagos = [];           // ← clear payments too
+      this.pagos = [];
       return;
     }
-    // It must receive the order as input and load only the details for that order
+
+    // Load order details
     this.ordenDetalleService.getByOrden(this.orden.id).subscribe({
       next: (data) => {
         this.ordenDetalles = data || [];
         console.log('[OrdenDetalleList] loaded ordenes detalles:', this.ordenDetalles.length, this.ordenDetalles);
-        this.cd.detectChanges(); // force view update if zone isn't triggering it
+        this.cd.detectChanges();
       },
       error: (err) => {
-        // log full error to inspect status/code in the console
         console.error('[OrdenDetalleList] failed to load ordenes detalles', err);
         this.ordenDetalles = [];
         if (err?.status === 0) {
@@ -117,11 +142,21 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
       }
     });
 
-    // 2. NEW: Load payments for this order
+    // Load payments (now extracted so we can refresh ONLY payments in real-time)
+    this.loadPagos();
+  }
+
+  // NEW: Dedicated method to reload only payments (used by real-time + manual actions)
+  private loadPagos(): void {
+    if (!this.orden?.id) {
+      this.pagos = [];
+      return;
+    }
+
     this.ordenPagoService.getPagosByOrden(this.orden.id).subscribe({
       next: (pagos) => {
         this.pagos = pagos || [];
-        console.log('[OrdenDetalleList] loaded payments:', this.pagos.length);
+        console.log('[OrdenDetalleList] loaded payments (real-time):', this.pagos.length);
         this.cd.detectChanges();
       },
       error: (err) => {
@@ -129,7 +164,6 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
         this.pagos = [];
       }
     });
-
   }
 
   openRegistrarAdelantoModal() {
@@ -143,7 +177,7 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
     this.ordenPagoService.registrarPago(this.orden.id, this.nuevoPago).subscribe({
       next: () => {
         this.showRegistrarAdelantoModal = false;
-        this.loadOrdenesDetalles(); // refresh payments
+        this.loadOrdenesDetalles(); // full refresh (keeps existing behavior)
       },
       error: (err) => {
         console.error('Error registrando adelanto', err);
@@ -151,7 +185,6 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
       }
     });
   }
-
 
   downloadPdf(): void {
     if (!this.orden?.id) return;
