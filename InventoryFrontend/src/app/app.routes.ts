@@ -38,6 +38,7 @@ import { ProductoPrecioListComponent } from './productos-precios/producto-precio
 import { ProductoPrecioFormComponent } from './productos-precios/producto-precio-form/producto-precio-form.component';
 import { OrdenSeguimientoImpresionDetalleListComponent } from './ordenes-seguimiento/orden-seguimiento-impresion-detalle-list/orden-seguimiento-impresion-detalle-list.component';
 import { OrdenSeguimientoGeneralListComponent } from './ordenes-seguimiento/orden-seguimiento-general-list/orden-seguimiento-general-list.component';
+import { OrdenPagoAprobarListComponent } from './ordenes-pago/orden-pago-aprobar-list.component';
 
 export const routes: Routes = [
   //{ path: '', component: HomeComponent }, 
@@ -69,6 +70,10 @@ export const routes: Routes = [
   { path: 'ordenes-calendario/:fecha/new', component: OrdenCalendarioFormComponent },
   //{ path: 'ordenes-calendario/:ordenId/new', component: OrdenCalendarioFormComponent },
   //{ path: 'ordenes-calendario/:ordenId/edit', component: OrdenCalendarioFormComponent },
+
+  /* Pago de ordenes */
+
+  { path: 'ordenes-pago/aprobar', component: OrdenPagoAprobarListComponent },
 
   /* Seguimiento de ordenes */
 

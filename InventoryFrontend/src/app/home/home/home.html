@@ -167,6 +167,17 @@
         </a>
       </div>
 
+      <!-- Aprobar Adelantos - ADMIN ONLY -->
+      <div *ngIf="hasAccess('admin')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+        <div class="text-5xl mb-4">💰</div>
+        <h2 class="text-2xl font-bold text-gray-900 mb-3">Aprobar Adelantos</h2>
+        <p class="text-gray-600 mb-6">Revisa y aprueba los pagos / adelantos pendientes de los clientes</p>
+        <a routerLink="/ordenes-pago/aprobar"
+          class="inline-flex items-center px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl shadow-lg transition">
+          Ver Adelantos Pendientes
+        </a>
+      </div>
+
     </div>
   </div>
 </div>

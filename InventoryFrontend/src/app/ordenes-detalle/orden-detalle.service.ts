@@ -22,10 +22,20 @@ export class OrdenDetalleService {
   }
 
   getPdf(idOrden: number): Observable<Blob> {
-  return this.http.get(`${this.apiUrl}/${idOrden}/pdf`, { 
-    responseType: 'blob' 
-  });
-}
+    return this.http.get(`${this.apiUrl}/${idOrden}/pdf`, { 
+      responseType: 'blob' 
+    });
+  }
+
+  // NEW: Get payments for a specific order
+  getPagosByOrden(idOrden: number): Observable<any[]> {
+    return this.http.get<any[]>(`/api/ordenes-pago/por-orden/${idOrden}`);
+  }
+
+  // NEW: Register a new advance payment
+  registrarPago(idOrden: number, pago: any): Observable<any> {
+    return this.http.post(`/api/ordenes-pago/${idOrden}`, pago);
+  }
 
   // Obtener un detalle específico por clave compuesta
   getById(idOrden: number, idOrdenDetalle: number): Observable<OrdenDetalle> {

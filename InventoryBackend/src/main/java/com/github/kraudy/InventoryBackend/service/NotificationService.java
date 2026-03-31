@@ -25,5 +25,7 @@ public class NotificationService {
         messagingTemplate.convertAndSend("/topic/ordenes-trabajo", "REFRESH");
     }
 
-    // You can add more specific ones later (e.g. by order ID)
+    public void notifyOrdenesPagoChanged() {
+        messagingTemplate.convertAndSend("/topic/ordenes-pago", "REFRESH");
+    }
 }

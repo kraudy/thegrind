@@ -36,6 +36,11 @@ export class NotificationService {
       this.stompClient!.subscribe('/topic/ordenes-trabajo', () => {
         this.refreshSubject.next('trabajo');
       });
+
+      this.stompClient!.subscribe('/topic/ordenes-pago', () => {
+        console.log('🔴 Ordenes Pago changed → notifying subscribers');
+        this.refreshSubject.next('pago');
+      });
     };
 
     this.stompClient.activate();

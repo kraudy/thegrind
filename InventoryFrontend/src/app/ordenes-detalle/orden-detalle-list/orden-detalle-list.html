@@ -121,6 +121,58 @@
       </div>
     </div>
 
+    <!-- ==================== Adelantos/Pagos ==================== -->
+    <div class="bg-white shadow-xl rounded-xl overflow-hidden mb-8" *ngIf="orden">
+      <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
+        <h2 class="text-lg font-semibold text-gray-800">Adelantos / Pagos</h2>
+        <button (click)="openRegistrarAdelantoModal()"
+                class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg">
+          + Registrar Adelanto
+        </button>
+      </div>
+
+      <div class="p-6">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Fecha</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Monto</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Método</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Referencia</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Banco</th>          <!-- ← NEW -->
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Estado</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Notas</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <tr *ngFor="let pago of pagos">
+              <td class="px-4 py-3 text-sm">{{ pago.fechaPago | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="px-4 py-3 text-sm font-medium">C$ {{ pago.monto | number:'1.2-2' }}</td>
+              <td class="px-4 py-3 text-sm">{{ pago.metodoPago }}</td>
+              <td class="px-4 py-3 text-sm">{{ pago.codigoReferencia || '-' }}</td>
+              <td class="px-4 py-3 text-sm">{{ pago.banco || '-' }}</td>                    <!-- ← NEW -->
+              <td class="px-4 py-3 text-sm">
+                <span class="px-3 py-1 text-xs rounded-full"
+                      [ngClass]="{
+                        'bg-yellow-100 text-yellow-800': pago.estado === 'Pendiente',
+                        'bg-green-100 text-green-800': pago.estado === 'Aprobado'
+                      }">
+                  {{ pago.estado }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-sm text-gray-600">{{ pago.notas || '-' }}</td>
+            </tr>
+            <tr *ngIf="pagos.length === 0">
+              <td colspan="7" class="px-4 py-8 text-center text-gray-500">   <!-- changed to 7 columns -->
+                No hay adelantos registrados para esta orden
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
     <!-- Descargar PDF - Bottom Right Corner -->
     <div class="flex justify-end p-6 border-t bg-gray-50" *ngIf="orden">
       <button (click)="downloadPdf()"
@@ -132,4 +184,57 @@
       </button>
     </div>
   </div>
+
+  <!-- Modal Registrar Adelanto -->
+  <div *ngIf="showRegistrarAdelantoModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
+      <div class="p-6">
+        <h3 class="text-xl font-semibold mb-4">Registrar Adelanto</h3>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Monto (C$)</label>
+            <input type="number" [(ngModel)]="nuevoPago.monto" class="w-full px-4 py-3 border rounded-xl" placeholder="0.00">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Método de pago</label>
+            <select [(ngModel)]="nuevoPago.metodoPago" class="w-full px-4 py-3 border rounded-xl">
+              <option value="Efectivo">Efectivo</option>
+              <option value="Transferencia">Transferencia</option>
+            </select>
+          </div>
+
+          <!-- Código de referencia -->
+          <div *ngIf="nuevoPago.metodoPago === 'Transferencia'">
+            <label class="block text-sm font-medium mb-1">Código de referencia</label>
+            <input type="text" [(ngModel)]="nuevoPago.codigoReferencia" class="w-full px-4 py-3 border rounded-xl" placeholder="Número de transferencia">
+          </div>
+
+          <!-- Banco (only for Transferencia) -->
+          <div *ngIf="nuevoPago.metodoPago === 'Transferencia'">
+            <label class="block text-sm font-medium mb-1">Banco</label>
+            <select [(ngModel)]="nuevoPago.banco" class="w-full px-4 py-3 border rounded-xl">
+              <option value="">Seleccione banco...</option>
+              <option value="Bac">Bac</option>
+              <option value="Lafise">Lafise</option>
+              <option value="Banpro">Banpro</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Notas (opcional)</label>
+            <textarea [(ngModel)]="nuevoPago.notas" rows="3" class="w-full px-4 py-3 border rounded-xl"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex border-t">
+        <button (click)="showRegistrarAdelantoModal = false" class="flex-1 py-4 text-gray-600 font-medium">Cancelar</button>
+        <button (click)="registrarAdelanto()" class="flex-1 py-4 bg-emerald-600 text-white font-medium rounded-br-2xl">Registrar Adelanto</button>
+      </div>
+    </div>
+  </div>
+
 </div>

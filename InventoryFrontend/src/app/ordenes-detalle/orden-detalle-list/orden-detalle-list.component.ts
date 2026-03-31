@@ -3,6 +3,7 @@ import { ChangeDetectorRef } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms'; 
 
 import { OrdenDetalleService } from '../orden-detalle.service';
 import { OrdenDetalle } from '../orden-detalle.model';
@@ -10,16 +11,31 @@ import { OrdenDetalle } from '../orden-detalle.model';
 import { Orden } from '../../ordenes/orden.model';
 import { OrdenService } from '../../ordenes/orden.service';
 
+import { OrdenPago } from '../../ordenes-pago/orden-pago.model';
+
 @Component({
   selector: 'app-orden-detalle-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './orden-detalle-list.html',
   styleUrls: ['./orden-detalle-list.css'],
 })
 export class OrdenDetalleListComponent implements OnInit, OnChanges {
   @Input() orden?: Orden;
   ordenDetalles: OrdenDetalle[] = [];
+
+  // Adelantos / Pagos
+  pagos: OrdenPago[] = [];                    // will hold OrdenPago data
+  showRegistrarAdelantoModal = false;
+
+  // Form for new payment
+  nuevoPago = {
+    monto: 0,
+    metodoPago: 'Efectivo',
+    codigoReferencia: '',
+    banco: '',
+    notas: ''
+  };
 
   constructor(
       private ordenDetalleService: OrdenDetalleService,
@@ -75,6 +91,7 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
   loadOrdenesDetalles(): void {
     if (!this.orden?.id) {
       this.ordenDetalles = [];
+      this.pagos = [];           // ← clear payments too
       return;
     }
     // It must receive the order as input and load only the details for that order
@@ -97,7 +114,42 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges {
         }
       }
     });
+
+    // 2. NEW: Load payments for this order
+    this.ordenDetalleService.getPagosByOrden(this.orden.id).subscribe({
+      next: (pagos) => {
+        this.pagos = pagos || [];
+        console.log('[OrdenDetalleList] loaded payments:', this.pagos.length);
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        console.error('[OrdenDetalleList] failed to load pagos', err);
+        this.pagos = [];
+      }
+    });
+
   }
+
+  openRegistrarAdelantoModal() {
+    this.nuevoPago = { monto: 0, metodoPago: 'Efectivo', codigoReferencia: '', banco: '', notas: '' };
+    this.showRegistrarAdelantoModal = true;
+  }
+
+  registrarAdelanto() {
+    if (!this.orden?.id || this.nuevoPago.monto <= 0) return;
+
+    this.ordenDetalleService.registrarPago(this.orden.id, this.nuevoPago).subscribe({
+      next: () => {
+        this.showRegistrarAdelantoModal = false;
+        this.loadOrdenesDetalles(); // refresh payments
+      },
+      error: (err) => {
+        console.error('Error registrando adelanto', err);
+        alert('No se pudo registrar el adelanto');
+      }
+    });
+  }
+
 
   downloadPdf(): void {
     if (!this.orden?.id) return;
