@@ -51,9 +51,9 @@ psql -h localhost -U inventoryuser -d inventorydb -W # tcp
 
 Simple database
 ```sql
-CREATE DATABASE inventorydb
-CREATE USER inventoryuser WITH PASSWORD 'pass'
-GRANT ALL PRIVILEGES ON DATABASE inventorydb TO inventoryuser
+CREATE DATABASE inventorydb;
+CREATE USER inventoryuser WITH PASSWORD 'pass';
+GRANT ALL PRIVILEGES ON DATABASE inventorydb TO inventoryuser;
 
 \l  -- List databases
 \q
@@ -63,7 +63,8 @@ GRANT ALL PRIVILEGES ON DATABASE inventorydb TO inventoryuser
 \e  -- Select editor
 \d table -- show colums, keys and indexs
 
-ALTER TABLE orden_seguimiento_historico DROP CONSTRAINT orden_seguimiento_historico_pkey;
+-- Delete database
+DROP DATABASE inventorydb;
 ```
 
 Creat db user
@@ -198,6 +199,11 @@ sudo nginx -t  # Test config
 sudo systemctl restart nginx # start nginx proc
 
 # access front-end at http://localhost
+```
+
+DB backup
+```bash
+pg_dump -U postgres -d inventorydb --schema=public > backup_2026-03-31.sql
 ```
 
 Start both

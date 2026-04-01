@@ -32,10 +32,10 @@ public class OrdenSeguimientoHistorico {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "id_orden")
+  @Column(nullable = false, name = "id_orden")
   private Long idOrden;
 
-  @Column(name = "id_orden_detalle")
+  @Column(nullable = false, name = "id_orden_detalle")
   private Long idOrdenDetalle;
 
   @Column(name = "estado", nullable = false, length = 100)

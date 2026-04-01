@@ -15,12 +15,21 @@ spring:
     
   jpa:
     hibernate:
-      ddl-auto: update # Creates/updates tables automatically
+      ddl-auto: validate  # Validates the schema, makes sure it matches the entities
+      #ddl-auto: update # Creates/updates tables automatically
       #ddl-auto: create-drop # Drops and rebuild the database schema on startup and shutdown (useful for testing)
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+  
+  # Flyway configuration
+  flyway:
+    enabled: true
+    # Estos permiten correr flyway sin hacer cambios a la base de datos
+    #baseline-on-migrate: true   # uncomment only if you already have data in the DB
+    #baseline-version: 3
+    #baseline-description: "Schema created by JPA + manual data (V1+V2+V3 already applied)"
 
 jwt:
   secret: superSecretKeyForInventoryApp2026MakeItAtLeast256BitsLongForHS512

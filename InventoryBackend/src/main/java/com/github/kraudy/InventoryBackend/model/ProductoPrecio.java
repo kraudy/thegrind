@@ -7,7 +7,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -27,7 +26,7 @@ public class ProductoPrecio {
   @Column(nullable = false, columnDefinition = "VARCHAR(255)")
   private String descripcion;
 
-  @Column(columnDefinition = "INTEGER")
+  @Column(nullable = false, columnDefinition = "INTEGER")
   private int cantidadRequerida = 0;
 
   @CreationTimestamp  

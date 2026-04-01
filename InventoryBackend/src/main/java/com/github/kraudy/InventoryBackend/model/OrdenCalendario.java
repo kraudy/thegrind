@@ -45,8 +45,11 @@ public class OrdenCalendario {
   @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
   private String usuarioModificacion;
 
+  // Relaciones
+
   @JsonIgnore
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id", nullable = false)
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "idOrden", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
   private Orden orden;
+
 }

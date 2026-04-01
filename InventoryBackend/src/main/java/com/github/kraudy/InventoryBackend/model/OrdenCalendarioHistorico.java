@@ -16,6 +16,7 @@ public class OrdenCalendarioHistorico {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private Long idOrden;                    // original order id
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP")

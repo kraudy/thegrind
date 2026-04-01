@@ -29,7 +29,7 @@ public class OrdenDetalle {
   @Column(name = "id_orden_detalle", nullable = false)
   private Long idOrdenDetalle;
 
-  @Column(name = "id_producto", insertable = false, updatable = false)
+  @Column(name = "id_producto", nullable = false, insertable = false, updatable = false)
   private Long idProducto;
 
   @Column(nullable = false, columnDefinition = "INTEGER")

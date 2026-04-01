@@ -43,7 +43,7 @@ public class OrdenTrabajo {
   @Column(nullable = false, columnDefinition = "VARCHAR(30)")
   private String rol;
 
-  @Column(nullable = false, columnDefinition = "INTEGER")
+  @Column(nullable = false)
   private Long idProducto; //TODO: Add FK to producto
 
   @Column(nullable = false, columnDefinition = "INTEGER")
