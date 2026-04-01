@@ -5,8 +5,9 @@ FROM node:20-alpine AS frontend-build
 
 WORKDIR /app/frontend
 COPY InventoryFrontend/package*.json ./
-RUN npm ci --omit=dev
-#RUN npm ci
+#RUN npm ci --omit=dev
+# install all deps
+RUN npm ci
 COPY InventoryFrontend/ ./
 RUN npm run build -- --configuration=production
 #RUN npm run build
