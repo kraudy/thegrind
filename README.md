@@ -264,6 +264,7 @@ Docker stuff
 docker compose ps
 
 # 2. Check backend logs (watch it start)
+# Este me sirve para los logs del backend
 docker compose logs -f backend --tail 100
 
 # 3. Check DB logs (optional)
@@ -303,6 +304,93 @@ docker compose down -v --remove-orphans
 
 docker compose build --no-cache
 docker compose up -d
+
+```
+
+## Set up unbuntu server 
+
+```bash
+# OS
+Ubuntu Server 24.04 LTS (Noble Numbat)
+
+# Rufus
+Device → Select your USB drive (double-check the size/name!)
+Boot selection → Click SELECT → choose the file ubuntu-24.04.4-live-server-amd64.iso
+Partition scheme → GPT (best for modern servers)
+Target system → UEFI (non CSM) ← very important
+Leave File system and all other options at default
+
+# Update the system
+sudo apt update && sudo apt upgrade -y
+sudo apt install curl git -y
+
+# Install Docker + Docker Compose 
+# 1. Add Docker's official GPG key
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# 2. Add the Docker repository
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# 3. Install Docker Engine + Compose plugin
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
+# 4. Start and enable Docker
+sudo systemctl enable --now docker
+
+# 5. Add your user to the docker group (so you don't need sudo every time)
+sudo usermod -aG docker $USER
+
+# Log out and log back in (or run `newgrp docker`) so the group change takes effect
+
+# verify
+docker --version
+docker compose version
+
+
+# firewall
+sudo apt install ufw -y
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh          # or your SSH port if you changed it
+sudo ufw allow 8080/tcp     # your app
+sudo ufw --force enable
+sudo ufw status
+
+# clone repo
+git clone https://github.com/kraudy/thegrind.git
+cd thegrind
+
+# First run (will take a few minutes the very first time)
+docker compose up -d --build
+
+# After that, normal start is just:
+# docker compose up -d
+
+# check
+docker compose ps
+docker compose logs backend --tail 50
+
+# See logs easily
+alias logs='docker compose logs -f backend'
+
+# Check container health
+watch -n 5 'docker compose ps'
+
+# db backups
+cat > ~/backup-db.sh << 'EOF'
+#!/bin/bash
+docker compose exec -T db pg_dump -U inventoryuser inventorydb > /backups/inventorydb_$(date +%F).sql
+echo "Backup done: /backups/inventorydb_$(date +%F).sql"
+EOF
+chmod +x ~/backup-db.sh
+mkdir -p ~/backups
 
 ```
 

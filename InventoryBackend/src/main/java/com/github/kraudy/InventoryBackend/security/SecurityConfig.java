@@ -53,8 +53,8 @@ public class SecurityConfig {
                                 "/**/*.jpg",
                                 "/**/*.svg").permitAll()
 
-                //.anyRequest().authenticated()                    // Everything else requires valid JWT
-                .anyRequest().permitAll()                    
+                .anyRequest().authenticated()                    // Everything else requires valid JWT
+                //.anyRequest().permitAll()                    
             )
 
             // Add our JWT filter BEFORE Spring's default auth filter
