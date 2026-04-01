@@ -42,8 +42,19 @@ public class SecurityConfig {
 
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                .anyRequest().authenticated()                    // Everything else requires valid JWT
-                //.anyRequest().permitAll()                    
+                // static Angular files
+                .requestMatchers("/",
+                                "/index.html",
+                                "/assets/**",
+                                "/**/*.js",
+                                "/**/*.css",
+                                "/**/*.ico",
+                                "/**/*.png",
+                                "/**/*.jpg",
+                                "/**/*.svg").permitAll()
+
+                //.anyRequest().authenticated()                    // Everything else requires valid JWT
+                .anyRequest().permitAll()                    
             )
 
             // Add our JWT filter BEFORE Spring's default auth filter
@@ -71,7 +82,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+        configuration.setAllowedOrigins(List.of(
+          "http://localhost:4200",   // dev server
+          "http://localhost:8080",   // production (Docker)
+          "http://127.0.0.1:8080"    // also common
+        ));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

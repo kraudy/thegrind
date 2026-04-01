@@ -206,6 +206,106 @@ DB backup
 pg_dump -U postgres -d inventorydb --schema=public > backup_2026-03-31.sql
 ```
 
+The real thing
+```bash
+# Clone your repo
+git clone https://github.com/kraudy/thegrind.git
+cd thegrind
+
+# install sht
+sudo apt update
+sudo apt upgrade -y
+sudo apt install ca-certificates curl gnupg lsb-release -y
+
+# 2. Add Docker's official GPG key
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# 3. Add the Docker repository
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+"
+
+# 4. Update apt again and install Docker + Compose plugin
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
+# 5 Start and enable Docker
+sudo systemctl enable --now docker
+
+# Add your user to the docker group (so you don't need sudo every time): 
+sudo usermod -aG docker $USER
+
+# Verify everything
+docker --version
+docker compose version
+
+# Build and run sht
+docker compose up -d --build
+
+# FE sht
+cd InventoryFrontend
+npm ci --omit=dev          # This install dependencies
+npm ci                     # This install dependencies
+ng build --configuration production
+ng build --proxy-config proxy.conf.json
+ng build
+```
+
+Docker stuff
+```bash
+# check sht
+
+# 1. See status of both containers
+docker compose ps
+
+# 2. Check backend logs (watch it start)
+docker compose logs -f backend --tail 100
+
+# 3. Check DB logs (optional)
+docker compose logs db
+
+# ====================
+# stop sht
+
+# Stop old containers
+docker compose down
+
+# Build with the new advanced Dockerfile (this will take 2-4 minutes the first time)
+docker compose up -d --build
+
+# ========================
+# postgress sht
+
+sudo lsof -i :5432
+sudo lsof -i :8080
+sudo kill xxxx
+
+# ========================
+# fix some network sht
+
+# show logs btch
+docker compose logs backend --tail 100
+
+# =====================
+
+# reset and rebuild
+
+# Clean everything (volumes + network + orphans)
+docker compose down -v --remove-orphans
+
+# Rebuild and start fresh
+# docker compose up -d --build
+
+docker compose build --no-cache
+docker compose up -d
+
+```
+
 Start both
 ```bash
 # Backend
