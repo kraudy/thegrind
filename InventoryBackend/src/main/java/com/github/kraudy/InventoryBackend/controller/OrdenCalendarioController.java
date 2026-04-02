@@ -22,6 +22,7 @@ import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoTipoEstadoRepository;
+import com.github.kraudy.InventoryBackend.service.OrdenCalendarioService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -49,6 +50,9 @@ public class OrdenCalendarioController {
 
   @Autowired
   private ProductoTipoEstadoRepository productoTipoEstadoRepository;
+
+  @Autowired
+  private OrdenCalendarioService ordenCalendarioService;
   
   
   @GetMapping
@@ -90,49 +94,7 @@ public class OrdenCalendarioController {
 
   @PostMapping
   public OrdenCalendario create(@RequestBody OrdenCalendario ordenCalendario) {
-    
-    if (ordenCalendario.getIdOrden() == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "idOrden es obligatorio");
-    }
-
-    // Cargamos la entidad Orden real
-    Orden orden = ordenRepository.findById(ordenCalendario.getIdOrden())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
-            "Orden con id " + ordenCalendario.getIdOrden() + " no encontrada"));
-
-    ordenCalendario.setOrden(orden);
-    ordenCalendario.setFecha(ordenCalendario.getFechaTrabajo().toLocalDate());
-
-    // Actualiza el estado de la orden
-    orden.setEstado("Repartida"); 
-    ordenRepository.save(orden);
-
-    //TODO: Move this to repo in sql
-    // Genera el seguimiento de cada detalle de la orden
-    for (OrdenDetalleDTO ordenDetalle : ordenDetalleRepository.getAllOrdenDetalle(orden.getId())) {
-
-      Producto producto = productoRepository.findById(ordenDetalle.idProducto()).
-        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
-
-      ProductoTipoEstadoPK productoTipoEstadoPK = new ProductoTipoEstadoPK(producto.getProductoTipo().getTipo(), producto.getSubTipoProducto(), 1);
-      
-      ProductoTipoEstado productoTipoEstado = productoTipoEstadoRepository.findById(productoTipoEstadoPK).
-        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado inicial de Producto no encontrado"));
-
-      OrdenSeguimiento ordenSeguimiento = new OrdenSeguimiento();
-
-      ordenSeguimiento.setIdOrden(ordenDetalle.idOrden());
-      ordenSeguimiento.setIdOrdenDetalle(ordenDetalle.idOrdenDetalle());
-      ordenSeguimiento.setTipo(producto.getTipoProducto());
-      ordenSeguimiento.setSubTipo(producto.getSubTipoProducto());
-      ordenSeguimiento.setEstado(productoTipoEstado.getEstado()); // Agregamos el estado obtenido
-      ordenSeguimiento.setSecuencia(productoTipoEstado.getSecuencia());
-      ordenSeguimiento.setSeguimientoPor("adminTest");
-      
-      ordenSeguimientoRepository.save(ordenSeguimiento);
-    }
-
-    return ordenCalendarioRepository.save(ordenCalendario);
+    return ordenCalendarioService.create(ordenCalendario);
   }
 
 

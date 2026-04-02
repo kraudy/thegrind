@@ -395,8 +395,46 @@ mkdir -p ~/backups
 
 ```
 
+Docker postgress
+```bash
+# Get in there you weasel!
+docker exec -it thegrind-db psql -U inventoryuser -d inventorydb
+```
+
+Set timezone
+```bash
+# 1. Check current timezone and NTP status
+timedatectl
+
+# 2. Confirm the exact timezone name exists
+timedatectl list-timezones | grep -i managua
+# (should return America/Managua)
+
+# 3. Set it
+sudo timedatectl set-timezone America/Managua
+
+# 4. Verify
+timedatectl
+
+# extra: Make sure the system clock stays accurate
+sudo apt update && sudo apt install -y chrony  # or just use the default systemd-timesyncd
+timedatectl set-ntp true
+
+# check shit
+# Inside Postgres container
+docker exec -it thegrind-db psql -U inventoryuser -d inventorydb -c "SHOW timezone;"
+
+# Inside Spring Boot container
+docker exec -it thegrind-backend date
+docker exec -it thegrind-backend sh -c 'echo "Current Java timezone:" && java -XshowSettings:properties -version 2>&1 | grep -i timezone'
+```
+
 Start both
 ```bash
+# do this sht fast
+docker compose down
+docker compose up -d --build
+
 # Backend
 # for prod
 cd InventoryBackend

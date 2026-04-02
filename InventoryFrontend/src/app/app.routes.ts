@@ -40,64 +40,64 @@ import { OrdenSeguimientoImpresionDetalleListComponent } from './ordenes-seguimi
 import { OrdenSeguimientoGeneralListComponent } from './ordenes-seguimiento/orden-seguimiento-general-list/orden-seguimiento-general-list.component';
 import { OrdenPagoAprobarListComponent } from './ordenes-pago/orden-pago-aprobar-list.component';
 
+import { authGuard } from './auth/auth.guard';
+
 export const routes: Routes = [
-  //{ path: '', component: HomeComponent }, 
-  { path: 'home', component: HomeComponent }, 
-  //{ path: 'login', component: LoginComponent },
   { path: '', component: LoginComponent },
 
-  { path: 'productos', component: ProductoListComponent },
-  { path: 'productos/new', component: ProductoFormComponent },
-  { path: 'productos/:id/edit', component: ProductoFormComponent },
+  { path: 'home', component: HomeComponent, canActivate: [authGuard] }, 
 
-  { path: 'productos-tipos', component: ProductoTipoListComponent },
-  { path: 'productos-tipos/new', component: ProductoTipoFormComponent },
-  { path: 'productos-tipos/:tipo/edit', component: ProductoTipoFormComponent },
+  { path: 'productos', component: ProductoListComponent, canActivate: [authGuard] },
+  { path: 'productos/new', component: ProductoFormComponent, canActivate: [authGuard] },
+  { path: 'productos/:id/edit', component: ProductoFormComponent, canActivate: [authGuard] },
 
-  { path: 'productos-precios', component: ProductoPrecioListComponent },
-  { path: 'productos-precios/new', component: ProductoPrecioFormComponent },
-  { path: 'productos-precios/:productoId/:precio/edit', component: ProductoPrecioFormComponent },
+  { path: 'productos-tipos', component: ProductoTipoListComponent, canActivate: [authGuard] },
+  { path: 'productos-tipos/new', component: ProductoTipoFormComponent, canActivate: [authGuard] },
+  { path: 'productos-tipos/:tipo/edit', component: ProductoTipoFormComponent, canActivate: [authGuard] },
 
-  { path: 'ordenes', component: OrdenListComponent },
-  { path: 'ordenes/new', component: OrdenFormComponent },
-  { path: 'ordenes/:id/edit', component: OrdenFormComponent },
+  { path: 'productos-precios', component: ProductoPrecioListComponent, canActivate: [authGuard] },
+  { path: 'productos-precios/new', component: ProductoPrecioFormComponent, canActivate: [authGuard] },
+  { path: 'productos-precios/:productoId/:precio/edit', component: ProductoPrecioFormComponent, canActivate: [authGuard] },
 
-  { path: 'ordenes-detalle/:ordenId', component: OrdenDetalleListComponent },
-  { path: 'ordenes-detalle/:ordenId/new', component: OrdenDetalleFormComponent },
-  { path: 'ordenes-detalle/:ordenId/:idOrdenDetalle/edit', component: OrdenDetalleFormComponent },
+  { path: 'ordenes', component: OrdenListComponent, canActivate: [authGuard] },
+  { path: 'ordenes/new', component: OrdenFormComponent, canActivate: [authGuard] },
+  { path: 'ordenes/:id/edit', component: OrdenFormComponent, canActivate: [authGuard] },
 
-  { path: 'ordenes-calendario', component: OrdenCalendarioListComponent },
-  { path: 'ordenes-calendario/:fecha/new', component: OrdenCalendarioFormComponent },
-  //{ path: 'ordenes-calendario/:ordenId/new', component: OrdenCalendarioFormComponent },
-  //{ path: 'ordenes-calendario/:ordenId/edit', component: OrdenCalendarioFormComponent },
+  { path: 'ordenes-detalle/:ordenId', component: OrdenDetalleListComponent, canActivate: [authGuard] },
+  { path: 'ordenes-detalle/:ordenId/new', component: OrdenDetalleFormComponent, canActivate: [authGuard] },
+  { path: 'ordenes-detalle/:ordenId/:idOrdenDetalle/edit', component: OrdenDetalleFormComponent, canActivate: [authGuard] },
+
+  { path: 'ordenes-calendario', component: OrdenCalendarioListComponent, canActivate: [authGuard] },
+  { path: 'ordenes-calendario/:fecha/new', component: OrdenCalendarioFormComponent, canActivate: [authGuard] },
+  //{ path: 'ordenes-calendario/:ordenId/new', component: OrdenCalendarioFormComponent, canActivate: [authGuard] },
+  //{ path: 'ordenes-calendario/:ordenId/edit', component: OrdenCalendarioFormComponent, canActivate: [authGuard] },
 
   /* Pago de ordenes */
 
-  { path: 'ordenes-pago/aprobar', component: OrdenPagoAprobarListComponent },
+  { path: 'ordenes-pago/aprobar', component: OrdenPagoAprobarListComponent, canActivate: [authGuard] },
 
   /* Seguimiento de ordenes */
 
-  { path: 'ordenes-seguimiento/:idOrden/:clienteNombre', component: OrdenSeguimientoListComponent },
+  { path: 'ordenes-seguimiento/:idOrden/:clienteNombre', component: OrdenSeguimientoListComponent, canActivate: [authGuard] },
 
-  { path: 'ordenes-seguimiento-impresion', component: OrdenSeguimientoImpresionListComponent },
-  { path: 'ordenes-seguimiento-impresion/:idOrden/:clienteNombre', component: OrdenSeguimientoImpresionDetalleListComponent},
+  { path: 'ordenes-seguimiento-impresion', component: OrdenSeguimientoImpresionListComponent, canActivate: [authGuard] },
+  { path: 'ordenes-seguimiento-impresion/:idOrden/:clienteNombre', component: OrdenSeguimientoImpresionDetalleListComponent, canActivate: [authGuard] },
 
-  { path: 'ordenes-seguimiento-preparacion', component: OrdenSeguimientoPreparacionListComponent },
-  { path: 'ordenes-seguimiento-preparacion/:idOrden/:clienteNombre', component: OrdenSeguimientoPreparacionDetalleListComponent},
+  { path: 'ordenes-seguimiento-preparacion', component: OrdenSeguimientoPreparacionListComponent, canActivate: [authGuard] },
+  { path: 'ordenes-seguimiento-preparacion/:idOrden/:clienteNombre', component: OrdenSeguimientoPreparacionDetalleListComponent, canActivate: [authGuard] },
 
-  { path: 'ordenes-seguimiento-entrega', component: OrdenSeguimientoEntregaListComponent },
-  { path: 'ordenes-seguimiento-entrega/:idOrden/:clienteNombre', component: OrdenSeguimientoEntregaDetalleListComponent},
+  { path: 'ordenes-seguimiento-entrega', component: OrdenSeguimientoEntregaListComponent, canActivate: [authGuard] },
+  { path: 'ordenes-seguimiento-entrega/:idOrden/:clienteNombre', component: OrdenSeguimientoEntregaDetalleListComponent, canActivate: [authGuard] },
 
-  { path: 'ordenes-seguimiento-repartir', component: OrdenSeguimientoRepartirListComponent },
-  { path: 'ordenes-seguimiento-repartir/:idOrden/:clienteNombre', component: OrdenSeguimientoRepartirDetalleListComponent },
+  { path: 'ordenes-seguimiento-repartir', component: OrdenSeguimientoRepartirListComponent, canActivate: [authGuard] },
+  { path: 'ordenes-seguimiento-repartir/:idOrden/:clienteNombre', component: OrdenSeguimientoRepartirDetalleListComponent, canActivate: [authGuard] },
 
-  { path: 'clientes', component: ClienteListComponent },
-  { path: 'clientes/new', component: ClienteFormComponent },
-  { path: 'clientes/:id/edit', component: ClienteFormComponent },
+  { path: 'clientes', component: ClienteListComponent, canActivate: [authGuard] },
+  { path: 'clientes/new', component: ClienteFormComponent, canActivate: [authGuard] },
+  { path: 'clientes/:id/edit', component: ClienteFormComponent, canActivate: [authGuard] },
 
-  { path: 'ordenes-seguimiento/general', component: OrdenSeguimientoGeneralListComponent },
-  
+  { path: 'ordenes-seguimiento/general', component: OrdenSeguimientoGeneralListComponent, canActivate: [authGuard] },
 
   // Catch-all → must be LAST
-  { path: '**', redirectTo: 'login' }
+  { path: '**', redirectTo: '' }
 ];

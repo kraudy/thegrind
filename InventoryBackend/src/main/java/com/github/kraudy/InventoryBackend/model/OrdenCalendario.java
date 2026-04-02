@@ -49,7 +49,7 @@ public class OrdenCalendario {
 
   @JsonIgnore
   @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "idOrden", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+  @JoinColumn(name = "idOrden", referencedColumnName = "id", nullable = false)
   private Orden orden;
 
 }

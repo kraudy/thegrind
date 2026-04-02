@@ -25,42 +25,47 @@ public class SecurityConfig {
     private final JwtRequestFilter jwtRequestFilter;
 
     public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
-        this.jwtRequestFilter = jwtRequestFilter;
+      this.jwtRequestFilter = jwtRequestFilter;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // Add this
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+      http
+        .csrf(csrf -> csrf.disable())
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // Add this
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()     // Login must be public
+        .authorizeHttpRequests(auth -> auth
+          .requestMatchers("/api/auth/**").permitAll()     // Login must be public
 
-                .requestMatchers("/ws/**").permitAll()           // Permiter acceso a WebSocket
+          .requestMatchers("/ws/**").permitAll()           // Permiter acceso a WebSocket
 
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+          .requestMatchers("/api/**").authenticated()      // protects all API calls
 
-                // static Angular files
-                .requestMatchers("/",
-                                "/index.html",
-                                "/assets/**",
-                                "/**/*.js",
-                                "/**/*.css",
-                                "/**/*.ico",
-                                "/**/*.png",
-                                "/**/*.jpg",
-                                "/**/*.svg").permitAll()
+          .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                .anyRequest().authenticated()                    // Everything else requires valid JWT
-                //.anyRequest().permitAll()                    
-            )
+          // static Angular files
+          .requestMatchers("/",
+                          "/index.html",
+                          "/assets/**",
+                          "/**/*.js",
+                          "/**/*.css",
+                          "/**/*.ico",
+                          "/**/*.png",
+                          "/**/*.jpg",
+                          "/**/*.svg").permitAll()
 
-            // Add our JWT filter BEFORE Spring's default auth filter
-            .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+          // fixes reloads on /home, /productos, etc.
+          .requestMatchers(HttpMethod.GET, "/**").permitAll()
 
-        return http.build();
+          .anyRequest().authenticated()                    // Everything else requires valid JWT
+          //.anyRequest().permitAll()                    
+        )
+
+        // Add our JWT filter BEFORE Spring's default auth filter
+        .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+
+      return http.build();
     }
 
     //TODO: Implemeentar bcrypt para producción

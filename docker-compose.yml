@@ -7,6 +7,8 @@ services:
       POSTGRES_DB: inventorydb
       POSTGRES_USER: inventoryuser
       POSTGRES_PASSWORD: pass
+      TZ: America/Managua
+      PGTZ: America/Managua        # ←extra safety for Postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -32,6 +34,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: pass
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       SPRING_FLYWAY_ENABLED: "true"
+      TZ: America/Managua
     ports:
       - "8080:8080"
 

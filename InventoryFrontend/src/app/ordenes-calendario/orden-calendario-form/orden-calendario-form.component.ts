@@ -111,9 +111,7 @@ export class OrdenCalendarioFormComponent implements OnInit {
     const requests = this.selectedOrderIds.map((idOrden, index) => {
       const cal: Partial<OrdenCalendario> = {
         idOrden: idOrden,
-        fechaTrabajo: new Date(fechaTrabajo.getTime() + index * 60000).toISOString(),
-        usuarioCreacion: 'adminTest',           // Cambia por usuario real del login
-        usuarioModificacion: 'adminTest'
+        fechaTrabajo: new Date(fechaTrabajo.getTime() + index * 60000).toISOString()
       };
       return this.calendarioService.create(cal);
     });

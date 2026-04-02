@@ -26,13 +26,13 @@ export class OrdenCalendarioService {
     return this.http.get<CalendarioDiaDTO[]>(`${this.apiUrl}/calendario`);
   }
 
-  create(ordenDetalle: Partial<OrdenCalendario>): Observable<OrdenCalendario> {
-    return this.http.post<OrdenCalendario>(`${this.apiUrl}`, ordenDetalle);
+  create(ordenCalendario: Partial<OrdenCalendario>): Observable<OrdenCalendario> {
+    return this.http.post<OrdenCalendario>(`${this.apiUrl}`, ordenCalendario);
   }
 
   // Actualizar un calendario
-  update(idOrden: number, ordenDetalle: Partial<OrdenCalendario>): Observable<OrdenCalendario> {
-    return this.http.put<OrdenCalendario>(`${this.apiUrl}/${idOrden}`, ordenDetalle);
+  update(idOrden: number, ordenCalendario: Partial<OrdenCalendario>): Observable<OrdenCalendario> {
+    return this.http.put<OrdenCalendario>(`${this.apiUrl}/${idOrden}`, ordenCalendario);
   }
 
   // Eliminar un calendario
