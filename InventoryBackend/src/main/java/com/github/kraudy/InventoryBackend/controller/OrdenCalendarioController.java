@@ -61,11 +61,6 @@ public class OrdenCalendarioController {
     return ordenCalendarioRepository.getByIdOrdenCalendario(id);
   }
 
-  //@GetMapping("/por-fecha/{fecha}")
-  //public List<OrdenCalendarioDTO> getByFecha(@PathVariable String fecha) {
-  //    return ordenCalendarioRepository.getByFecha(fecha);
-  //}
-
   @GetMapping("/total-por-fecha/{fecha}")
   public Long getTotalPorFecha(@PathVariable String fecha) {
       return ordenCalendarioRepository.getTotalPorFecha(fecha);
