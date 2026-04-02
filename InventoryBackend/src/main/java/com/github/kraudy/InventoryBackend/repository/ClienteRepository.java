@@ -17,4 +17,18 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
       LIMIT 10
       """)
   List<Cliente> searchByTerm(@Param("term") String term);
+
+  @Query("""
+      SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Cliente c
+      WHERE LOWER(c.nombre) = LOWER(:nombre) AND LOWER(c.apellido) = LOWER(:apellido)
+      """)
+  boolean existeCliente(@Param("nombre") String nombre, @Param("apellido") String apellido);
+
+  @Query("""
+      SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Cliente c
+      WHERE c.id <> :id AND 
+        LOWER(c.nombre) = LOWER(:nombre) AND LOWER(c.apellido) = LOWER(:apellido) 
+      """)
+  boolean existeClienteDiferenteId(@Param("nombre") String nombre, @Param("apellido") String apellido, @Param("id") Long id);
+
 }

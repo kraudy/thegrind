@@ -297,7 +297,7 @@ docker compose logs backend --tail 100
 # reset and rebuild
 
 # Clean everything (volumes + network + orphans)
-docker compose down -v --remove-orphans
+docker compose down -v --remove-orphans #REMOVES DATABASE
 
 # Rebuild and start fresh
 # docker compose up -d --build
@@ -306,6 +306,35 @@ docker compose build --no-cache
 docker compose up -d
 
 ```
+
+Faster redeploy
+```bash
+git pull
+docker compose up -d --build
+# usually, no need for docker compose down
+
+# in case of major changes
+git pull
+docker compose build --no-cache backend   # only rebuild backend, not db
+docker compose up -d
+
+# in case of layer corruption (rare)
+docker compose build --no-cache
+docker compose up -d
+```
+
+Shootdown
+```bash
+# 1. Gracefully stop everything (recommended)
+docker compose down
+
+# 2. Then shut down or reboot the server
+sudo shutdown -h now
+# or
+sudo reboot
+```
+
+
 
 ## Set up unbuntu server 
 
@@ -378,8 +407,7 @@ docker compose up -d --build
 docker compose ps
 docker compose logs backend --tail 50
 
-# See logs easily
-alias logs='docker compose logs -f backend'
+
 
 # Check container health
 watch -n 5 'docker compose ps'
@@ -395,10 +423,60 @@ mkdir -p ~/backups
 
 ```
 
+Set alias 
+```bash
+# See logs easily
+alias logs='docker compose logs -f backend'
+
+# get into database
+alias invdb='docker exec -it thegrind-db psql -U inventoryuser -d inventorydb'
+
+```
+
 Docker postgress
 ```bash
 # Get in there you weasel!
 docker exec -it thegrind-db psql -U inventoryuser -d inventorydb
+
+```
+
+Set auto start
+```bash
+sudo nano /etc/systemd/system/thegrind.service
+
+[Unit]
+Description=TheGrind App (Spring Boot + Angular + PostgreSQL)
+After=docker.service
+Requires=docker.service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/kraudy/thegrind
+ExecStart=/usr/bin/docker compose up -d --build
+ExecStop=/usr/bin/docker compose down
+TimeoutStartSec=300
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+# Step 2: Reload systemd and enable the service
+sudo systemctl daemon-reload
+sudo systemctl enable thegrind.service
+
+sudo systemctl start thegrind.service
+sudo systemctl stop thegrind.service
+
+sudo systemctl restart thegrind.service
+sudo systemctl status thegrind.service
+
+sudo journalctl -u thegrind.service -f
+
+# Check status
+docker compose ps
 ```
 
 Set timezone
@@ -452,4 +530,41 @@ ng serve --proxy-config proxy.conf.json
 # show process listeingn
 sudo lsof -i :4200
 sudo kill -9 xxxx
+```
+
+
+
+Backup
+```bash
+services:
+  db:
+    ...
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups   # ← add this
+
+  # Optional: dedicated backup service (recommended for automation)
+  backup:
+    image: postgres:16-alpine
+    container_name: thegrind-backup
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backups:/backups
+    entrypoint: /bin/sh
+    command: >
+      -c '
+        while true; do
+          echo "=== Starting backup at $$(date) ==="
+          pg_dump -h db -U inventoryuser -d inventorydb -Fc -Z 9 > /backups/inventorydb_$$(date +%Y-%m-%d_%H-%M).dump
+          echo "Backup completed. Size: $$(du -sh /backups/inventorydb_*.dump | tail -n1)"
+          # Optional: keep only last 7 daily + last 4 weekly
+          find /backups -name "inventorydb_*.dump" -mtime +7 -delete
+          sleep 86400   # 24 hours
+        done
+      '
+    environment:
+      PGPASSWORD: pass
 ```

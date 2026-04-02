@@ -6,14 +6,22 @@ import org.springframework.web.bind.annotation.*;
 import com.github.kraudy.InventoryBackend.model.Cliente;
 import com.github.kraudy.InventoryBackend.repository.ClienteRepository;
 
+import com.github.kraudy.InventoryBackend.service.ClienteService;
+
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/clientes")
 @CrossOrigin(origins = "http://localhost:4200")
 public class ClienteController {
+
   @Autowired
   private ClienteRepository clienteRepository;
+
+  @Autowired
+  private ClienteService clienteService;
 
   @GetMapping
   public List<Cliente> getAll() {
@@ -27,13 +35,13 @@ public class ClienteController {
 
   @PostMapping
   public Cliente create(@RequestBody Cliente cliente) {
-    return clienteRepository.save(cliente);
+    return clienteService.create(cliente);
   }
 
   @PutMapping("/{id}")
   public Cliente update(@PathVariable Long id, @RequestBody Cliente cliente) {
     cliente.setId(id);
-    return clienteRepository.save(cliente);
+    return clienteService.update(cliente);
   }
 
   @DeleteMapping("/{id}")
