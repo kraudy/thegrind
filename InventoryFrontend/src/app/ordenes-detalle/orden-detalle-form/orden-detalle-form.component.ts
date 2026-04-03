@@ -149,22 +149,56 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     }
   }
 
-  onSearchChange(term: string): void {
-    if (this.isEdit) return; // nunca debería llamarse en edición por el *ngIf
+  onSearchChange(newValue: string): void {
+  const term = (newValue || '').trim();
 
-    this.searchProducto = term;
-
-    if (!term || term.trim().length < 2) {
-      this.productosFiltrados = [];
-      return;
-    }
-
-    this.searchTerms.next(term.trim());
+  // Clear suggestions if input is empty
+  if (!term) {
+    this.productosFiltrados = [];
+    return;
   }
 
+  // Intelligent search: if it's a number → exact ID, else → nombre LIKE
+  // (exactly the same logic used in ProductoListComponent)
+  let filterId: number | undefined;
+  let filterNombre: string | undefined;
+
+  const num = Number(term);
+  if (!isNaN(num) && num > 0 && Number.isInteger(num)) {
+    filterId = num;
+  } else {
+    filterNombre = term;
+  }
+
+  this.productoService.getAllWithFilters({
+    id: filterId,
+    nombre: filterNombre,
+    // tipo / subTipo / sinPrecio are not needed for this autocomplete,
+    // but you can add them later if you want extra filters in the form
+  }).subscribe({
+    next: (data) => {
+      this.productosFiltrados = data || [];
+      // Optional: limit the dropdown (recommended for UX)
+      // this.productosFiltrados = (data || []).slice(0, 15);
+    },
+    error: (err) => {
+      console.error('[OrdenDetalleForm] failed to search products', err);
+      this.productosFiltrados = [];
+    }
+  });
+}
+
   seleccionarProducto(producto: Producto): void {
+    //this.formOrdenDetalle.idProducto = producto.id;
+    //this.searchProducto = `${producto.id} - ${producto.nombre}`;
+    //this.productosFiltrados = [];
+
     this.formOrdenDetalle.idProducto = producto.id;
+
+    // Show a friendly value in the search input
     this.searchProducto = `${producto.id} - ${producto.nombre}`;
+
+    // Hide the suggestion list
     this.productosFiltrados = [];
 
     this.loadPreciosForProducto(producto.id); // auto-selecciona el primer precio (modo creación)

@@ -472,39 +472,58 @@ Set auto start
 ```bash
 sudo nano /etc/systemd/system/thegrind.service
 
+============================================================
 [Unit]
 Description=TheGrind App (Spring Boot + Angular + PostgreSQL)
-After=docker.service
 Requires=docker.service
+After=docker.service network-online.target
 Wants=network-online.target
-After=network-online.target
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=/home/kraudy/thegrind
+
+# Start
 ExecStart=/usr/bin/docker compose up -d --build
+
+# Stop (this runs on systemctl stop AND during shutdown/power button)
 ExecStop=/usr/bin/docker compose down
+
+# Give more time for graceful shutdown (PostgreSQL and Spring Boot need time)
 TimeoutStartSec=300
+TimeoutStopSec=180     # <--- Important addition (3 minutes)
+
+# Optional but useful: restart the whole stack if it fails to start
 Restart=on-failure
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
+============================================================
 
-# Step 2: Reload systemd and enable the service
+# Step 2: Reload 
 sudo systemctl daemon-reload
+sudo systemctl restart thegrind.service   # or just reboot to test
+
+# systemd and enable the service
 sudo systemctl enable thegrind.service
 
 sudo systemctl start thegrind.service
 sudo systemctl stop thegrind.service
 
-sudo systemctl restart thegrind.service
 sudo systemctl status thegrind.service
 
 sudo journalctl -u thegrind.service -f
 
 # Check status
 docker compose ps
+
+# seguimiento en linea
+sudo journalctl -u thegrind.service -f
+sudo journalctl -u thegrind.service -xe
+docker compose logs backend
+docker compose logs db
 ```
 
 Set timezone

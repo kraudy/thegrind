@@ -18,6 +18,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    stop_grace_period: 90s        # ← Postgres needs time to checkpoint/flush
 
   backend:
     build:
@@ -37,6 +38,7 @@ services:
       TZ: America/Managua
     ports:
       - "8080:8080"
+    stop_grace_period: 60s        # ← Spring Boot graceful shutdown
 
 volumes:
   postgres_data:
