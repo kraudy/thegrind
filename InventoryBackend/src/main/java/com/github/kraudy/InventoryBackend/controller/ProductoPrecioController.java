@@ -25,8 +25,14 @@ public class ProductoPrecioController {
     return productoPrecioRepository.getAll();
   }
 
+  @GetMapping("/{idProducto}")
+  public List<ProductoPrecio> getById(
+          @PathVariable Long idProducto) {
+    return productoPrecioRepository.obtenerPreciosProducto(idProducto);
+  }
+
   @GetMapping("/{productoId}/{precio}")
-  public ProductoPrecio getById(
+  public ProductoPrecio getByIdPrecio(
           @PathVariable Long productoId,
           @PathVariable BigDecimal precio) {
       ProductoPrecioPK pk = new ProductoPrecioPK(productoId, precio);

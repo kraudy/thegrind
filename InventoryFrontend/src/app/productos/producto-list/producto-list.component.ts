@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router'; 
 
 import { ProductoService } from '../producto.service';
 import { Producto } from '../producto.model';
@@ -20,6 +20,7 @@ export class ProductoListComponent implements OnInit {
 
   constructor(
     private productoService: ProductoService,
+    private router: Router,
     private cd: ChangeDetectorRef 
   ) {}
 
@@ -48,6 +49,10 @@ export class ProductoListComponent implements OnInit {
         }
       }
     });
+  }
+
+  viewDetails(id: number): void {
+    this.router.navigate(['/productos-detalle', id]);
   }
 
   selectProduct(product: Producto): void {

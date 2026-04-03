@@ -50,7 +50,19 @@ public class ProductoService {
         producto.setNombre(toTitleCase(producto.getNombre()));
         producto.setDescripcion(toTitleCase(producto.getDescripcion()));
 
-        return productoRepository.save(producto);
+        Producto existente = productoRepository.findById(producto.getId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
+
+        // Solo copiamos los campos que queremos actualizar
+        existente.setNombre(producto.getNombre());
+        existente.setDescripcion(producto.getDescripcion());
+        existente.setTipoProducto(producto.getTipoProducto());
+        existente.setSubTipoProducto(producto.getSubTipoProducto());
+        existente.setMedidaProducto(producto.getMedidaProducto());
+        existente.setModeloProducto(producto.getModeloProducto());
+        existente.setActivo(producto.isActivo());
+
+        return productoRepository.save(existente);
     }
 
     private String toTitleCase(String input) {

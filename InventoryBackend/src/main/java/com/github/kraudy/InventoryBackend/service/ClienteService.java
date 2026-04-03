@@ -1,6 +1,7 @@
 package com.github.kraudy.InventoryBackend.service;
 
 import com.github.kraudy.InventoryBackend.model.Cliente;
+import com.github.kraudy.InventoryBackend.model.Producto;
 import com.github.kraudy.InventoryBackend.repository.ClienteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -42,7 +43,17 @@ public class ClienteService {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya existe un cliente con el mismo nombre y apellido que desea actualizar");
         }
 
-        return clienteRepository.save(cliente);
+        Cliente existente = clienteRepository.findById(cliente.getId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente no encontrado"));
+
+        // Solo copiamos los campos que queremos actualizar
+        existente.setNombre(cliente.getNombre());
+        existente.setApellido(cliente.getApellido());
+        existente.setTelefono(cliente.getTelefono());
+        existente.setCorreo(cliente.getCorreo());
+        existente.setDireccion(cliente.getDireccion());
+
+        return clienteRepository.save(existente);
     }
 
     private String toTitleCase(String input) {

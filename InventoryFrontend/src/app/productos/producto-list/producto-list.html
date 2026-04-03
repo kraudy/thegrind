@@ -30,27 +30,33 @@
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo Producto</th>
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sub Tipo Producto</th>
-            <!-- NEW COLUMNS -->
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medida Producto</th>
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modelo Producto</th>
             <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <!-- Product rows -->
-          <tr *ngFor="let producto of productos" class="hover:bg-gray-50 transition">
+          <!-- Product rows → ahora toda la fila es clickeable -->
+          <tr *ngFor="let producto of productos" 
+              class="hover:bg-gray-50 transition cursor-pointer"
+              (click)="producto.id && viewDetails(producto.id)">
+            
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ producto.id }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ producto.nombre }}</td>
             <td class="px-6 py-4 text-sm text-gray-600">{{ producto.descripcion || '-' }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ producto.tipoProducto }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ producto.subTipoProducto || '-' }}</td>
-            <!-- NEW CELLS -->
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ producto.medidaProducto || '-' }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ producto.modeloProducto || '-' }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
+            
+            <!-- Acciones (evitamos que el clic de la fila dispare navegación) -->
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-4">
               <a [routerLink]="['/productos', producto.id, 'edit']"
-                 class="text-indigo-600 hover:text-indigo-900 font-medium">Editar</a>
-              <button (click)="deleteProduct(producto.id)"
+                 class="text-indigo-600 hover:text-indigo-900 font-medium"
+                 (click)="$event.stopPropagation()">
+                Editar
+              </a>
+              <button (click)="$event.stopPropagation(); deleteProduct(producto.id)"
                       class="text-red-600 hover:text-red-900 font-medium">
                 Eliminar
               </button>

@@ -17,6 +17,10 @@ export class ProductoPrecioService {
     return this.http.get<ProductoPrecio[]>(this.apiUrl);
   }
 
+  getPreciosByProducto(productoId: number): Observable<ProductoPrecio[]> {
+    return this.http.get<ProductoPrecio[]>(`${this.apiUrl}/${productoId}`);
+  }
+
   getByComposite(productoId: number, precio: number): Observable<ProductoPrecio> {
     return this.http.get<ProductoPrecio>(`${this.apiUrl}/${productoId}/${precio}`);
   }

@@ -36,6 +36,8 @@ import { ProductoTipoFormComponent } from './productos-tipos/producto-tipo-form/
 
 import { ProductoPrecioListComponent } from './productos-precios/producto-precio-list/producto-precio-list.component';
 import { ProductoPrecioFormComponent } from './productos-precios/producto-precio-form/producto-precio-form.component';
+import { ProductoDetalleComponent } from './productos/producto-detalle/producto-detalle.component';
+
 import { OrdenSeguimientoImpresionDetalleListComponent } from './ordenes-seguimiento/orden-seguimiento-impresion-detalle-list/orden-seguimiento-impresion-detalle-list.component';
 import { OrdenSeguimientoGeneralListComponent } from './ordenes-seguimiento/orden-seguimiento-general-list/orden-seguimiento-general-list.component';
 import { OrdenPagoAprobarListComponent } from './ordenes-pago/orden-pago-aprobar-list.component';
@@ -51,6 +53,8 @@ export const routes: Routes = [
   { path: 'productos/new', component: ProductoFormComponent, canActivate: [authGuard] },
   { path: 'productos/:id/edit', component: ProductoFormComponent, canActivate: [authGuard] },
 
+  { path: 'productos-detalle/:id', component: ProductoDetalleComponent, canActivate: [authGuard] },
+  
   { path: 'productos-tipos', component: ProductoTipoListComponent, canActivate: [authGuard] },
   { path: 'productos-tipos/new', component: ProductoTipoFormComponent, canActivate: [authGuard] },
   { path: 'productos-tipos/:tipo/edit', component: ProductoTipoFormComponent, canActivate: [authGuard] },

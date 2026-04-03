@@ -44,47 +44,55 @@ export class ProductoPrecioFormComponent  implements OnChanges, OnInit {
   private searchTerms = new Subject<string>();
 
   ngOnInit(): void {
-    // Configuración del debounce para búsqueda
-    this.searchTerms.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(term => term ? this.productoService.search(term) : of([]))
-    ).subscribe(productos => {
-      this.filteredProductos = productos;
-      this.cd.detectChanges();
-    });
+    const productoIdParam = this.route.snapshot.paramMap.get('productoId');
+    const precioParam     = this.route.snapshot.paramMap.get('precio');
+    const queryProductoId = this.route.snapshot.queryParamMap.get('productoId');
 
-    if (!this.productoPrecio) { // If no id in route — ensure fresh form
-      this.resetForm();
-      this.isEdit = false;
-      console.log('[ProductoPrecioForm] no productoPrecio provided', this.productoPrecio);
+    // === MODO EDICIÓN (viene de /productos-precios/:id/:precio/edit) ===
+    if (productoIdParam && precioParam) {
+      const productoId = Number(productoIdParam);
+      const precio = parseFloat(precioParam);
+
+      if (!isNaN(productoId) && !isNaN(precio)) {
+        this.productoPrecioService.getByComposite(productoId, precio).subscribe({
+          next: (data) => {
+            this.formProductoPrecio = { ...data };
+            this.isEdit = true;
+            this.loadProductoForDisplay();
+            this.cd.detectChanges();
+          },
+          error: (err) => {
+            console.error('[ProductoPrecioForm] Error cargando precio para editar', err);
+            this.resetForm();
+            this.isEdit = false;
+            this.cd.detectChanges();
+          }
+        });
+        return;
+      }
     }
 
-    const productoIdParam = this.route.snapshot.paramMap.get('productoId');
-    const precioParam = this.route.snapshot.paramMap.get('precio');
-
-    if (!productoIdParam || !precioParam) return;
-    const productoId = Number(productoIdParam);
-    const precio = parseFloat(precioParam); // BigDecimal → number
-    if (isNaN(productoId) || isNaN(precio)) return;
-
-    this.productoPrecioService.getByComposite(productoId, precio).subscribe({
-      next: (data) => {
-        this.formProductoPrecio = { ...data };
-        this.isEdit = true;
-        this.loadProductoForDisplay(); // Cargar nombre del producto en modo edición
-        console.log('[ProductoPrecioForm] loaded producto for edit', data);
-        this.cd.detectChanges();  // Force view update
-      },
-      error: (err) => {
-        console.error('[ProductoPrecioForm] failed to load producto', err);
-        // Keep form reset so user can create, but mark not edit on failure
-        this.resetForm();
-        this.isEdit = false;
-        this.cd.detectChanges();  // Force view update
+    // === MODO CREACIÓN (viene del detalle del producto con ?productoId=XXX) ===
+    if (queryProductoId) {
+      const productoId = Number(queryProductoId);
+      if (!isNaN(productoId)) {
+        this.productoService.getById(productoId).subscribe({
+          next: (prod) => {
+            this.selectedProducto = prod;
+            this.formProductoPrecio.productoId = prod.id;
+            this.cd.detectChanges();
+          },
+          error: () => console.error('[ProductoPrecioForm] No se pudo cargar el producto')
+        });
       }
-    });
+    }
+
+    // Si no hay nada → formulario limpio (por si se accede directamente)
+    if (!this.isEdit) {
+      this.resetForm();
+    }
   }
+
 
   ngOnChanges(): void {
     if (this.productoPrecio) {

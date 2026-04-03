@@ -125,7 +125,6 @@ export class OrdenSeguimientoListComponent implements OnInit, OnDestroy {
     if (confirm(`¿Estás seguro de que quieres eliminar la orden #${this.idOrden} del calendario?`)) {
       this.ordenCalendarioService.delete(this.idOrden).subscribe({
         next: () => {
-          alert('Orden eliminada del calendario exitosamente');
           this.router.navigate(['/ordenes-calendario']);
         },
         error: (err) => {

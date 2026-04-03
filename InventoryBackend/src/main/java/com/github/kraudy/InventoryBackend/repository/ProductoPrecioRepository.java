@@ -5,6 +5,7 @@ import com.github.kraudy.InventoryBackend.model.ProductoPrecio;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecioPK;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -28,4 +29,11 @@ public interface ProductoPrecioRepository extends JpaRepository<ProductoPrecio, 
       ORDER BY prod.nombre, pp.precio DESC
       """)
     List<ProductoPrecioDTO> getAll();
+
+    @Query(value ="""
+      SELECT producto_id, precio, descripcion, cantidad_requerida, fecha_creacion, fecha_modificacion, activo
+      FROM producto_precio pp
+      WHERE pp.producto_id = :idProducto
+      """, nativeQuery = true)
+    List<ProductoPrecio> obtenerPreciosProducto(@Param("idProducto") Long idProducto);
 }
