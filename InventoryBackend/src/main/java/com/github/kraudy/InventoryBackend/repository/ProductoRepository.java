@@ -32,9 +32,16 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
       AND (:nombre IS NULL OR LOWER(nombre) LIKE LOWER(CONCAT('%', :nombre, '%')))
       AND (:tipo IS NULL OR tipo_producto = :tipo)
       AND (:subTipo IS NULL OR sub_tipo_producto = :subTipo)
+      AND (:sinPrecio IS NULL  OR :sinPrecio = false
+               OR NOT EXISTS (
+                   SELECT 1 
+                   FROM producto_precio pp 
+                   WHERE pp.producto_id = producto.id 
+                     AND pp.activo = true
+               ))
     ORDER BY id
     """, nativeQuery = true)
-  List<Producto> obtenerProductos(@Param("id") Long id, @Param("nombre") String nombre, @Param("tipo") String tipo, @Param("subTipo") String subTipo);
+  List<Producto> obtenerProductos(@Param("id") Long id, @Param("nombre") String nombre, @Param("tipo") String tipo, @Param("subTipo") String subTipo, @Param("sinPrecio") Boolean sinPrecio);
   
   @Query(value ="""
     SELECT p FROM Producto p

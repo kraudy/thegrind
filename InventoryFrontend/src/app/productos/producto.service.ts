@@ -13,10 +13,6 @@ export class ProductoService {
     private http: HttpClient
   ) {}
 
-  getAll(): Observable<Producto[]> {
-    return this.http.get<Producto[]>(this.apiUrl);
-  }
-
   getById(id: number): Observable<Producto> {
     return this.http.get<Producto>(`${this.apiUrl}/${id}`);
   }
@@ -37,4 +33,33 @@ export class ProductoService {
     const params = new HttpParams().set('q', q.trim());
     return this.http.get<Producto[]>(`${this.apiUrl}/search`, { params });
   }
+
+  getAllWithFilters(filters: {
+    id?: number;
+    nombre?: string;
+    tipo?: string;
+    subTipo?: string;
+    sinPrecio?: boolean;
+  } = {}): Observable<Producto[]> {
+    let params = new HttpParams();
+
+    if (filters.id !== undefined) {
+      params = params.set('id', filters.id.toString());
+    }
+    if (filters.nombre) {
+      params = params.set('nombre', filters.nombre);
+    }
+    if (filters.tipo) {
+      params = params.set('tipo', filters.tipo);
+    }
+    if (filters.subTipo) {
+      params = params.set('subTipo', filters.subTipo);
+    }
+    if (filters.sinPrecio !== undefined) {
+      params = params.set('sinPrecio', filters.sinPrecio.toString()); // true/false as string
+    }
+
+    return this.http.get<Producto[]>(this.apiUrl, { params });
+  }
+
 }
