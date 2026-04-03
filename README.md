@@ -334,6 +334,28 @@ sudo shutdown -h now
 sudo reboot
 ```
 
+tmux on this btch
+```bash
+tmux new -s main
+
+# split vertical 
+Ctrl+b %
+# split horizontal
+Ctrl+b "                       #"
+# move between terminals
+Ctrl+b 1-9 
+# exit pane and terminal
+exit
+# detach
+Ctrl+b d
+# attach
+tmux attach -t main
+# show sessions
+tmux ls
+# kill main
+tmux kill-session -t main
+```
+
 
 
 ## Set up unbuntu server 
@@ -425,11 +447,17 @@ mkdir -p ~/backups
 
 Set alias 
 ```bash
+# add alises to this file, it is already used ty bashrc
+vim ~/.bash_aliases
+
 # See logs easily
 alias logs='docker compose logs -f backend'
 
 # get into database
 alias invdb='docker exec -it thegrind-db psql -U inventoryuser -d inventorydb'
+
+# reload
+source ~/.bashrc
 
 ```
 

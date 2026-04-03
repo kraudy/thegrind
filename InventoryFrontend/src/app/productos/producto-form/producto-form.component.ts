@@ -10,6 +10,12 @@ import { ProductoTipoService } from '../../productos-tipos/producto-tipo.service
 import { ProductoSubTipo } from '../../productos-sub-tipos/producto-sub-tipo.model';
 import { ProductoSubTipoService } from '../../productos-sub-tipos/producto-sub-tipo.service';
 
+import { ProductoMedida } from '../../productos-medidas/producto-medida.model';
+import { ProductoMedidaService } from '../../productos-medidas/producto-medida.service';
+
+import { ProductoModelo } from '../../productos-modelos/producto-modelo.model';
+import { ProductoModeloService } from '../../productos-modelos/producto-modelo.service';
+
 import { ProductoService } from '../producto.service';
 import { Producto } from '../producto.model';
 
@@ -23,21 +29,31 @@ import { Producto } from '../producto.model';
 export class ProductoFormComponent implements OnChanges, OnInit {
   @Input() producto: Producto | null = null;
   @Output() productoSaved = new EventEmitter<void>();
+
   isEdit = false;
   productoId: number | null = null;
+
   tipos: ProductoTipo[] = [];
   subTipos: ProductoSubTipo[] = [];
+  medidas: ProductoMedida[] = [];
+  modelos: ProductoModelo[] = [];
 
   constructor(
     private productoService: ProductoService,
     private productoTipoService: ProductoTipoService,
     private productoSubTipoService: ProductoSubTipoService,
+    private productoMedidaService: ProductoMedidaService,
+    private productoModeloService: ProductoModeloService,
     private location: Location,
     private route: ActivatedRoute,
     private cd: ChangeDetectorRef
   ) {}
 
-  formProducto: Partial<Producto> = { tipoProducto: '', subTipoProducto: '', nombre: '', descripcion: ''};
+  formProducto: Partial<Producto> = { 
+    tipoProducto: '', subTipoProducto: '', 
+    medidaProducto: '',
+    modeloProducto: '',
+    nombre: '', descripcion: ''};
 
   ngOnInit(): void {
     if (!this.producto) { // If no id in route — ensure fresh form
@@ -46,30 +62,16 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     }
 
     // Cargar tipos de producto siempre
-    this.productoTipoService.getAll().subscribe({
-      next: (data) => {
-        this.tipos = data || [];
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        console.error('[ProductoForm] failed to load tipo producto', err);
-        this.tipos = [];
-        this.cd.detectChanges();
-      }
-    });
+    this.loadTipos();
 
     // Cargar sub-tipos de producto siempre
-    this.productoSubTipoService.getAll().subscribe({
-      next: (data) => {
-        this.subTipos = data || [];
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        console.error('[ProductoForm] failed to load sub-tipos products', err);
-        this.tipos = [];
-        this.cd.detectChanges();
-      }
-    });
+    this.loadSubTipos();
+
+    // Cargar medidas de producto siempre
+    this.loadMedidas();
+
+    // Cargar modelos de producto siempre
+    this.loadModelos();
 
     const idParam = this.route.snapshot.paramMap.get('id');
     if (!idParam) {return;}
@@ -105,12 +107,59 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     }
   }
 
+  private loadTipos(): void {
+    this.productoTipoService.getAll().subscribe({
+      next: (data) => {
+        this.tipos = data || [];
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        console.error('[ProductoForm] failed to load tipo producto', err);
+        this.tipos = [];
+        this.cd.detectChanges();
+      }
+    });
+  }
+
+  private loadSubTipos(): void {
+    this.productoSubTipoService.getAll().subscribe({
+      next: (data) => {
+        this.subTipos = data || [];
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        console.error('[ProductoForm] failed to load sub-tipos products', err);
+        this.tipos = [];
+        this.cd.detectChanges();
+      }
+    });
+  }
+
+  // NEW
+  private loadMedidas(): void {
+    this.productoMedidaService.getAll().subscribe({
+      next: (data) => { this.medidas = data || []; this.cd.detectChanges(); },
+      error: (err) => { console.error('[ProductoForm] failed to load medidas', err); this.medidas = []; this.cd.detectChanges(); }
+    });
+  }
+
+  // NEW
+  private loadModelos(): void {
+    this.productoModeloService.getAll().subscribe({
+      next: (data) => { this.modelos = data || []; this.cd.detectChanges(); },
+      error: (err) => { console.error('[ProductoForm] failed to load modelos', err); this.modelos = []; this.cd.detectChanges(); }
+    });
+  }
+
+
+
   goBack(): void {
     this.location.back();
   }
 
   resetForm(): void {
-    this.formProducto = {tipoProducto: '', subTipoProducto: '', nombre: '', descripcion: ''};
+    this.formProducto = {tipoProducto: '', subTipoProducto: '', medidaProducto: '',
+      modeloProducto: '', nombre: '', descripcion: ''};
   }
 
   onSubmit(): void {

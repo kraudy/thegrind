@@ -4,6 +4,7 @@ import com.github.kraudy.InventoryBackend.model.Producto;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecio;
 import com.github.kraudy.InventoryBackend.repository.ProductoPrecioRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoRepository;
+import com.github.kraudy.InventoryBackend.service.ProductoService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,9 @@ public class ProductoController {
     @Autowired
     private ProductoPrecioRepository productoPrecioRepository;
 
+    @Autowired
+    private ProductoService productoService; 
+
     @GetMapping
     public List<Producto> getAll() {
         return productoRepository.findAll();
@@ -36,13 +40,13 @@ public class ProductoController {
 
     @PostMapping
     public Producto create(@RequestBody Producto product) {
-        return productoRepository.save(product);
+        return productoService.create(product);
     }
 
     @PutMapping("/{id}")
     public Producto update(@PathVariable Long id, @RequestBody Producto product) {
       product.setId(id);
-      return productoRepository.save(product);
+      return productoService.update(product);
     }
 
     @DeleteMapping("/{id}")
