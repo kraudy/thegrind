@@ -18,8 +18,8 @@
     <!-- Grid de tarjetas -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
 
-      <!-- Clientes - ADMIN ONLY -->
-      <div *ngIf="hasAccess('admin')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+      <!-- Clientes - ADMIN + Cliente ONLY -->
+      <div *ngIf="hasAccess('cliente')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
         <div class="mb-8">
           <div class="w-20 h-20 mx-auto bg-indigo-100 rounded-full flex items-center justify-center">
             <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,13 +30,12 @@
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Clientes</h2>
         <p class="text-gray-600 mb-8">Crear y gestionar información de los clientes</p>
         <div class="space-y-4">
-          <a routerLink="/clientes/new" class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">Crear Nuevo Cliente</a>
           <a routerLink="/clientes" class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">Ver Lista de Clientes</a>
         </div>
       </div>
 
-      <!-- Órdenes - ADMIN ONLY -->
-      <div *ngIf="hasAccess('admin')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+      <!-- Órdenes - ADMIN + RECIBE ONLY -->
+      <div *ngIf="hasAccess('recibe')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
         <div class="mb-8">
           <div class="w-20 h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center">
             <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,7 +46,6 @@
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Órdenes</h2>
         <p class="text-gray-600 mb-8">Registra y administra órdenes de los clientes</p>
         <div class="space-y-4">
-          <a routerLink="/ordenes/new" class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">Crear Nueva Orden</a>
           <a routerLink="/ordenes" class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">Ver Lista de Órdenes</a>
         </div>
       </div>
@@ -64,7 +62,6 @@
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Productos</h2>
         <p class="text-gray-600 mb-8">Administra catálogo de productos</p>
         <div class="space-y-4">
-          <a routerLink="/productos/new" class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">Crear Nuevo Producto</a>
           <a routerLink="/productos" class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">Ver Catálogo de Productos</a>
         </div>
       </div>
@@ -82,13 +79,12 @@
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Tipos de Productos</h2>
         <p class="text-gray-600 mb-8">Administrar tipos de productos</p>
         <div class="space-y-4">
-          <a routerLink="/productos-tipos/new" class="block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">Crear Nuevo Tipo</a>
           <a routerLink="/productos-tipos" class="block px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow transition">Ver Tipos de Productos</a>
         </div>
       </div>
 
-      <!-- Agendar Ordenes - ADMIN + REPARTE -->
-      <div *ngIf="hasAccess('reparte')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+      <!-- Agendar Ordenes - ADMIN + AGENDA -->
+      <div *ngIf="hasAccess('agenda')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
         <div class="mb-8">
           <div class="w-20 h-20 mx-auto bg-amber-100 rounded-full flex items-center justify-center">
             <svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
