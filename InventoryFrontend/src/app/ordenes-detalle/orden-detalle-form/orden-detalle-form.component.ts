@@ -14,6 +14,11 @@ import { Producto } from '../../productos/producto.model';
 import { ProductoPrecioService } from '../../productos-precios/producto-precio.service';
 import { ProductoPrecio } from '../../productos-precios/producto-precio.model';
 
+import { ProductoTipo } from '../../productos-tipos/producto-tipo.model';
+import { ProductoSubTipo } from '../../productos-sub-tipos/producto-sub-tipo.model';
+import { ProductoTipoService } from '../../productos-tipos/producto-tipo.service';
+import { ProductoSubTipoService } from '../../productos-sub-tipos/producto-sub-tipo.service';
+
 @Component({
   selector: 'app-orden-detalle-form',
   standalone: true,
@@ -28,10 +33,18 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
   isEdit = false;
   clienteNombre: string = '';
 
+  // Filters
+  tipos: ProductoTipo[] = [];
+  subTipos: ProductoSubTipo[] = [];
+  selectedTipo: string = '';
+  selectedSubTipo: string = '';
+
   constructor(
     private ordenDetalleService: OrdenDetalleService,
     private productoService: ProductoService,
     private productoPrecioService: ProductoPrecioService,
+    private productoTipoService: ProductoTipoService,
+    private productoSubTipoService: ProductoSubTipoService,
     private location: Location,
     private route: ActivatedRoute,
     private cd: ChangeDetectorRef
@@ -96,6 +109,10 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
       this.resetForm();  // conserva el idOrden
       this.isEdit = false;
     }
+
+    // Load filter options (always - harmless in edit mode)
+    this.loadTipos();
+    this.loadSubTipos();
   }
 
   ngOnChanges(): void {
@@ -104,6 +121,21 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
       this.isEdit = true;
     }
   }
+
+  private loadTipos(): void {
+    this.productoTipoService.getAll().subscribe({
+      next: (data) => { this.tipos = data || []; this.cd.detectChanges(); },
+      error: (err) => { console.error('[OrdenDetalleForm] failed to load tipos', err); this.tipos = []; }
+    });
+  }
+
+  private loadSubTipos(): void {
+    this.productoSubTipoService.getAll().subscribe({
+      next: (data) => { this.subTipos = data || []; this.cd.detectChanges(); },
+      error: (err) => { console.error('[OrdenDetalleForm] failed to load sub-tipos', err); this.subTipos = []; }
+    });
+  }
+
 
   private loadForm(data: OrdenDetalle): void {
     this.formOrdenDetalle = { ...data };
@@ -126,17 +158,14 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     }
   }
 
-  onSearchChange(newValue: string): void {
-    const term = (newValue || '').trim();
-
-    // Clear suggestions if input is empty
+  // Centralized search with filters + intelligent ID/name logic
+  private performProductSearch(): void {
+    const term = (this.searchProducto || '').trim();
     if (!term) {
       this.productosFiltrados = [];
       return;
     }
 
-    // Intelligent search: if it's a number → exact ID, else → nombre LIKE
-    // (exactly the same logic used in ProductoListComponent)
     let filterId: number | undefined;
     let filterNombre: string | undefined;
 
@@ -150,13 +179,11 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     this.productoService.getAllWithFilters({
       id: filterId,
       nombre: filterNombre,
-      // tipo / subTipo / sinPrecio are not needed for this autocomplete,
-      // but you can add them later if you want extra filters in the form
+      tipo: this.selectedTipo || undefined,
+      subTipo: this.selectedSubTipo || undefined
     }).subscribe({
       next: (data) => {
         this.productosFiltrados = data || [];
-        // Optional: limit the dropdown (recommended for UX)
-        // this.productosFiltrados = (data || []).slice(0, 15);
       },
       error: (err) => {
         console.error('[OrdenDetalleForm] failed to search products', err);
@@ -165,17 +192,18 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     });
   }
 
+  onSearchChange(newValue: string): void {
+    this.searchProducto = newValue;
+    this.performProductSearch();
+  }
+
+  onFilterChange(): void {
+    this.performProductSearch();
+  }
+
   seleccionarProducto(producto: Producto): void {
-    //this.formOrdenDetalle.idProducto = producto.id;
-    //this.searchProducto = `${producto.id} - ${producto.nombre}`;
-    //this.productosFiltrados = [];
-
     this.formOrdenDetalle.idProducto = producto.id;
-
-    // Show a friendly value in the search input
     this.searchProducto = `${producto.id} - ${producto.nombre}`;
-
-    // Hide the suggestion list
     this.productosFiltrados = [];
 
     this.loadPreciosForProducto(producto.id); // auto-selecciona el primer precio (modo creación)
@@ -214,6 +242,13 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     this.cd.detectChanges();
   }
 
+  // Clear filters
+  clearFilters(): void {
+    this.selectedTipo = '';
+    this.selectedSubTipo = '';
+    this.performProductSearch();   // refreshes the list with current search term (if any)
+  }
+
   resetForm(): void {
     const currentOrdenId = this.formOrdenDetalle.idOrden ?? 0;
     this.formOrdenDetalle = {
@@ -228,6 +263,9 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     this.searchProducto = '';
     this.productosFiltrados = [];
     this.preciosDisponibles = [];
+    // Also reset filters when creating a new line
+    this.selectedTipo = '';
+    this.selectedSubTipo = '';
   }
 
   /** Helper: devuelve el objeto ProductoPrecio que coincide con el precio seleccionado */

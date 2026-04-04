@@ -23,22 +23,58 @@
                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-50">
           </div>
 
-          <!-- PRODUCTO (ahora con búsqueda backend como en ProductoPrecioForm) -->
+          <!-- PRODUCTO -->
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Producto <span class="text-red-600">*</span>
             </label>
 
-            <!-- Modo creación: búsqueda con autocomplete -->
+            <!-- Modo creación: filters + autocomplete -->
             <div *ngIf="!isEdit; else editModeProducto">
-              <input type="text"
-                     [(ngModel)]="searchProducto"
-                     (ngModelChange)="onSearchChange($event)"
-                     name="searchProducto"
-                     placeholder="Escribe nombre o ID del producto..."
-                     class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+              
+              <!-- Filter bar (compact - Tipo + SubTipo only) -->
+              <div class="flex flex-wrap gap-3 mb-4 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                <!-- Tipo -->
+                <div class="flex-1 min-w-[200px]">
+                  <select [(ngModel)]="selectedTipo" 
+                          (ngModelChange)="onFilterChange()"
+                          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    <option value="">Todos los tipos</option>
+                    <option *ngFor="let tipo of tipos" [value]="tipo.tipo">
+                      {{ tipo.tipo }} — {{ tipo.descripcion || 'Sin descripción' }}
+                    </option>
+                  </select>
+                </div>
 
-              <!-- Lista de sugerencias -->
+                <!-- SubTipo -->
+                <div class="flex-1 min-w-[200px]">
+                  <select [(ngModel)]="selectedSubTipo" 
+                          (ngModelChange)="onFilterChange()"
+                          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    <option value="">Todos los subtipos</option>
+                    <option *ngFor="let subTipo of subTipos" [value]="subTipo.subTipo">
+                      {{ subTipo.subTipo }} — {{ subTipo.descripcion || 'Sin descripción' }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Clear filters button - FIXED -->
+                <button type="button"
+                        (click)="clearFilters()"
+                        class="px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors flex-shrink-0">
+                  Limpiar filtros
+                </button>
+              </div>
+
+              <!-- Search input -->
+              <input type="text"
+                    [(ngModel)]="searchProducto"
+                    (ngModelChange)="onSearchChange($event)"
+                    name="searchProducto"
+                    placeholder="Escribe nombre o ID del producto..."
+                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+
+              <!-- Suggestion dropdown -->
               <div *ngIf="productosFiltrados.length > 0" 
                   class="mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
                 <div *ngFor="let p of productosFiltrados" 
@@ -52,19 +88,18 @@
                 </div>
               </div>
 
-              <!-- Campo oculto para el ID -->
+              <!-- Hidden ID -->
               <input type="hidden" [(ngModel)]="formOrdenDetalle.idProducto" name="idProducto" required>
             </div>
 
-            <!-- Modo edición: producto fijo (readonly) -->
+            <!-- Modo edición: readonly -->
             <ng-template #editModeProducto>
               <input type="text"
-                     [value]="searchProducto || 'Cargando producto...'"
-                     disabled
-                     class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-50 cursor-not-allowed">
+                    [value]="searchProducto || 'Cargando producto...'"
+                    disabled
+                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-50 cursor-not-allowed">
             </ng-template>
           </div>
-
           <!-- Cantidad -->
           <div>
             <label for="cantidad" class="block text-sm font-medium text-gray-700 mb-2">
