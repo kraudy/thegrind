@@ -40,7 +40,7 @@ import { ProductoDetalleComponent } from './productos/producto-detalle/producto-
 
 import { OrdenSeguimientoImpresionDetalleListComponent } from './ordenes-seguimiento/orden-seguimiento-impresion-detalle-list/orden-seguimiento-impresion-detalle-list.component';
 import { OrdenSeguimientoGeneralListComponent } from './ordenes-seguimiento/orden-seguimiento-general-list/orden-seguimiento-general-list.component';
-import { OrdenPagoAprobarListComponent } from './ordenes-pago/orden-pago-aprobar-list.component';
+import { OrdenPagoAprobarListComponent } from './ordenes-pago/orden-pago-list/orden-pago-aprobar-list.component';
 
 import { authGuard } from './auth/auth.guard';
 

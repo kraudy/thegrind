@@ -6,10 +6,10 @@ import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { OrdenPagoService } from './orden-pago.service';   // reuse the service
-import { NotificationService } from '../shared/notification.service';
+import { OrdenPagoService } from '../orden-pago.service';   // reuse the service
+import { NotificationService } from '../../shared/notification.service';
 
-import { OrdenPago } from './orden-pago.model';
+import { OrdenPago } from '../orden-pago.model';
 
 @Component({
   selector: 'app-orden-pago-aprobar-list',

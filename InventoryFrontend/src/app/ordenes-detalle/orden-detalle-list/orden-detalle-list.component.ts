@@ -171,13 +171,33 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges, OnDestroy {
     this.showRegistrarAdelantoModal = true;
   }
 
+  // Clear reference & bank when user changes payment method
+  onMetodoPagoChange() {
+    if (this.nuevoPago.metodoPago !== 'Transferencia') {
+      this.nuevoPago.codigoReferencia = '';
+      this.nuevoPago.banco = '';
+    }
+  }
+
   registrarAdelanto() {
     if (!this.orden?.id || this.nuevoPago.monto <= 0) return;
+
+    // Validacion para transferencia
+    if (this.nuevoPago.metodoPago === 'Transferencia') {
+      if (!this.nuevoPago.codigoReferencia?.trim()) {
+        alert('❌ El código de referencia es obligatorio cuando el método es Transferencia.');
+        return;
+      }
+      if (!this.nuevoPago.banco || this.nuevoPago.banco === '') {
+        alert('❌ Debe seleccionar un banco cuando el método es Transferencia.');
+        return;
+      }
+    }
 
     this.ordenPagoService.registrarPago(this.orden.id, this.nuevoPago).subscribe({
       next: () => {
         this.showRegistrarAdelantoModal = false;
-        this.loadOrdenesDetalles(); // full refresh (keeps existing behavior)
+        this.loadOrdenesDetalles(); // full refresh
       },
       error: (err) => {
         console.error('Error registrando adelanto', err);

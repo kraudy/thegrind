@@ -43,7 +43,8 @@ RUN ./mvnw clean package -DskipTests
 # ================================================
 # Stage 3: Final runtime image
 # ================================================
-FROM eclipse-temurin:21-jre-alpine
+#FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre-alpine-3.21
 WORKDIR /app
 COPY --from=backend-build /app/backend/target/*.jar app.jar
 
