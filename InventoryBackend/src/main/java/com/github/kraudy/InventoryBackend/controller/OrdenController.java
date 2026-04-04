@@ -26,8 +26,13 @@ public class OrdenController {
   private ClienteRepository clienteRepository;
 
   @GetMapping
-  public List<OrdenDTO> getAll() {
-    return ordenRepository.getAll();
+  public List<OrdenDTO> getAll(
+    @RequestParam(required = false) Long id,
+    @RequestParam(required = false) String cliente,
+    @RequestParam(required = false) String recepcionista,
+    @RequestParam(required = false) String estado
+  ) {
+    return ordenRepository.obtenerOrdenes(id, cliente, recepcionista, estado);
   }
 
   @GetMapping("/{id}")

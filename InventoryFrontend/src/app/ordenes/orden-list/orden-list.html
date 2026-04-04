@@ -1,5 +1,6 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
+  <!-- Header original (sin cambios) -->
   <div class="relative flex justify-between items-center mb-8">
     <!-- Botón Volver al Inicio (izquierda) -->
     <a routerLink="/home" class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-md transition transform hover:scale-105">
@@ -22,9 +23,70 @@
       Órdenes
     </h1>
   </div>
-  
+
+  <!-- ==================== NUEVA SECCIÓN DE FILTROS ==================== -->
+  <div class="flex flex-wrap gap-4 items-center bg-white shadow rounded-2xl p-4 mb-8">
+    <!-- Búsqueda inteligente (ID o Cliente) -->
+    <div class="flex-1 min-w-[300px]">
+      <input type="text" 
+             [(ngModel)]="searchTerm" 
+             (ngModelChange)="onFilterChange()"
+             placeholder="Buscar por ID o cliente..." 
+             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+    </div>
+
+    <!-- Botones de Estado -->
+    <div class="flex items-center gap-2 flex-wrap">
+      <button (click)="selectedEstadoFilter = ''; onFilterChange()" 
+              [class.bg-indigo-600]="selectedEstadoFilter === ''" 
+              [class.text-white]="selectedEstadoFilter === ''"
+              class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
+        Todos
+      </button>
+      <button (click)="selectedEstadoFilter = 'Recibida'; onFilterChange()" 
+              [class.bg-indigo-600]="selectedEstadoFilter === 'Recibida'" 
+              [class.text-white]="selectedEstadoFilter === 'Recibida'"
+              class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
+        Recibida
+      </button>
+      <button (click)="selectedEstadoFilter = 'Repartida'; onFilterChange()" 
+              [class.bg-indigo-600]="selectedEstadoFilter === 'Repartida'" 
+              [class.text-white]="selectedEstadoFilter === 'Repartida'"
+              class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
+        Repartida
+      </button>
+      <button (click)="selectedEstadoFilter = 'Lista'; onFilterChange()" 
+              [class.bg-indigo-600]="selectedEstadoFilter === 'Lista'" 
+              [class.text-white]="selectedEstadoFilter === 'Lista'"
+              class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
+        Lista
+      </button>
+      <button (click)="selectedEstadoFilter = 'Entregada'; onFilterChange()" 
+              [class.bg-indigo-600]="selectedEstadoFilter === 'Entregada'" 
+              [class.text-white]="selectedEstadoFilter === 'Entregada'"
+              class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
+        Entregada
+      </button>
+    </div>
+
+    <!-- Limpiar filtros -->
+    <button (click)="clearFilters()" 
+            class="px-5 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">
+      Limpiar filtros
+    </button>
+  </div>
+  <!-- ==================== FIN FILTROS ==================== -->
+
+  <!-- Tabla con loading y error -->
   <div class="bg-white shadow-xl rounded-xl overflow-hidden">
-    <div class="overflow-x-auto">
+    <div *ngIf="loading" class="p-10 text-center text-gray-600">Cargando órdenes...</div>
+    
+    <div *ngIf="!loading && errorMessage" 
+         class="p-6 bg-red-50 text-red-700 text-center">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="!loading && !errorMessage" class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
@@ -40,11 +102,10 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr *ngFor="let orden of ordenes" class="hover:bg-gray-50 transition cursor-pointer" (click)="orden.id && viewDetails(orden.id)">
-            <!-- ID no longer clickable -->
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              {{ orden.id }}
-            </td>
+          <tr *ngFor="let orden of ordenes" 
+              class="hover:bg-gray-50 transition cursor-pointer" 
+              (click)="orden.id && viewDetails(orden.id)">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ orden.id }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ orden.clienteNombre }}</td>
             <td class="px-6 py-4 whitespace-nowrap">
               <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
@@ -60,7 +121,6 @@
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ orden.totalProductos }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ orden.totalMonto | number:'1.2-2' }}</td>
-            
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
               {{ orden.fechaCreacion ? (orden.fechaCreacion | date:'dd/MM/yyyy HH:mm') : '-' }}
             </td>
@@ -70,10 +130,9 @@
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
               {{ orden.fechaPreparada ? (orden.fechaPreparada | date:'dd/MM/yyyy HH:mm') : '-' }}
             </td>
-
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-4">
               <a [routerLink]="['/ordenes', orden.id, 'edit']"
-                class="text-indigo-600 hover:text-indigo-900 font-medium">
+                 class="text-indigo-600 hover:text-indigo-900 font-medium">
                 Editar
               </a>
               <button (click)="$event.stopPropagation(); deleteOrden(orden.id)"
@@ -85,9 +144,9 @@
         </tbody>
       </table>
 
-      <!-- Mensaje cuando no hay órdenes -->
+      <!-- Mensaje vacío con filtros -->
       <div *ngIf="ordenes.length === 0" class="text-center py-12">
-        <p class="text-gray-500 text-lg">No hay órdenes registradas aún.</p>
+        <p class="text-gray-500 text-lg">No hay órdenes con los filtros seleccionados.</p>
       </div>
     </div>
   </div>
