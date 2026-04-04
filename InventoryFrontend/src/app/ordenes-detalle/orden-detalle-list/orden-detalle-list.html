@@ -123,12 +123,8 @@
 
     <!-- ==================== Adelantos/Pagos ==================== -->
     <div class="bg-white shadow-xl rounded-xl overflow-hidden mb-8" *ngIf="orden">
-      <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
+      <div class="px-6 py-4 border-b bg-gray-50">
         <h2 class="text-lg font-semibold text-gray-800">Adelantos / Pagos</h2>
-        <button (click)="openRegistrarAdelantoModal()"
-                class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg">
-          + Registrar Adelanto
-        </button>
       </div>
 
       <div class="p-6">
@@ -172,9 +168,17 @@
       </div>
     </div>
 
+    <!-- Registrar Adelanto Button -->
+    <div class="flex justify-end mb-8" *ngIf="orden">
+      <button (click)="openRegistrarAdelantoModal()"
+              class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg">
+        + Registrar Adelanto
+      </button>
+    </div>
 
-    <!-- Descargar PDF - Bottom Right Corner -->
-    <div class="flex justify-end p-6 border-t bg-gray-50" *ngIf="orden">
+
+    <!-- Descargar PDF - Bottom Left Corner -->
+    <div class="flex justify-start p-6 border-t bg-gray-50" *ngIf="orden">
       <button (click)="downloadPdf()"
         class="inline-flex items-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-md transition transform hover:scale-105">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -207,13 +211,18 @@
 
           <!-- Código de referencia -->
           <div *ngIf="nuevoPago.metodoPago === 'Transferencia'">
-            <label class="block text-sm font-medium mb-1">Código de referencia</label>
-            <input type="text" [(ngModel)]="nuevoPago.codigoReferencia" class="w-full px-4 py-3 border rounded-xl" placeholder="Número de transferencia">
+            <label class="block text-sm font-medium mb-1">
+              Código de referencia <span class="text-red-500">*</span>
+            </label>
+            <input type="text" [(ngModel)]="nuevoPago.codigoReferencia" 
+                  class="w-full px-4 py-3 border rounded-xl" placeholder="Número de transferencia">
           </div>
 
-          <!-- Banco (only for Transferencia) -->
+          <!-- Banco -->
           <div *ngIf="nuevoPago.metodoPago === 'Transferencia'">
-            <label class="block text-sm font-medium mb-1">Banco</label>
+            <label class="block text-sm font-medium mb-1">
+              Banco <span class="text-red-500">*</span>
+            </label>
             <select [(ngModel)]="nuevoPago.banco" class="w-full px-4 py-3 border rounded-xl">
               <option value="">Seleccione banco...</option>
               <option value="Bac">Bac</option>
