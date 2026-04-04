@@ -29,11 +29,6 @@ export class ProductoService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  search(q: string): Observable<Producto[]> {
-    const params = new HttpParams().set('q', q.trim());
-    return this.http.get<Producto[]>(`${this.apiUrl}/search`, { params });
-  }
-
   getAllWithFilters(filters: {
     id?: number;
     nombre?: string;

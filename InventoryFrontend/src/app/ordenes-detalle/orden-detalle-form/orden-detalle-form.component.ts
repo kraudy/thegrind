@@ -51,7 +51,6 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
   private searchTerms = new Subject<string>();
 
   // Precios del producto seleccionado
-  allPrecios: ProductoPrecio[] = [];
   preciosDisponibles: ProductoPrecio[] = [];
 
   ngOnInit(): void {
@@ -73,19 +72,6 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
       console.error('ordenId inválido:', this.formOrdenDetalle.idOrden);
       alert('ID de orden inválido. Regresando...');
     }
-
-    // Cargar SOLO los precios (los productos ahora se buscan en backend)
-    this.cargarDatosIniciales();
-
-    // Configuración del buscador con debounce (exactamente como el ejemplo que me diste)
-    this.searchTerms.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(term => this.productoService.search(term))  // backend search
-    ).subscribe(productos => {
-      this.productosFiltrados = productos;
-      this.cd.detectChanges();
-    });
 
     const idOrdenDetalleStr = params.get('idOrdenDetalle');
 
@@ -110,15 +96,6 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
       this.resetForm();  // conserva el idOrden
       this.isEdit = false;
     }
-  }
-
-  private cargarDatosIniciales(): void {
-    this.productoPrecioService.getAll().subscribe({
-      next: (precios) => {
-        this.allPrecios = precios.filter(p => p.activo);
-      },
-      error: (err) => console.error('Error cargando precios iniciales', err)
-    });
   }
 
   ngOnChanges(): void {
@@ -150,43 +127,43 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
   }
 
   onSearchChange(newValue: string): void {
-  const term = (newValue || '').trim();
+    const term = (newValue || '').trim();
 
-  // Clear suggestions if input is empty
-  if (!term) {
-    this.productosFiltrados = [];
-    return;
-  }
-
-  // Intelligent search: if it's a number → exact ID, else → nombre LIKE
-  // (exactly the same logic used in ProductoListComponent)
-  let filterId: number | undefined;
-  let filterNombre: string | undefined;
-
-  const num = Number(term);
-  if (!isNaN(num) && num > 0 && Number.isInteger(num)) {
-    filterId = num;
-  } else {
-    filterNombre = term;
-  }
-
-  this.productoService.getAllWithFilters({
-    id: filterId,
-    nombre: filterNombre,
-    // tipo / subTipo / sinPrecio are not needed for this autocomplete,
-    // but you can add them later if you want extra filters in the form
-  }).subscribe({
-    next: (data) => {
-      this.productosFiltrados = data || [];
-      // Optional: limit the dropdown (recommended for UX)
-      // this.productosFiltrados = (data || []).slice(0, 15);
-    },
-    error: (err) => {
-      console.error('[OrdenDetalleForm] failed to search products', err);
+    // Clear suggestions if input is empty
+    if (!term) {
       this.productosFiltrados = [];
+      return;
     }
-  });
-}
+
+    // Intelligent search: if it's a number → exact ID, else → nombre LIKE
+    // (exactly the same logic used in ProductoListComponent)
+    let filterId: number | undefined;
+    let filterNombre: string | undefined;
+
+    const num = Number(term);
+    if (!isNaN(num) && num > 0 && Number.isInteger(num)) {
+      filterId = num;
+    } else {
+      filterNombre = term;
+    }
+
+    this.productoService.getAllWithFilters({
+      id: filterId,
+      nombre: filterNombre,
+      // tipo / subTipo / sinPrecio are not needed for this autocomplete,
+      // but you can add them later if you want extra filters in the form
+    }).subscribe({
+      next: (data) => {
+        this.productosFiltrados = data || [];
+        // Optional: limit the dropdown (recommended for UX)
+        // this.productosFiltrados = (data || []).slice(0, 15);
+      },
+      error: (err) => {
+        console.error('[OrdenDetalleForm] failed to search products', err);
+        this.productosFiltrados = [];
+      }
+    });
+  }
 
   seleccionarProducto(producto: Producto): void {
     //this.formOrdenDetalle.idProducto = producto.id;
@@ -205,12 +182,24 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
   }
 
   private loadPreciosForProducto(idProducto: number, autoSelect = true): void {
-    this.preciosDisponibles = this.allPrecios.filter(p => p.productoId === idProducto);
+    this.preciosDisponibles = []; // clear previous
 
-    if (autoSelect && this.preciosDisponibles.length > 0) {
-      this.formOrdenDetalle.precioUnitario = this.preciosDisponibles[0].precio;
-      this.updateSubtotal();
-    }
+    this.productoPrecioService.getPreciosByProducto(idProducto).subscribe({
+      next: (precios) => {
+        // Mantener solo los activos (igual que antes)
+        this.preciosDisponibles = precios; // no fitler, this can be done in the backend
+
+        if (autoSelect && this.preciosDisponibles.length > 0) {
+          this.formOrdenDetalle.precioUnitario = this.preciosDisponibles[0].precio;
+          this.updateSubtotal();
+        }
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando precios para producto', idProducto, err);
+        this.preciosDisponibles = [];
+      }
+    });
   }
 
   goBack(): void {
@@ -241,7 +230,34 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     this.preciosDisponibles = [];
   }
 
+  /** Helper: devuelve el objeto ProductoPrecio que coincide con el precio seleccionado */
+  private getSelectedPrecio(): ProductoPrecio | undefined {
+    if (!this.formOrdenDetalle.precioUnitario) return undefined;
+    return this.preciosDisponibles.find(
+      p => p.precio === this.formOrdenDetalle.precioUnitario
+    );
+  }
+
   onSubmit(): void {
+    const selectedPrecio = this.getSelectedPrecio();
+
+    if ((this.formOrdenDetalle.cantidad || 0) <= 0) {
+      alert('La cantidad debe ser mayor a cero.');
+      return; // ← detiene el envío
+    }
+
+    if (selectedPrecio && selectedPrecio.cantidadRequerida > 0) {
+      const cantidadUsuario = this.formOrdenDetalle.cantidad || 0;
+
+      if (cantidadUsuario < selectedPrecio.cantidadRequerida) {
+        alert(
+          `La cantidad debe ser al menos ${selectedPrecio.cantidadRequerida} ` +
+          `para el precio seleccionado (${selectedPrecio.precio}).`
+        );
+        return; // ← detiene el envío
+      }
+    }
+
     if (this.isEdit) {
       const updatePayload = {
         cantidad: this.formOrdenDetalle.cantidad,
