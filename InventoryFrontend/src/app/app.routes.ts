@@ -34,9 +34,10 @@ import { ClienteFormComponent } from './clientes/cliente-form/cliente-form.compo
 import { ProductoTipoListComponent } from './productos-tipos/producto-tipo-list/producto-tipo-list.component';
 import { ProductoTipoFormComponent } from './productos-tipos/producto-tipo-form/producto-tipo-form.component';
 
-import { ProductoPrecioListComponent } from './productos-precios/producto-precio-list/producto-precio-list.component';
 import { ProductoPrecioFormComponent } from './productos-precios/producto-precio-form/producto-precio-form.component';
 import { ProductoDetalleComponent } from './productos/producto-detalle/producto-detalle.component';
+
+import { ProductoCostoFormComponent } from './productos-costos/producto-costo-form/producto-costo-form.component';
 
 import { OrdenSeguimientoImpresionDetalleListComponent } from './ordenes-seguimiento/orden-seguimiento-impresion-detalle-list/orden-seguimiento-impresion-detalle-list.component';
 import { OrdenSeguimientoGeneralListComponent } from './ordenes-seguimiento/orden-seguimiento-general-list/orden-seguimiento-general-list.component';
@@ -59,9 +60,11 @@ export const routes: Routes = [
   { path: 'productos-tipos/new', component: ProductoTipoFormComponent, canActivate: [authGuard] },
   { path: 'productos-tipos/:tipo/edit', component: ProductoTipoFormComponent, canActivate: [authGuard] },
 
-  { path: 'productos-precios', component: ProductoPrecioListComponent, canActivate: [authGuard] },
   { path: 'productos-precios/new', component: ProductoPrecioFormComponent, canActivate: [authGuard] },
   { path: 'productos-precios/:productoId/:precio/edit', component: ProductoPrecioFormComponent, canActivate: [authGuard] },
+
+  { path: 'productos-costos/new', component: ProductoCostoFormComponent, canActivate: [authGuard] },
+  { path: 'productos-costos/:productoId/:tipoCosto/edit', component: ProductoCostoFormComponent, canActivate: [authGuard] },
 
   { path: 'ordenes', component: OrdenListComponent, canActivate: [authGuard] },
   { path: 'ordenes/new', component: OrdenFormComponent, canActivate: [authGuard] },

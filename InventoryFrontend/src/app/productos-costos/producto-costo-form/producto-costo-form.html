@@ -1,0 +1,87 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="bg-white shadow-2xl rounded-2xl p-8 md:p-12">
+    <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+      {{ isEdit ? 'Editar Costo del Producto' : 'Crear Nuevo Costo para Producto' }}
+    </h2>
+
+    <form (ngSubmit)="onSubmit()" class="space-y-8">
+
+      <!-- Producto (solo información - no se puede cambiar) -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Producto
+        </label>
+        <input type="text"
+               [value]="selectedProducto ? (selectedProducto.nombre + ' (ID: ' + selectedProducto.id + ')') : 'Cargando...'"
+               disabled
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-700">
+      </div>
+
+      <!-- Campos del costo -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Tipo de Costo <span class="text-red-600">*</span>
+            <span *ngIf="isEdit" class="ml-2 text-xs font-medium text-amber-600">(no editable)</span>
+          </label>
+          <select [(ngModel)]="formProductoCosto.tipoCosto"
+                  name="tipoCosto"
+                  required
+                  [disabled]="isEdit"
+                  [class.bg-gray-100]="isEdit"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+            <option value="">Seleccione...</option>
+            <option value="General">General</option>
+            <option value="Compra">Compra</option>
+            <option value="Reparacion">Reparación</option>
+            <option value="Pegado">Pegado</option>
+            <option value="Fallado">Fallado</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Costo <span class="text-red-600">*</span></label>
+          <input type="number" 
+                 step="0.0001" 
+                 min="0"
+                 [(ngModel)]="formProductoCosto.costo"
+                 name="costo"
+                 required
+                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad Requerida <span class="text-red-600">*</span></label>
+          <input type="number" 
+                 min="0"
+                 [(ngModel)]="formProductoCosto.cantidadRequerida"
+                 name="cantidadRequerida"
+                 required
+                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+        <textarea [(ngModel)]="formProductoCosto.descripcion"
+                  name="descripcion"
+                  rows="3"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"></textarea>
+      </div>
+
+      <!-- Botones -->
+      <div class="flex justify-center space-x-6 pt-6">
+        <button type="submit"
+                [disabled]="!formProductoCosto.productoId || !formProductoCosto.tipoCosto"
+                class="px-8 py-4 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
+          {{ isEdit ? 'Actualizar Costo' : 'Crear Costo' }}
+        </button>
+        <button type="button" 
+                (click)="goBack()"
+                class="px-8 py-4 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

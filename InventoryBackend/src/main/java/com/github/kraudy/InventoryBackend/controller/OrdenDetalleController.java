@@ -99,7 +99,7 @@ public class OrdenDetalleController {
     
     // De existir, validamos que la cantidad del detalle cumpla con el requisito mínimo del precio
     if (existingPrecio.getCantidadRequerida() > 0){
-      if (ordenDetalle.getCantidad() <= existingPrecio.getCantidadRequerida()) {
+      if (ordenDetalle.getCantidad() < existingPrecio.getCantidadRequerida()) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Para este precio, se necesita un minimo de " + existingPrecio.getCantidadRequerida() + " unidades del producto");
       }
     }
@@ -139,7 +139,7 @@ public class OrdenDetalleController {
 
     // De existir, validamos que la cantidad del detalle cumpla con el requisito mínimo del precio
     if (existingPrecio.getCantidadRequerida() > 0){
-      if (existing.getCantidad() <= existingPrecio.getCantidadRequerida()) {
+      if (existing.getCantidad() < existingPrecio.getCantidadRequerida()) {
         throw new RuntimeException("Para este precio, se necesita un minimo de " + existingPrecio.getCantidadRequerida() + " unidades del producto");
       }
     }

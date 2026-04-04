@@ -13,10 +13,6 @@ export class ProductoPrecioService {
     private http: HttpClient
   ) {}
 
-  getAll(): Observable<ProductoPrecio[]> {
-    return this.http.get<ProductoPrecio[]>(this.apiUrl);
-  }
-
   getPreciosByProducto(productoId: number): Observable<ProductoPrecio[]> {
     return this.http.get<ProductoPrecio[]>(`${this.apiUrl}/${productoId}`);
   }
