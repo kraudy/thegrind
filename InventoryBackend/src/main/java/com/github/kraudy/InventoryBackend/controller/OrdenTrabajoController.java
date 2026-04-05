@@ -75,7 +75,7 @@ public class OrdenTrabajoController {
 
     // Se valida estado anterior y siguiente. Esto es conveniente para filtrar otros productos que puedan tener algun estado en comun pero que son de otro flujo.
     // Se agrega listo para incluir a las ampliaciones
-    if (!List.of("Pegado", "Enmarcado", "Listo", "Entregado").contains(productoTipoEstadoSiguiente.getEstado())) {
+    if (!List.of("Pegado", "Enmarcado", "Armado", "Calado", "Sublimacion", "Bodega", "Listo", "Entregado").contains(productoTipoEstadoSiguiente.getEstado())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El siguiente estado del producto no es valido para progreso de trabajo: " + productoTipoEstadoSiguiente.getEstado());
     }
 
@@ -90,6 +90,14 @@ public class OrdenTrabajoController {
       estado = "Pegado";
     } else if (ordenSeguimientoActual.getEstado().equals("Enmarcado")) {
       estado = "Enmarcado";
+    } else if (ordenSeguimientoActual.getEstado().equals("Armado")) {
+      estado = "Armado";
+    } else if (ordenSeguimientoActual.getEstado().equals("Calado")) {
+      estado = "Calado";
+    } else if (ordenSeguimientoActual.getEstado().equals("Sublimacion")) {
+      estado = "Sublimacion";
+    } else if (ordenSeguimientoActual.getEstado().equals("Bodega")) {
+      estado = "Bodega";
     } else if (ordenSeguimientoActual.getEstado().equals("Listo")) {
       estado = "Entregado";
     } else {
@@ -167,7 +175,7 @@ public class OrdenTrabajoController {
 
     //TODO: Es necesario Enmarcado?
     // tambien se podria validar con el estado actual: Repartir, Impresion pero este podria permitir otros estados como las Ampliaciones que pasan directo a Listo
-    if (!List.of("Reparacion", "Normal", "Enmarcado", "Pegado", "Entregado").contains(productoTipoEstadoSiguiente.getEstado())) {
+    if (!List.of("Reparacion", "Normal", "Enmarcado", "Pegado", "Armado", "Calado", "Sublimacion", "Entregado").contains(productoTipoEstadoSiguiente.getEstado())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El siguiente estado del producto no es valido para asignar trabajo: " + productoTipoEstadoSiguiente.getEstado());
     }
 
@@ -194,7 +202,9 @@ public class OrdenTrabajoController {
       trabajo.setRol("entrega");
     }
 
-    if (productoTipoEstadoSiguiente.getEstado().equals("Pegado") || productoTipoEstadoSiguiente.getEstado().equals("Enmarcado")) {
+    if (productoTipoEstadoSiguiente.getEstado().equals("Pegado") || productoTipoEstadoSiguiente.getEstado().equals("Enmarcado") ||
+        productoTipoEstadoSiguiente.getEstado().equals("Armado") || productoTipoEstadoSiguiente.getEstado().equals("Calado") || 
+        productoTipoEstadoSiguiente.getEstado().equals("Sublimacion")) {
       //TODO: Por ahora, pasar "Pegador" desde el FE
       if (ordenSeguimientoActual.getTipo().equals("Retablos")) {
         if (!usuarioRepository.usuarioEsPegador(trabajador)) {

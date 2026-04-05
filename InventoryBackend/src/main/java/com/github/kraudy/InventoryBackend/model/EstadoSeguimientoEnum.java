@@ -9,7 +9,13 @@ public enum EstadoSeguimientoEnum {
     PEGADO("Pegado"),
     LISTO("Listo"),
     ENTREGADO("Entregado"),
-    NORMAL("Normal");
+    NORMAL("Normal"),
+    // Nuevos estados aquí
+    BODEGA("Bodega"),
+    ARMADO("Armado"),
+    SUBLIMACION("Sublimacion"),
+    CALADO("Calado")
+    ;
 
     private final String dbValue;
 

@@ -479,6 +479,11 @@ Requires=docker.service
 After=docker.service network-online.target
 Wants=network-online.target
 
+# ← These 3 lines ensure ExecStop runs and systemd WAITS for it during full shutdown/reboot/power-off
+DefaultDependencies=no
+Conflicts=shutdown.target
+Before=shutdown.target
+
 [Service]
 Type=oneshot
 RemainAfterExit=yes
@@ -488,7 +493,7 @@ WorkingDirectory=/home/kraudy/thegrind
 ExecStart=/usr/bin/docker compose up -d --build
 
 # Stop (this runs on systemctl stop AND during shutdown/power button)
-ExecStop=/usr/bin/docker compose down
+ExecStop=/usr/bin/docker compose down --timeout 60
 
 # Give more time for graceful shutdown (PostgreSQL and Spring Boot need time)
 TimeoutStartSec=300
@@ -516,12 +521,20 @@ sudo systemctl status thegrind.service
 
 sudo journalctl -u thegrind.service -f
 
-# Check status
-docker compose ps
+# Spring Boot graceful shutdown
+docker compose stop
+
+sudo docker logs thegrind-backend | tail -50 | grep -E "shutdown|SHUTDOWN|graceful|Closing|Stopped"
+
+# Postgres clean shutdown
+sudo docker logs thegrind-db | tail -30 | grep -E "checkpoint|shut down|terminated|LOG:  shutting down"
 
 # seguimiento en linea
 sudo journalctl -u thegrind.service -f
 sudo journalctl -u thegrind.service -xe
+# this shows logs after shutdown
+sudo journalctl -u thegrind.service -b -1 --no-pager | tail -100
+
 docker compose logs backend
 docker compose logs db
 ```

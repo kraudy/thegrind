@@ -151,7 +151,7 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, On
           alert('Error al obtener pegadores. No se puede avanzar.');
         }
       });
-    } else if (det.tipoProducto === 'Molduras') {
+    } else if (det.tipoProducto === 'Molduras') { //TODO: Notar como aqui se asinga primero y despues se avanza
         this.ordenSeguimientoService.assignTrabajo(det.idOrden, det.idOrdenDetalle, "alistador").subscribe({
           next: () => {
             // Assignment successful, now advance
@@ -164,7 +164,7 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, On
             alert('Error al asignar alistador. No se puede avanzar.');
           }
         });
-    } else if (det.tipoProducto === 'Ampliaciones') {
+    } else if (det.tipoProducto === 'Ampliaciones') { //TODO: Aqui se avance y despues se asigna
       this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe({
         next: () => {
           this.load();
@@ -179,8 +179,23 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, On
           });
         },
         error: (err) => {
-          console.error('Error avanzand estado');
-          alert('Error al avanzar estado');
+          console.error('Error avanzand estado para ampliaciones:');
+          alert('Error al avanzar estado para ampliaciones');
+        }
+      });
+    } else if (det.tipoProducto === 'Baner' || det.tipoProducto === 'Calado' || 
+        det.tipoProducto === 'Camisa' || det.tipoProducto === 'Taza' || det.tipoProducto === 'Llavero') {
+
+      this.ordenSeguimientoService.assignTrabajo(det.idOrden, det.idOrdenDetalle, "alistador").subscribe({
+        next: () => {
+          // Assignment successful, now advance
+          this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
+            this.load();
+          });
+        },
+        error: (err) => {
+          console.error('Error assigning alistador:', err);
+          alert('Error al asignar alistador. No se puede avanzar.');
         }
       });
     }

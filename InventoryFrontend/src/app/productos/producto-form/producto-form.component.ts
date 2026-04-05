@@ -46,6 +46,7 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     private productoModeloService: ProductoModeloService,
     private location: Location,
     private route: ActivatedRoute,
+    private router: Router,
     private cd: ChangeDetectorRef
   ) {}
 
@@ -172,10 +173,11 @@ export class ProductoFormComponent implements OnChanges, OnInit {
       });
     } else {
       console.log('Creating producto: ');
-      this.productoService.create(this.formProducto).subscribe(() => {
+      this.productoService.create(this.formProducto).subscribe((createdProducto) => {
         this.productoSaved.emit();
         this.resetForm();
-        this.location.back();
+        // Navigate to the newly created product's detail page
+        this.router.navigate(['productos-detalle', createdProducto.id]);
       });
     }
   }

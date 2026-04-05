@@ -116,7 +116,12 @@ public class OrdenSeguimientoService {
                 EstadoSeguimientoEnum.NORMAL,
                 EstadoSeguimientoEnum.IMPRESION,
                 EstadoSeguimientoEnum.PEGADO,
-                EstadoSeguimientoEnum.ENMARCADO
+                EstadoSeguimientoEnum.ENMARCADO,
+
+                EstadoSeguimientoEnum.BODEGA,
+                EstadoSeguimientoEnum.ARMADO,
+                EstadoSeguimientoEnum.SUBLIMACION,
+                EstadoSeguimientoEnum.CALADO
         );
         
         // Si el estado era Reparacion, Normal, Impresion, Enmarcado, Pegado, se elimina orden de trabajo asociada
@@ -137,18 +142,31 @@ public class OrdenSeguimientoService {
     }
 
     private void resetPreviousTrabajoIfNeeded(OrdenSeguimiento actual) {
-        if (!List.of(EstadoSeguimientoEnum.IMPRESION, EstadoSeguimientoEnum.ENMARCADO,
-                EstadoSeguimientoEnum.PEGADO, EstadoSeguimientoEnum.LISTO,
+        if (!List.of(EstadoSeguimientoEnum.IMPRESION, 
+                EstadoSeguimientoEnum.ENMARCADO, EstadoSeguimientoEnum.ARMADO, EstadoSeguimientoEnum.CALADO, EstadoSeguimientoEnum.SUBLIMACION, EstadoSeguimientoEnum.PEGADO, 
+                EstadoSeguimientoEnum.LISTO,
                 EstadoSeguimientoEnum.ENTREGADO).contains(EstadoSeguimientoEnum.fromString(actual.getEstado()))) {
             // El trabajo no requiere resetearse
             return;
         }
+        int seq = 0;
 
-        int seq = switch (EstadoSeguimientoEnum.fromString(actual.getEstado())) {
+        if (actual.getTipo().equals("Ampliaciones")) {
+          seq = switch (EstadoSeguimientoEnum.fromString(actual.getEstado())) {
+            case IMPRESION -> actual.getSecuencia() - 1;
+            case LISTO -> actual.getSecuencia() - 2;
+            case ENTREGADO -> actual.getSecuencia();
+            default -> actual.getSecuencia() - 2;
+          };
+        } else {
+          seq = switch (EstadoSeguimientoEnum.fromString(actual.getEstado())) {
             case IMPRESION, LISTO -> actual.getSecuencia() - 1;
             case ENTREGADO -> actual.getSecuencia();
             default -> actual.getSecuencia() - 2;
-        };
+          };
+        }
+
+       
 
         ProductoTipoEstadoPK resetPk = new ProductoTipoEstadoPK(
                 actual.getTipo(), actual.getSubTipo(), seq);
@@ -160,7 +178,7 @@ public class OrdenSeguimientoService {
                 actual.getIdOrden(), actual.getIdOrdenDetalle(), resetEstado.getEstado());
 
         OrdenTrabajo trabajo = ordenTrabajoRepository.findById(trabajoPk)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay trabajo asignado para este estado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay trabajo asignado para este estado:" + resetEstado.getEstado()));
 
         trabajo.setCantidadTrabajada(0);
         trabajo.setCantidadNoTrabajada(trabajo.getCantidadAsignada());

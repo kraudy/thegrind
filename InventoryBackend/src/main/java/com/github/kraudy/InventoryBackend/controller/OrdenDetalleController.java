@@ -155,7 +155,7 @@ public class OrdenDetalleController {
   }
 
   // Eliminar un detalle
-  @DeleteMapping("/{idOrden}/{idOrdenDetalle}/{idProducto}")
+  @DeleteMapping("/{idOrden}/{idOrdenDetalle}")
   public void delete(
           @PathVariable Long idOrden,
           @PathVariable Long idOrdenDetalle) {

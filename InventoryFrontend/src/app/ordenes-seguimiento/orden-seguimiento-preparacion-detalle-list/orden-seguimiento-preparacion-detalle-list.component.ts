@@ -102,7 +102,10 @@ export class OrdenSeguimientoPreparacionDetalleListComponent implements OnInit, 
   }
 
   advanceDetail(det: OrdenSeguimientoDetallePreparacion) {
-    if (det.estadoActual === 'Pegado' || det.estadoActual === 'Enmarcado') {
+    //TODO: Componer esto para que quede dinamico como en impresion
+    if (det.estadoActual === 'Pegado' || det.estadoActual === 'Enmarcado' || 
+        det.estadoActual === 'Armado' || det.estadoActual === 'Calado' || 
+        det.estadoActual === 'Sublimacion' || det.estadoActual === 'Bodega') {
       // Add progress with cantidadAsignadaActual before advancing
       this.service.progresoTrabajo(det.idOrden, det.idOrdenDetalle, det.cantidadAsignadaActual).subscribe({
         next: () => {

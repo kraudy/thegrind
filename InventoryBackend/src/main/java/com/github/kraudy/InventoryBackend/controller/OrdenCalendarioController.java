@@ -20,6 +20,7 @@ import com.github.kraudy.InventoryBackend.repository.OrdenCalendarioRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenDetalleRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoRepository;
+import com.github.kraudy.InventoryBackend.repository.OrdenTrabajoRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoTipoEstadoRepository;
 import com.github.kraudy.InventoryBackend.service.OrdenCalendarioService;
@@ -50,6 +51,9 @@ public class OrdenCalendarioController {
 
   @Autowired
   private ProductoTipoEstadoRepository productoTipoEstadoRepository;
+
+  @Autowired
+  private OrdenTrabajoRepository ordenTrabajoRepository;
 
   @Autowired
   private OrdenCalendarioService ordenCalendarioService;
@@ -113,6 +117,9 @@ public class OrdenCalendarioController {
     }
 
     //TODO: Deberia eleminar el historico tambien?
+    
+    /* Elimina el trabajo de la orden */
+    ordenTrabajoRepository.deleteByOrden(id);
 
     //TODO: Try to move to cascade
     /* Elimina el seguimiento de los detalles */

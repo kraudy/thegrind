@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class OrdenCalendarioService {
   private final OrdenCalendarioRepository ordenCalendarioRepository;
+  private final OrdenTrabajoRepository ordenTrabajoRepository;
   private final OrdenRepository ordenRepository;
   private final OrdenDetalleRepository ordenDetalleRepository;
   private final ProductoRepository productoRepository;
@@ -68,7 +69,28 @@ public class OrdenCalendarioService {
       ordenSeguimiento.setSecuencia(productoTipoEstado.getSecuencia());
       ordenSeguimiento.setSeguimientoPor(currentUser);
 
-      ordenSeguimientoRepository.save(ordenSeguimiento);
+      ordenSeguimiento = ordenSeguimientoRepository.save(ordenSeguimiento);
+
+      if (ordenSeguimiento.getSubTipo().equals("Vacio") || ordenSeguimiento.getSubTipo().equals("Pintado") || ordenSeguimiento.getSubTipo().equals("Lijado")) {
+        OrdenTrabajo trabajo = new OrdenTrabajo();
+        trabajo.setIdOrden(ordenDetalle.idOrden());
+        trabajo.setIdOrdenDetalle(ordenDetalle.idOrdenDetalle());
+        trabajo.setEstado("Bodega"); 
+
+        trabajo.setCantidadAsignada(ordenDetalle.cantidad());
+        trabajo.setCantidadTrabajada(0);
+        trabajo.setCantidadNoTrabajada(ordenDetalle.cantidad());
+
+        trabajo.setSecuencia(1);
+        trabajo.setTrabajador("alistador");
+        trabajo.setIdProducto(ordenDetalle.idProducto());
+        trabajo.setRol("alista"); 
+        trabajo.setComentario(""); 
+        trabajo.setFechaTrabajo(ordenCalendario.getFechaTrabajo().toLocalDate());
+
+        ordenTrabajoRepository.save(trabajo);
+      }
+
     }
 
     return ordenCalendarioRepository.save(ordenCalendario);

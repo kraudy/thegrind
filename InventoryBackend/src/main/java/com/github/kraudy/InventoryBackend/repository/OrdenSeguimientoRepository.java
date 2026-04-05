@@ -211,7 +211,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
       FROM orden_seguimiento seg                                -- Relacionamos con orden_seguimiento para obtener el estado actual de cada orden
       JOIN cal ON cal.id = seg.id_orden
 
-      WHERE seg.estado IN ('Enmarcado', 'Pegado') 
+      WHERE seg.estado IN ('Enmarcado', 'Pegado', 'Bodega', 'Armado', 'Sublimacion') 
       GROUP BY seg.id_orden
     )
     SELECT
@@ -251,9 +251,9 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
         COALESCE(trabajoPrevio.cantidad_trabajada, 0) AS cantidadTrabajadaPrevio,
 
         CASE 
-          WHEN seg.estado IN ('Enmarcado', 'Pegado') THEN true 
+          WHEN seg.estado IN ('Enmarcado', 'Pegado', 'Bodega', 'Armado', 'Calado', 'Sublimacion') THEN true 
           ELSE false 
-        END AS permiteMover                                                 -- Solo permitir mover si el estado es Enmarcado o Pegado
+        END AS permiteMover                                                 -- Solo permitir mover si el estado es Enmarcado, Pegado, Bodega, Armado o Sublimacion
 
     FROM orden_seguimiento seg
     JOIN orden_detalle det ON det.id_orden = seg.id_orden                   -- Necesitamos el deatalle para mostrar el producto y la cantidad
@@ -268,7 +268,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     LEFT JOIN orden_trabajo trabajoActual 
                          ON trabajoActual.id_orden = seg.id_orden
                         AND trabajoActual.id_orden_detalle = seg.id_orden_detalle
-                        AND trabajoActual.estado IN ('Pegado', 'Enmarcado') -- Lo ocupamos para obtener la cantidad trabajada actualmente
+                        AND trabajoActual.estado IN ('Pegado', 'Enmarcado', 'Armado', 'Calado', 'Sublimacion') -- Lo ocupamos para obtener la cantidad trabajada actualmente
 
     WHERE seg.id_orden = :idOrden
       AND seg.estado NOT IN ('Listo', 'Entregado') -- Mostrar detalles anteriores a preparacion pero que no estén listos o entregados

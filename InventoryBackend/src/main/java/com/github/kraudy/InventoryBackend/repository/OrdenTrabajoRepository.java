@@ -46,4 +46,12 @@ public interface OrdenTrabajoRepository extends JpaRepository<OrdenTrabajo, Orde
     """, nativeQuery = true)
   UsuarioDTO getNormal(Long idOrden, Long idOrdenDetalle);
 
+  @Modifying
+  @Transactional
+  @Query(value = """
+    DELETE FROM orden_trabajo trabajo
+    WHERE trabajo.id_orden = :idOrden
+    """, nativeQuery = true)
+  void deleteByOrden(@Param("idOrden") Long idOrden);
+
 }
