@@ -268,7 +268,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     LEFT JOIN orden_trabajo trabajoActual 
                          ON trabajoActual.id_orden = seg.id_orden
                         AND trabajoActual.id_orden_detalle = seg.id_orden_detalle
-                        AND trabajoActual.estado IN ('Pegado', 'Enmarcado', 'Armado', 'Calado', 'Sublimacion') -- Lo ocupamos para obtener la cantidad trabajada actualmente
+                        AND trabajoActual.estado IN ('Pegado', 'Enmarcado', 'Armado', 'Calado', 'Sublimacion', 'Bodega') -- Lo ocupamos para obtener la cantidad trabajada actualmente
 
     WHERE seg.id_orden = :idOrden
       AND seg.estado NOT IN ('Listo', 'Entregado') -- Mostrar detalles anteriores a preparacion pero que no estén listos o entregados
@@ -338,7 +338,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     LEFT JOIN orden_trabajo trabajoActual 
                          ON trabajoActual.id_orden = seg.id_orden
                         AND trabajoActual.id_orden_detalle = seg.id_orden_detalle
-                        AND trabajoActual.estado IN ('Pegado', 'Enmarcado') -- Lo ocupamos para obtener la cantidad trabajada actualmente
+                        AND trabajoActual.estado IN ('Pegado', 'Enmarcado', 'Armado', 'Calado', 'Sublimacion', 'Bodega') -- Lo ocupamos para obtener la cantidad trabajada actualmente
 
     WHERE seg.id_orden = :idOrden
                                                                             -- por ahora mostramos todos los estados

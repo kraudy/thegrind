@@ -227,6 +227,8 @@ public class OrdenSeguimientoService {
         }
 
         if (siguiente.getEstado().equals(EstadoSeguimientoEnum.ENTREGADO.toString())) {
+            //TODO: Aqui, una vez la orden esta entregada, agregar nuevo registro para facturacion, puede generarse aqui y caer en lista como ordenes para facturar
+            // o incluso un nuevo estado en orden trabajo. Luego, una vez se factura la orden, se genera la factura en su propia tabla y se le relaciona la orden correspondiente
             if (ordenSeguimientoRepository.estanTodosLosDetallesEntregados(actual.getIdOrden())) {
                 ordenRepository.updateEstado(actual.getIdOrden(), siguiente.getEstado());
             }

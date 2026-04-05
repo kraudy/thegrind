@@ -102,7 +102,10 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDe
 
   advanceDetail(det: OrdenSeguimientoDetalleEntrega) {
     let cantidad =  0;
-    if (det.tipoProducto === 'Molduras' || det.tipoProducto === 'Retables') {
+    if (det.tipoProducto === 'Molduras' || det.tipoProducto === 'Retablos' || det.tipoProducto === 'Tabla' || 
+      det.tipoProducto === 'Baner' || det.tipoProducto === 'Calado' || det.tipoProducto === 'Camisa' || 
+      det.tipoProducto === 'Taza' || det.tipoProducto === 'Llavero'
+    ) {
       cantidad = det.cantidadTrabajadaActual;
     } else {
       cantidad = det.cantidadTrabajadaPrevio;

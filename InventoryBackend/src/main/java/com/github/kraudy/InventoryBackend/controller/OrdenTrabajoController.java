@@ -69,10 +69,6 @@ public class OrdenTrabajoController {
     ProductoTipoEstado productoTipoEstadoSiguiente = productoTipoEstadoRepository.findById(productoTipoEstadoSiguientePK).
       orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Siguiente estado no encontrado"));
 
-    ProductoTipoEstadoPK productoTipoEstadoAnteriorPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 1);
-    ProductoTipoEstado productoTipoEstadoAnterior = productoTipoEstadoRepository.findById(productoTipoEstadoAnteriorPK).
-      orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
-
     // Se valida estado anterior y siguiente. Esto es conveniente para filtrar otros productos que puedan tener algun estado en comun pero que son de otro flujo.
     // Se agrega listo para incluir a las ampliaciones
     if (!List.of("Pegado", "Enmarcado", "Armado", "Calado", "Sublimacion", "Bodega", "Listo", "Entregado").contains(productoTipoEstadoSiguiente.getEstado())) {
@@ -80,9 +76,9 @@ public class OrdenTrabajoController {
     }
 
     //TODO: validar si esta validacion es necesaria
-    if (!List.of("Reparacion", "Normal", "Impresion", "Enmarcado", "Pegado").contains(productoTipoEstadoAnterior.getEstado())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El estado anterior del producto no es valido para progreso de trabajo: " + productoTipoEstadoAnterior.getEstado());
-    }
+    //if (!List.of("Reparacion", "Normal", "Impresion", "Enmarcado", "Pegado").contains(productoTipoEstadoAnterior.getEstado())) {
+    //  throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El estado anterior del producto no es valido para progreso de trabajo: " + productoTipoEstadoAnterior.getEstado());
+    //}
 
     // estado anterior por ahora deberia ser "Reparacion" o "Normal"
     String estado = "";
@@ -101,6 +97,9 @@ public class OrdenTrabajoController {
     } else if (ordenSeguimientoActual.getEstado().equals("Listo")) {
       estado = "Entregado";
     } else {
+      ProductoTipoEstadoPK productoTipoEstadoAnteriorPK = new ProductoTipoEstadoPK(ordenSeguimientoActual.getTipo(), ordenSeguimientoActual.getSubTipo(), ordenSeguimientoActual.getSecuencia() - 1);
+      ProductoTipoEstado productoTipoEstadoAnterior = productoTipoEstadoRepository.findById(productoTipoEstadoAnteriorPK).
+        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estado anterior no encontrado"));
       estado = productoTipoEstadoAnterior.getEstado();
     }
     OrdenTrabajoPK trabajoPK = new OrdenTrabajoPK(idOrden, idOrdenDetalle, estado);
