@@ -12,10 +12,12 @@ import com.github.kraudy.InventoryBackend.model.OrdenTrabajoPK;
 import com.github.kraudy.InventoryBackend.dto.EstadosPorDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleFacturacionDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleEntregaDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleImpresionDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetallePreparacionDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosGeneralDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoFacturacionDTO;
 import com.github.kraudy.InventoryBackend.model.Orden;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajo;
@@ -136,6 +138,17 @@ public class OrdenSeguimientoController {
   @GetMapping("/para-repartir/{idOrden}")
   public List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaRepartir(@PathVariable Long idOrden) {
     return ordenSeguimientoRepository.getSeguimientoDeOrdenParaRepartir(idOrden);
+  }
+
+  /* Retorna lista de ordenes para facturacion */
+  @GetMapping("/para-facturacion")
+  public List<OrdenSeguimientoFacturacionDTO> getOrdenesParaFacturacion() {
+    return ordenSeguimientoRepository.getOrdenesParaFacturacion();
+  }
+
+  @GetMapping("/para-facturacion/{idOrden}")
+  public List<OrdenSeguimientoDetalleFacturacionDTO> getSeguimientoDeOrdenParaFacturacion(@PathVariable Long idOrden) {
+    return ordenSeguimientoRepository.getSeguimientoDeOrdenParaFacturacion(idOrden);
   }
 
   /* Muestra el seguimiento completo de los detalles de una orden */

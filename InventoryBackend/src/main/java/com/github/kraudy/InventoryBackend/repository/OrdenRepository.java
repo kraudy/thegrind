@@ -74,10 +74,17 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
   @Transactional
   @Query(value = """
     UPDATE orden
-    SET estado = :estado
+    SET estado = :estado, 
+      CASE 
+        WHEN :estado = 'Listo'      THEN fecha_preparada = CURRENT_TIMESTAMP
+        WHEN :estado = 'Entregado'  THEN fecha_despachada = CURRENT_TIMESTAMP
+        WHEN :estado = 'Repartida'  THEN fecha_preparada = NULL, fecha_despachada = NULL
+        WHEN :estado = 'Recibida'   THEN fecha_preparada = NULL, fecha_despachada = NULL
+        ELSE fecha_modificacion = CURRENT_TIMESTAMP
+      END
     WHERE id = :idOrden
     """, nativeQuery = true)
-  void updateEstado(Long idOrden, String estado);
+  void updateEstadoOrdenYFecha(Long idOrden, String estado);
 
   @Query(value = """
     SELECT COALESCE(SUM(od.subtotal), 0)

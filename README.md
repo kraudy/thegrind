@@ -533,7 +533,7 @@ sudo docker logs thegrind-db | tail -30 | grep -E "checkpoint|shut down|terminat
 sudo journalctl -u thegrind.service -f
 sudo journalctl -u thegrind.service -xe
 # this shows logs after shutdown
-sudo journalctl -u thegrind.service -b -1 --no-pager | tail -100
+sudo journalctl -u thegrind.service -b -1 --no-pager | tail -200
 
 docker compose logs backend
 docker compose logs db

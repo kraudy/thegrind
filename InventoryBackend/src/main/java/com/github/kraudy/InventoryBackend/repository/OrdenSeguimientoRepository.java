@@ -6,6 +6,8 @@ import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosGeneralDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleEntregaDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoFacturacionDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleFacturacionDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleImpresionDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetallePreparacionDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
@@ -424,6 +426,95 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     ORDER BY cal.id_cliente, cal.fecha_vencimiento ASC
   """, nativeQuery = true)
   List<OrdenSeguimientoEstadosGeneralDTO> getOrdenesPorEstadosSeguimiento(@Param("search") String search, @Param("estadoOrden") String estadoOrden);
+
+
+  // esto porque la orden puede estar lista un dia antes de su entrega
+  @Query(value = """
+    WITH factura_totals AS (
+        SELECT 
+            seg.id_orden,
+            SUM(det.precio_unitario * COALESCE(trabajoEntregado.cantidad_trabajada, 0)) AS totalFactura,
+            SUM(COALESCE(trabajoEntregado.cantidad_trabajada, 0))                    AS totalProductosFactura
+        FROM orden_seguimiento seg
+        JOIN orden_detalle det 
+            ON det.id_orden = seg.id_orden 
+           AND det.id_orden_detalle = seg.id_orden_detalle
+        LEFT JOIN orden_trabajo trabajoEntregado 
+            ON trabajoEntregado.id_orden = seg.id_orden
+           AND trabajoEntregado.id_orden_detalle = seg.id_orden_detalle
+           AND trabajoEntregado.estado IN ('Entregado')
+        WHERE seg.estado IN ('Entregado')
+        GROUP BY seg.id_orden
+    )
+    SELECT
+      ord.id,
+      ord.id_cliente AS idCliente,
+      CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
+      ord.creada_por  AS creadaPor,
+
+      ord.total_monto          AS totalMontoOrden,
+      COALESCE(factura.totalFactura, 0)         AS totalMontoFactura,
+      
+      ord.total_productos      AS totalProductosOrden,
+      COALESCE(factura.totalProductosFactura, 0) AS totalProductosFactura,
+
+      ord.fecha_creacion AS fechaCreacion,
+
+      ord.fecha_vencimiento AS fechaVencimiento,
+
+      ord.fecha_preparada AS fechaLista,
+      ord.fecha_despachada AS fechaEntregada,
+      ord.fecha_modificacion AS fechaModificacion,
+      ord.estado AS estado,
+
+      (ord.fecha_vencimiento - current_timestamp)::text AS tiempoRestante,
+      (ord.fecha_creacion - ord.fecha_despachada)::text AS duracionTrabajo
+
+    FROM orden_calendario cal
+    JOIN orden ord ON ord.id = cal.id_orden
+    JOIN cliente cte ON cte.id = ord.id_cliente
+
+    LEFT JOIN factura_totals factura ON factura.id_orden = ord.id
+
+    WHERE ord.estado = 'Entregado'
+    ORDER BY ord.id_cliente, ord.fecha_vencimiento ASC
+  """, nativeQuery = true)
+  List<OrdenSeguimientoFacturacionDTO> getOrdenesParaFacturacion();
+
+  /* Aqui no se especifica current date porque el id ya deberia estar filtrado */
+  @Query(value = """
+    SELECT
+        seg.id_orden,
+        seg.id_orden_detalle,
+        det.id_producto,
+        prod.nombre as nombreProducto,
+        det.cantidad as cantidadOrden,
+        det.subtotal as subTotalOrden,
+        -- //TODO: agregar usuario creacion al detalle
+        det.precio_unitario,
+        det.fecha_creacion,
+        det.fecha_modificacion,
+        seg.tipo as tipoProducto,
+        seg.sub_tipo as subTipoProducto,
+        COALESCE(trabajoEntregado.trabajador, '') AS trabajadorEntrega,
+        COALESCE(trabajoEntregado.cantidad_trabajada, 0) AS cantidadFactura,
+        (det.precio_unitario * COALESCE(trabajoEntregado.cantidad_trabajada, 0)) AS subtotalFactura
+
+    FROM orden_seguimiento seg
+    JOIN orden_detalle det ON det.id_orden = seg.id_orden                   -- Necesitamos el deatalle para mostrar el producto y la cantidad
+                        AND det.id_orden_detalle = seg.id_orden_detalle
+    JOIN producto prod ON prod.id = det.id_producto
+
+    LEFT JOIN orden_trabajo trabajoEntregado 
+                         ON trabajoEntregado.id_orden = seg.id_orden
+                        AND trabajoEntregado.id_orden_detalle = seg.id_orden_detalle
+                        AND trabajoEntregado.estado IN ('Entregado') -- Lo ocupamos para obtener la cantidad entregada
+
+    WHERE seg.id_orden = :idOrden
+      AND seg.estado IN ('Entregado') -- Mostrar detalles entregados
+    ORDER BY seg.id_orden_detalle ASC 
+    """, nativeQuery = true)
+  List<OrdenSeguimientoDetalleFacturacionDTO> getSeguimientoDeOrdenParaFacturacion(@Param("idOrden") Long idOrden);
 
 
   @Modifying

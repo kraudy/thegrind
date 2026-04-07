@@ -128,7 +128,7 @@ public class OrdenCalendarioController {
     /* Elimina el calendario de la orden */
     ordenCalendarioRepository.deleteById(id);
 
-    ordenRepository.updateEstado(id, "Recibida"); // Deja la orden como recibida para que pueda ser re-agendada
+    ordenRepository.updateEstadoOrdenYFecha(id, "Recibida"); // Deja la orden como recibida para que pueda ser re-agendada
   }
 
 }

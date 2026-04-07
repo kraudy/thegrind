@@ -12,6 +12,9 @@ import { OrdenSeguimientoDetallePreparacion } from './orden-seguimiento-detalle-
 import { OrdenSeguimientoDetalleEntrega } from './orden-seguimiento-detalle-entrega.model';
 import { OrdenSeguimientoDetalleGeneral } from './orden-seguimiento-detalle-general.model';
 
+import { OrdenFacturacion } from '../ordenes-facturacion/orden-facturacion.model';
+import { OrdenFacturacionDetalle } from '../ordenes-facturacion/orden-facturacion-detalle.model';
+
 
 @Injectable({
   providedIn: 'root',
@@ -71,6 +74,15 @@ export class OrdenSeguimientoService {
 
   getOrdenDetalleParaRepartir(idOrden: number): Observable<OrdenSeguimientoDetalle[]> {
     return this.http.get<OrdenSeguimientoDetalle[]>(`${this.apiUrl}/para-repartir/${idOrden}`);
+  }
+
+  /* Seguimiento para facturacion */
+  getOrdenesParaFacturacion(): Observable<OrdenFacturacion[]> {
+    return this.http.get<OrdenFacturacion[]>(`${this.apiUrl}/para-facturacion`);
+  }
+
+  getOrdenDetalleParaFacturacion(idOrden: number): Observable<OrdenFacturacionDetalle[]> {
+    return this.http.get<OrdenFacturacionDetalle[]>(`${this.apiUrl}/para-facturacion/${idOrden}`);
   }
 
   getByDetalle(idOrden: number, idOrdenDetalle: number): Observable<OrdenSeguimientoDetalle[]> {

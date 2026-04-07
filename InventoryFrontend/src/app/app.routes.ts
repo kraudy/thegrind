@@ -43,7 +43,11 @@ import { OrdenSeguimientoImpresionDetalleListComponent } from './ordenes-seguimi
 import { OrdenSeguimientoGeneralListComponent } from './ordenes-seguimiento/orden-seguimiento-general-list/orden-seguimiento-general-list.component';
 import { OrdenPagoAprobarListComponent } from './ordenes-pago/orden-pago-list/orden-pago-aprobar-list.component';
 
+import { OrdenFacturacionDetalleListComponent } from './ordenes-facturacion/orden-facturacion-detalle-list/orden-facturacion-detalle-list.component';
+import { OrdenFacturacionListComponent } from './ordenes-facturacion/orden-facturacion-list/orden-facturacion-list.component';
+
 import { authGuard } from './auth/auth.guard';
+
 
 export const routes: Routes = [
   { path: '', component: LoginComponent },
@@ -82,6 +86,11 @@ export const routes: Routes = [
   /* Pago de ordenes */
 
   { path: 'ordenes-pago/aprobar', component: OrdenPagoAprobarListComponent, canActivate: [authGuard] },
+
+  /* Facturacion de ordenes */
+
+  { path: 'ordenes-facturacion', component: OrdenFacturacionListComponent, canActivate: [authGuard] },
+  { path: 'ordenes-facturacion/:idOrden/:clienteNombre', component: OrdenFacturacionDetalleListComponent, canActivate: [authGuard] },
 
   /* Seguimiento de ordenes */
 
