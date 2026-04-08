@@ -23,7 +23,7 @@ export class OrdenPagoService {
     let params: any = {};
     if (search?.trim()) params.search = search.trim();
     if (estado) params.estado = estado;
-    return this.http.get<OrdenPago[]>(`${this.apiUrl}/pendientes`, { params });
+    return this.http.get<OrdenPago[]>(`${this.apiUrl}/pagos`, { params });
   }
 
   aprobarPago(id: number): Observable<void> {

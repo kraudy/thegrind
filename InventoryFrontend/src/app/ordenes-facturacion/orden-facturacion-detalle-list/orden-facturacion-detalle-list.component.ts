@@ -1,19 +1,25 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ChangeDetectorRef } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { OrdenSeguimientoService } from '../../ordenes-seguimiento/orden-seguimiento.service';
+
 import { NotificationService } from '../../shared/notification.service'; 
+import { ToastService } from '../../shared/toast/toast.service';   // ← NEW
+
 import { OrdenFacturacionDetalle } from '../orden-facturacion-detalle.model';
+
+import { OrdenPagoService } from '../../ordenes-pago/orden-pago.service';
+import { OrdenPago } from '../../ordenes-pago/orden-pago.model';
 
 @Component({
   selector: 'app-orden-facturacion-detalle-list',
   standalone: true,
-  imports: [CommonModule],   // ← removed RouterLink (not used)
+  imports: [CommonModule, FormsModule],
   templateUrl: './orden-facturacion-detalle-list.html',
   styleUrls: ['./orden-facturacion-detalle-list.css'],
 })
@@ -25,18 +31,37 @@ export class OrdenFacturacionDetalleListComponent implements OnInit, OnDestroy {
   detalles: OrdenFacturacionDetalle[] = [];
   clienteNombre = 'Cargando...';
 
-  // Totals passed from list component
   totalProductosOrden: number = 0;
   totalMontoOrden: number = 0;
   totalProductosFactura: number = 0;
   totalMontoFactura: number = 0;
+
+  // ==================== NUEVO ====================
+  saldoPendiente: number = 0;
+
+  // ==================== PAGOS ====================
+  pagos: OrdenPago[] = [];
+
+  // ==================== Modal Saldo ====================
+  showRegistrarSaldoModal = false;
+
+  nuevoPago = {
+    monto: 0,
+    metodoPago: 'Efectivo',
+    codigoReferencia: '',
+    banco: '',
+    notas: '',
+    tipoPago: 'Saldo' as const
+  };
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private service: OrdenSeguimientoService,
     private notificationService: NotificationService, 
-    private cd: ChangeDetectorRef
+    private toastService: ToastService, 
+    private cd: ChangeDetectorRef,
+    private ordenPagoService: OrdenPagoService
   ) {}
 
   ngOnInit() {
@@ -45,22 +70,23 @@ export class OrdenFacturacionDetalleListComponent implements OnInit, OnDestroy {
     this.notificationService.refreshNeeded$
       .pipe(takeUntil(this.destroy$))
       .subscribe(view => {
-        if (view === 'seguimiento') {
-          console.log('🔄 Real-time refresh triggered for facturación detail');
-          this.load();
+        if (view === 'seguimiento' || view === 'pago') {
+          console.log('🔄 Refresh triggered in facturación');
+          this.loadAll();
         }
       });
 
     this.idOrden = Number(this.route.snapshot.paramMap.get('idOrden'));
     this.clienteNombre = String(this.route.snapshot.queryParamMap.get('clienteNombre') || this.route.snapshot.paramMap.get('clienteNombre'));
     
-    // Read totals from query params
+    // Leer todos los valores desde query params
     this.totalProductosOrden = Number(this.route.snapshot.queryParamMap.get('totalProductosOrden')) || 0;
     this.totalMontoOrden = Number(this.route.snapshot.queryParamMap.get('totalMontoOrden')) || 0;
     this.totalProductosFactura = Number(this.route.snapshot.queryParamMap.get('totalProductosFactura')) || 0;
     this.totalMontoFactura = Number(this.route.snapshot.queryParamMap.get('totalMontoFactura')) || 0;
-    
-    this.load();
+    this.saldoPendiente = Number(this.route.snapshot.queryParamMap.get('saldoPendiente')) || 0;   // ← NUEVO
+
+    this.loadAll();
   }
 
   ngOnDestroy() {
@@ -68,7 +94,12 @@ export class OrdenFacturacionDetalleListComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  load() {
+  private loadAll(): void {
+    this.loadDetalles();
+    this.loadPagos();
+  }
+
+  private loadDetalles(): void {
     this.service.getOrdenDetalleParaFacturacion(this.idOrden).subscribe({
       next: (data) => {
         this.detalles = data || [];
@@ -78,11 +109,83 @@ export class OrdenFacturacionDetalleListComponent implements OnInit, OnDestroy {
     });
   }
 
+  private loadPagos(): void {
+    if (!this.idOrden) return;
+    this.ordenPagoService.getPagosByOrden(this.idOrden).subscribe({
+      next: (pagos) => {
+        this.pagos = pagos || [];
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando pagos', err);
+        this.pagos = [];
+      }
+    });
+  }
+
+  // ==================== Modal Saldo (con prellenado automático) ====================
+  openRegistrarSaldoModal() {
+    this.nuevoPago = {
+      monto: this.saldoPendiente,           // ← PRELLENADO AUTOMÁTICO
+      metodoPago: 'Efectivo',
+      codigoReferencia: '',
+      banco: '',
+      notas: '',
+      tipoPago: 'Saldo'
+    };
+    this.showRegistrarSaldoModal = true;
+  }
+
+  onMetodoPagoChange() {
+    if (this.nuevoPago.metodoPago !== 'Transferencia') {
+      this.nuevoPago.codigoReferencia = '';
+      this.nuevoPago.banco = '';
+    }
+  }
+
+  registrarSaldo() {
+    if (!this.idOrden || this.nuevoPago.monto <= 0) {
+      alert('❌ El monto debe ser mayor a 0');
+      return;
+    }
+
+    if (this.nuevoPago.metodoPago === 'Transferencia') {
+      if (!this.nuevoPago.codigoReferencia?.trim()) {
+        alert('❌ El código de referencia es obligatorio cuando el método es Transferencia.');
+        return;
+      }
+      if (!this.nuevoPago.banco || this.nuevoPago.banco === '') {
+        alert('❌ Debe seleccionar un banco cuando el método es Transferencia.');
+        return;
+      }
+    }
+
+    this.ordenPagoService.registrarPago(this.idOrden, this.nuevoPago).subscribe({
+      next: () => {
+        this.showRegistrarSaldoModal = false;
+
+        // ← Beautiful toast instead of alert
+        this.toastService.showToast(
+          'success',
+          'Pago registrado',
+          `Se registró un pago de saldo por C$ ${this.nuevoPago.monto.toFixed(2)}`,
+          5000
+        );
+        //alert('✅ Pago de Saldo registrado correctamente.\nEl administrador debe aprobarlo.');
+
+        this.loadAll();
+      },
+      error: (err) => {
+        console.error('Error registrando saldo', err);
+        alert('No se pudo registrar el pago de saldo. Revisa la consola.');
+      }
+    });
+  }
+
   generarFactura(): void {
     if (confirm('¿Desea generar la factura con las cantidades entregadas?')) {
-      // TODO: Replace with real service call when you create FacturaController
       alert('✅ Factura generada (backend pendiente). Los datos ya están listos.');
-      this.load();
+      this.loadAll();
     }
   }
 

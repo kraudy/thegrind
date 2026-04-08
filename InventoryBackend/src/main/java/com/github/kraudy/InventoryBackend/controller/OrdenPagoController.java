@@ -44,8 +44,8 @@ public class OrdenPagoController {
     }
 
     // Get all payments with optional search + estado filter
-    @GetMapping("/pendientes")
-    public List<OrdenPagoDTO> getPendientes(
+    @GetMapping("/pagos")
+    public List<OrdenPagoDTO> getPagos(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String estado) {
         return ordenPagoRepository.findAllWithFilter(search, estado);

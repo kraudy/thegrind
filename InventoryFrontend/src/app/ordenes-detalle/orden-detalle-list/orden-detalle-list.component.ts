@@ -16,7 +16,9 @@ import { OrdenPago } from '../../ordenes-pago/orden-pago.model';
 
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+
 import { NotificationService } from '../../shared/notification.service';
+import { ToastService } from '../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-orden-detalle-list',
@@ -50,6 +52,7 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges, OnDestroy {
       private ordenDetalleService: OrdenDetalleService,
       private ordenPagoService: OrdenPagoService,
       private notificationService: NotificationService,
+      private toastService: ToastService, 
       private ordenService: OrdenService,
       private route: ActivatedRoute,
       private router: Router,
@@ -63,7 +66,13 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(view => {
         if (view === 'pago') {           // ← triggered when any pago is approved/rejected/created elsewhere
-          console.log('🔄 Refresh triggered by WebSocket (pagos) in OrdenDetalleListComponent');
+          //console.log('🔄 Refresh triggered by WebSocket (pagos) in OrdenDetalleListComponent');
+          //TODO: Hay que componerlo porque tambien se dispara al ingresar un nuevo adelanto. El toast lo quiero solo cuando el aprobador apruebe o rechace.
+          //this.toastService.showToast(
+          //  'info',
+          //  'Pago revisado',
+          //  `Pago fue revisado por aprobador`
+          //);
           if (this.orden?.id) {
             this.loadPagos();
           }
@@ -198,11 +207,20 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges, OnDestroy {
     this.ordenPagoService.registrarPago(this.orden.id, this.nuevoPago).subscribe({
       next: () => {
         this.showRegistrarAdelantoModal = false;
+        this.toastService.showToast(
+          'success',
+          'Pago registrado',
+          `Se registró un pago de C$ ${this.nuevoPago.monto.toFixed(2)}`
+        );
         this.loadOrdenesDetalles(); // full refresh
       },
       error: (err) => {
         console.error('Error registrando adelanto', err);
-        alert('No se pudo registrar el adelanto');
+        this.toastService.showToast(
+          'error',
+          'Error al registrar pago',
+          `No se pudo registrar el pago de C$ ${this.nuevoPago.monto.toFixed(2)}`
+        );
       }
     });
   }

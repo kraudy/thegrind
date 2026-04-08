@@ -7,6 +7,7 @@ export interface OrdenFacturacion {
 
   totalMontoOrden: number;
   totalMontoFactura: number;
+  saldoPendiente: number;
 
   totalProductosOrden: number;
   totalProductosFactura: number;

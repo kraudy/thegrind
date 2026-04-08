@@ -79,7 +79,8 @@ export class OrdenFacturacionListComponent implements OnInit, OnDestroy {
         totalProductosOrden: orden.totalProductosOrden,
         totalMontoOrden: orden.totalMontoOrden,
         totalProductosFactura: orden.totalProductosFactura,
-        totalMontoFactura: orden.totalMontoFactura
+        totalMontoFactura: orden.totalMontoFactura,
+        saldoPendiente: orden.saldoPendiente   // ← NUEVO
       }
     });
   }

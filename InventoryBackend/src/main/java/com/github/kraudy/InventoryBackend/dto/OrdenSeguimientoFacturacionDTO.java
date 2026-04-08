@@ -13,6 +13,7 @@ public record OrdenSeguimientoFacturacionDTO(
 
     BigDecimal totalMontoOrden,
     BigDecimal totalMontoFactura,
+    BigDecimal saldoPendiente,
 
     int totalProductosOrden,
     Long totalProductosFactura,

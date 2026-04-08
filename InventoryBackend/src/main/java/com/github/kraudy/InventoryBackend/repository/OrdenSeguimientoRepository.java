@@ -430,7 +430,8 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
 
   // esto porque la orden puede estar lista un dia antes de su entrega
   @Query(value = """
-    WITH factura_totals AS (
+    WITH 
+    factura_totals AS (
         SELECT 
             seg.id_orden,
             SUM(det.precio_unitario * COALESCE(trabajoEntregado.cantidad_trabajada, 0)) AS totalFactura,
@@ -445,6 +446,14 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
            AND trabajoEntregado.estado IN ('Entregado')
         WHERE seg.estado IN ('Entregado')
         GROUP BY seg.id_orden
+    ),
+    pagos_totals AS (
+        SELECT 
+            p.id_orden,
+            SUM(p.monto) AS totalPagos
+        FROM orden_pago p
+        WHERE p.estado = 'Aprobado'
+        GROUP BY p.id_orden
     )
     SELECT
       ord.id,
@@ -454,6 +463,8 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
 
       ord.total_monto          AS totalMontoOrden,
       COALESCE(factura.totalFactura, 0)         AS totalMontoFactura,
+
+      (COALESCE(factura.totalFactura, 0) - COALESCE(pagos.totalPagos, 0)) AS saldoPendiente,
       
       ord.total_productos      AS totalProductosOrden,
       COALESCE(factura.totalProductosFactura, 0) AS totalProductosFactura,
@@ -475,6 +486,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     JOIN cliente cte ON cte.id = ord.id_cliente
 
     LEFT JOIN factura_totals factura ON factura.id_orden = ord.id
+    LEFT JOIN pagos_totals pagos ON pagos.id_orden = ord.id
 
     WHERE ord.estado = 'Entregado'
     ORDER BY ord.id_cliente, ord.fecha_vencimiento ASC
