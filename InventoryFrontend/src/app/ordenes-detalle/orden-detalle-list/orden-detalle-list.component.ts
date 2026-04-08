@@ -39,7 +39,8 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges, OnDestroy {
     metodoPago: 'Efectivo',
     codigoReferencia: '',
     banco: '',
-    notas: ''
+    notas: '',
+    tipoPago: 'Adelanto'  // default to Adelanto, but could be selectable in the future
   };
 
   // Real-time WebSocket support
@@ -167,7 +168,7 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   openRegistrarAdelantoModal() {
-    this.nuevoPago = { monto: 0, metodoPago: 'Efectivo', codigoReferencia: '', banco: '', notas: '' };
+    this.nuevoPago = { monto: 0, metodoPago: 'Efectivo', codigoReferencia: '', banco: '', notas: '', tipoPago: 'Adelanto' };
     this.showRegistrarAdelantoModal = true;
   }
 

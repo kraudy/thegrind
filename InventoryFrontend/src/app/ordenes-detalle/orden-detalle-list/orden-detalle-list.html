@@ -134,6 +134,7 @@
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Fecha</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Monto</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Método</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Tipo</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Referencia</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Banco</th>          <!-- ← NEW -->
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Estado</th>
@@ -145,6 +146,15 @@
               <td class="px-4 py-3 text-sm">{{ pago.fechaPago | date:'dd/MM/yyyy HH:mm' }}</td>
               <td class="px-4 py-3 text-sm font-medium">C$ {{ pago.monto | number:'1.2-2' }}</td>
               <td class="px-4 py-3 text-sm">{{ pago.metodoPago }}</td>
+              <td class="px-4 py-3 text-sm">
+                <span class="px-3 py-1 text-xs rounded-full"
+                      [ngClass]="{
+                        'bg-blue-100 text-blue-800': pago.tipoPago === 'Adelanto',
+                        'bg-green-100 text-green-800': pago.tipoPago === 'Saldo'
+                      }">
+                  {{ pago.tipoPago }}
+                </span>
+              </td>
               <td class="px-4 py-3 text-sm">{{ pago.codigoReferencia || '-' }}</td>
               <td class="px-4 py-3 text-sm">{{ pago.banco || '-' }}</td>                    <!-- ← NEW -->
               <td class="px-4 py-3 text-sm">
@@ -159,7 +169,7 @@
               <td class="px-4 py-3 text-sm text-gray-600">{{ pago.notas || '-' }}</td>
             </tr>
             <tr *ngIf="pagos.length === 0">
-              <td colspan="7" class="px-4 py-8 text-center text-gray-500">   <!-- changed to 7 columns -->
+              <td colspan="8" class="px-4 py-8 text-center text-gray-500">   <!-- changed to 8 columns -->
                 No hay adelantos registrados para esta orden
               </td>
             </tr>
@@ -172,7 +182,7 @@
     <div class="flex justify-end mb-8" *ngIf="orden">
       <button (click)="openRegistrarAdelantoModal()"
               class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg">
-        + Registrar Adelanto
+        + Registrar Pago
       </button>
     </div>
 
@@ -193,7 +203,7 @@
   <div *ngIf="showRegistrarAdelantoModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
       <div class="p-6">
-        <h3 class="text-xl font-semibold mb-4">Registrar Adelanto</h3>
+        <h3 class="text-xl font-semibold mb-4">Registrar Pago</h3>
 
         <div class="space-y-4">
           <div>
@@ -206,6 +216,14 @@
             <select [(ngModel)]="nuevoPago.metodoPago" class="w-full px-4 py-3 border rounded-xl">
               <option value="Efectivo">Efectivo</option>
               <option value="Transferencia">Transferencia</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Tipo de Pago</label>
+            <select [(ngModel)]="nuevoPago.tipoPago" class="w-full px-4 py-3 border rounded-xl">
+              <option value="Adelanto">Adelanto</option>
+              <option value="Saldo">Saldo</option>
             </select>
           </div>
 
@@ -241,7 +259,7 @@
 
       <div class="flex border-t">
         <button (click)="showRegistrarAdelantoModal = false" class="flex-1 py-4 text-gray-600 font-medium">Cancelar</button>
-        <button (click)="registrarAdelanto()" class="flex-1 py-4 bg-emerald-600 text-white font-medium rounded-br-2xl">Registrar Adelanto</button>
+        <button (click)="registrarAdelanto()" class="flex-1 py-4 bg-emerald-600 text-white font-medium rounded-br-2xl">Registrar Pago</button>
       </div>
     </div>
   </div>

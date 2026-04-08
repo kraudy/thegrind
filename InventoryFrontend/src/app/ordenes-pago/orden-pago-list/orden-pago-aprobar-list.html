@@ -43,6 +43,7 @@
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Cliente</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Monto Total</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Adelanto</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Tipo Pago</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Tipo</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Banco</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Recibido por</th>
@@ -56,6 +57,15 @@
             <td class="px-6 py-4">{{ pago.clienteNombre }}</td>
             <td class="px-6 py-4 font-medium">C$ {{ pago.totalMonto | number:'1.2-2' }}</td>
             <td class="px-6 py-4 font-medium">C$ {{ pago.monto | number:'1.2-2' }}</td>
+            <td class="px-6 py-4">
+              <span class="px-3 py-1 text-xs rounded-full"
+                    [ngClass]="{
+                      'bg-blue-100 text-blue-800': pago.tipoPago === 'Adelanto',
+                      'bg-green-100 text-green-800': pago.tipoPago === 'Saldo'
+                    }">
+                {{ pago.tipoPago }}
+              </span>
+            </td>
             <td class="px-6 py-4">{{ pago.metodoPago }}</td>
             <td class="px-6 py-4">{{ pago.banco || '-' }}</td>
             <td class="px-6 py-4">{{ pago.recibidoPor }}</td>

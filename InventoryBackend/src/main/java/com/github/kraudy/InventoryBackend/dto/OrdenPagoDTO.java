@@ -17,5 +17,6 @@ public record OrdenPagoDTO(
     String recibidoPor,
     String aprobadoPor,
     LocalDateTime fechaAprobacion,
-    String notas
+    String notas,
+    String tipoPago
 ) {}

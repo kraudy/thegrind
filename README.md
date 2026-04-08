@@ -374,7 +374,6 @@ Leave File system and all other options at default
 # Update the system
 sudo apt update && sudo apt upgrade -y
 sudo apt install curl git -y
-sudo apt install npm
 
 # Install Docker + Docker Compose 
 # 1. Add Docker's official GPG key

@@ -13,4 +13,5 @@ export interface OrdenPago {
   aprobadoPor: string;
   fechaAprobacion: Date;
   notas: string;
+  tipoPago: string;
 }

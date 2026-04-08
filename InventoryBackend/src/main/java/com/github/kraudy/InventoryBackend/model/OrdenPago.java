@@ -53,6 +53,9 @@ public class OrdenPago {
     @Column(columnDefinition = "TEXT")
     private String notas;
 
+    @Column(nullable = false, length = 20)
+    private String tipoPago;  // Adelanto, Saldo
+
     // Relationship to Orden
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)

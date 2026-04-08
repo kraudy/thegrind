@@ -71,7 +71,8 @@ public interface OrdenPagoRepository extends JpaRepository<OrdenPago, Long> {
           op.recibido_por as recibidoPor,
           op.aprobado_por as aprobadoPor,
           op.fecha_aprobacion as fechaAprobacion,
-          op.notas
+          op.notas,
+          op.tipo_pago as tipoPago
 
       FROM orden_pago op
       INNER JOIN orden ord ON ord.id = op.id_orden
