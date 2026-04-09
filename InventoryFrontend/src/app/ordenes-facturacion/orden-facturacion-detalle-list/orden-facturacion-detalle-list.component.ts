@@ -9,7 +9,7 @@ import { takeUntil } from 'rxjs/operators';
 import { OrdenSeguimientoService } from '../../ordenes-seguimiento/orden-seguimiento.service';
 
 import { NotificationService } from '../../shared/notification.service'; 
-import { ToastService } from '../../shared/toast/toast.service';   // ← NEW
+import { ToastService } from '../../shared/toast/toast.service';
 
 import { OrdenFacturacionDetalle } from '../orden-facturacion-detalle.model';
 

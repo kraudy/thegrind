@@ -143,6 +143,15 @@
     </div>
   </div>
 
+  <!-- Botón Registrar Pago de Saldo -->
+  <div class="flex justify-end mt-8">
+    <button (click)="openRegistrarSaldoModal()"
+            class="inline-flex items-center px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white text-lg font-semibold rounded-2xl shadow-xl transition transform hover:scale-105">
+      <span class="text-2xl mr-3">💰</span>
+      Registrar Pago de Saldo
+    </button>
+  </div>
+
   <!-- Botón Generar Factura -->
   <div class="flex justify-end mt-8">
     <button (click)="generarFactura()"
@@ -151,15 +160,6 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H3a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />
       </svg>
       Generar Factura
-    </button>
-  </div>
-
-  <!-- Botón Registrar Pago de Saldo -->
-  <div class="flex justify-end mt-8">
-    <button (click)="openRegistrarSaldoModal()"
-            class="inline-flex items-center px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white text-lg font-semibold rounded-2xl shadow-xl transition transform hover:scale-105">
-      <span class="text-2xl mr-3">💰</span>
-      Registrar Pago de Saldo
     </button>
   </div>
 

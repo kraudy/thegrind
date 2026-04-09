@@ -1,0 +1,129 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+  <!-- Header -->
+  <div class="relative flex justify-between items-center mb-8">
+    <!-- Botón Volver al Inicio -->
+    <a routerLink="/home" 
+       class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-md transition transform hover:scale-105">
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Volver al Inicio
+    </a>
+
+    <!-- Título centrado -->
+    <h1 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-bold text-gray-900 pointer-events-none">
+      Facturas
+    </h1>
+  </div>
+
+  <!-- ==================== SECCIÓN DE FILTROS ==================== -->
+  <div class="flex flex-wrap gap-4 items-center bg-white shadow rounded-2xl p-4 mb-8">
+    <!-- Búsqueda inteligente (ID o Cliente) -->
+    <div class="flex-1 min-w-[300px]">
+      <input type="text" 
+             [(ngModel)]="searchTerm" 
+             (ngModelChange)="onFilterChange()"
+             placeholder="Buscar por ID de factura o cliente..." 
+             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+    </div>
+
+    <!-- Botones de Estado (adaptados a facturas) -->
+    <div class="flex items-center gap-2 flex-wrap">
+      <button (click)="selectedEstadoFilter = ''; onFilterChange()" 
+              [class.bg-indigo-600]="selectedEstadoFilter === ''" 
+              [class.text-white]="selectedEstadoFilter === ''"
+              class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
+        Todos
+      </button>
+      <button (click)="selectedEstadoFilter = 'Pendiente'; onFilterChange()" 
+              [class.bg-indigo-600]="selectedEstadoFilter === 'Pendiente'" 
+              [class.text-white]="selectedEstadoFilter === 'Pendiente'"
+              class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
+        Pendiente
+      </button>
+      <button (click)="selectedEstadoFilter = 'Pagada'; onFilterChange()" 
+              [class.bg-indigo-600]="selectedEstadoFilter === 'Pagada'" 
+              [class.text-white]="selectedEstadoFilter === 'Pagada'"
+              class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
+        Pagada
+      </button>
+      <button (click)="selectedEstadoFilter = 'Anulada'; onFilterChange()" 
+              [class.bg-indigo-600]="selectedEstadoFilter === 'Anulada'" 
+              [class.text-white]="selectedEstadoFilter === 'Anulada'"
+              class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
+        Anulada
+      </button>
+    </div>
+
+    <!-- Limpiar filtros -->
+    <button (click)="clearFilters()" 
+            class="px-5 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">
+      Limpiar filtros
+    </button>
+  </div>
+  <!-- ==================== FIN FILTROS ==================== -->
+
+  <!-- Tabla con loading y error -->
+  <div class="bg-white shadow-xl rounded-xl overflow-hidden">
+    <div *ngIf="loading" class="p-10 text-center text-gray-600">Cargando facturas...</div>
+    
+    <div *ngIf="!loading && errorMessage" 
+         class="p-6 bg-red-50 text-red-700 text-center">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="!loading && !errorMessage" class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Orden</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario Creación</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">F. Creación</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let factura of facturas" 
+              class="hover:bg-gray-50 transition cursor-pointer" 
+              (click)="viewDetails(factura)">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ factura.id }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ factura.idOrden || '-' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ factura.clienteNombre }}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                    [ngClass]="{
+                      'bg-yellow-100 text-yellow-800': (factura.estado || '').toLowerCase() === 'pendiente',
+                      'bg-green-100 text-green-800': (factura.estado || '').toLowerCase() === 'pagada',
+                      'bg-red-100 text-red-800': (factura.estado || '').toLowerCase() === 'anulada',
+                      'bg-gray-100 text-gray-800': !['pendiente','pagada','anulada'].includes((factura.estado || '').toLowerCase())
+                    }">
+                {{ factura.estado | uppercase }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ factura.usuarioCreacion }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ factura.total | number:'1.2-2' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              {{ factura.fechaCreacion ? (factura.fechaCreacion | date:'dd/MM/yyyy HH:mm') : '-' }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <button (click)="$event.stopPropagation(); viewDetails(factura)"
+                      class="text-indigo-600 hover:text-indigo-900 font-medium">
+                Ver Detalle
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Mensaje vacío -->
+      <div *ngIf="facturas.length === 0" class="text-center py-12">
+        <p class="text-gray-500 text-lg">No hay facturas con los filtros seleccionados.</p>
+      </div>
+    </div>
+  </div>
+</div>

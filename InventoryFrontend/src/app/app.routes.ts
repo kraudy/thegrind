@@ -46,6 +46,8 @@ import { OrdenPagoAprobarListComponent } from './ordenes-pago/orden-pago-list/or
 import { OrdenFacturacionDetalleListComponent } from './ordenes-facturacion/orden-facturacion-detalle-list/orden-facturacion-detalle-list.component';
 import { OrdenFacturacionListComponent } from './ordenes-facturacion/orden-facturacion-list/orden-facturacion-list.component';
 
+import { FacturaListComponent } from './facturas/factura-list/factura-list.component';
+
 import { authGuard } from './auth/auth.guard';
 
 
@@ -113,6 +115,9 @@ export const routes: Routes = [
   { path: 'clientes/:id/edit', component: ClienteFormComponent, canActivate: [authGuard] },
 
   { path: 'ordenes-seguimiento/general', component: OrdenSeguimientoGeneralListComponent, canActivate: [authGuard] },
+
+  // Facturas
+  { path: 'facturas', component: FacturaListComponent, canActivate: [authGuard] },
 
   // Catch-all → must be LAST
   { path: '**', redirectTo: '' }

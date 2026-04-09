@@ -28,4 +28,8 @@ public class NotificationService {
     public void notifyOrdenesPagoChanged() {
         messagingTemplate.convertAndSend("/topic/ordenes-pago", "REFRESH");
     }
+
+    public void notifyFacturasChanged() {
+        messagingTemplate.convertAndSend("/topic/facturas", "REFRESH");
+    }
 }

@@ -1,5 +1,6 @@
 package com.github.kraudy.InventoryBackend.repository;
 
+import com.github.kraudy.InventoryBackend.dto.TrabajoEntregadoDTO;
 import com.github.kraudy.InventoryBackend.dto.UsuarioDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajo;
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajoPK;
@@ -53,5 +54,29 @@ public interface OrdenTrabajoRepository extends JpaRepository<OrdenTrabajo, Orde
     WHERE trabajo.id_orden = :idOrden
     """, nativeQuery = true)
   void deleteByOrden(@Param("idOrden") Long idOrden);
+
+  @Query(value = """
+    SELECT 
+      trabajoEntregado.id_orden, 
+      trabajoEntregado.id_orden_detalle, 
+      trabajoEntregado.id_producto, 
+      trabajoEntregado.cantidad_trabajada,
+      det.precio_unitario as precio,
+      trabajoEntregado.cantidad_trabajada * det.precio_unitario AS subtotal
+
+    FROM orden_seguimiento seg
+
+    JOIN orden_detalle det 
+        ON det.id_orden = seg.id_orden 
+        AND det.id_orden_detalle = seg.id_orden_detalle
+
+    LEFT JOIN orden_trabajo trabajoEntregado 
+        ON trabajoEntregado.id_orden = seg.id_orden
+        AND trabajoEntregado.id_orden_detalle = seg.id_orden_detalle
+        AND trabajoEntregado.estado IN ('Entregado')
+
+    WHERE seg.estado IN ('Entregado') and seg.id_orden = :idOrden
+    """, nativeQuery = true)
+  List<TrabajoEntregadoDTO> getTrabajoEntregado(Long idOrden);
 
 }

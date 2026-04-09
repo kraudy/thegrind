@@ -41,6 +41,12 @@ export class NotificationService {
         console.log('🔴 Ordenes Pago changed → notifying subscribers');
         this.refreshSubject.next('pago');
       });
+
+      this.stompClient!.subscribe('/topic/facturas', () => {
+        console.log('🔴 Facturas changed → notifying subscribers');
+        this.refreshSubject.next('facturas');
+      });
+      
     };
 
     this.stompClient.activate();

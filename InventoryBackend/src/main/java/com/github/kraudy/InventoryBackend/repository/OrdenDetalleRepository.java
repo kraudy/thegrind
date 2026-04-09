@@ -37,6 +37,24 @@ public interface OrdenDetalleRepository extends JpaRepository<OrdenDetalle, Orde
   """)
   List<OrdenDetalleDTO> getAllOrdenDetalle(Long idOrden);
 
+  @Query(value = """
+    SELECT 
+        odet.idOrden,
+        odet.idProducto,
+        odet.idOrdenDetalle,
+        odet.cantidad,
+        odet.precioUnitario,
+        odet.subtotal,
+        odet.fechaCreacion,
+        odet.fechaModificacion
+
+    FROM OrdenDetalle odet
+
+    WHERE odet.idOrden = :idOrden
+    ORDER BY odet.idOrdenDetalle ASC
+  """)
+  List<OrdenDetalle> getDetalleByOrdenId(Long idOrden);
+
   @Modifying
   @Transactional  // Required for DML operations
   @Query(value = """

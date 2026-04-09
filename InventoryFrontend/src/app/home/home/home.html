@@ -168,6 +168,17 @@
         </a>
       </div>
 
+      <!-- ✅ NUEVA TARJETA: Facturas -->
+      <div *ngIf="hasAccess('admin')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
+        <div class="text-5xl mb-4">💰</div>
+        <h2 class="text-2xl font-bold text-gray-900 mb-3">Facturas</h2>
+        <p class="text-gray-600 mb-6">Lista completa de facturas emitidas y su estado de pago</p>
+        <a routerLink="/facturas"
+          class="inline-flex items-center px-8 py-4 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-2xl shadow-lg transition">
+          Ver Lista de Facturas
+        </a>
+      </div>
+
     </div>
   </div>
 </div>
