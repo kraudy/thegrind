@@ -35,6 +35,9 @@ public class Producto {
   @Column(nullable = false, columnDefinition = "VARCHAR(25)")
   private String modeloProducto;
 
+  @Column(nullable = false, columnDefinition = "VARCHAR(25)")
+  private String colorProducto;
+
   @Column(nullable = false, columnDefinition = "VARCHAR(100)")
   private String nombre;
 
@@ -81,4 +84,9 @@ public class Producto {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "modeloProducto", referencedColumnName = "modelo", nullable = false, insertable = false, updatable = false)
   private ProductoModelo productoModelo;
+
+  @JsonIgnore
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "colorProducto", referencedColumnName = "color", nullable = false, insertable = false, updatable = false)
+  private ProductoColor productoColor;
 }

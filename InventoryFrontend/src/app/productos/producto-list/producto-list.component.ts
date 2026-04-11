@@ -11,8 +11,19 @@ import { Producto } from '../producto.model';
 
 import { ProductoTipo } from '../../productos-tipos/producto-tipo.model';
 import { ProductoSubTipo } from '../../productos-sub-tipos/producto-sub-tipo.model';
+
 import { ProductoSubTipoService } from '../../productos-sub-tipos/producto-sub-tipo.service';
 import { ProductoTipoService } from '../../productos-tipos/producto-tipo.service';
+
+import { ProductoMedida } from '../../productos-medidas/producto-medida.model';
+import { ProductoMedidaService } from '../../productos-medidas/producto-medida.service';
+
+import { ProductoModelo } from '../../productos-modelos/producto-modelo.model';
+import { ProductoModeloService } from '../../productos-modelos/producto-modelo.service';
+
+import { ProductoColor } from '../../productos-colores/producto-color.model';
+import { ProductoColorService } from '../../productos-colores/producto-color.service';
+
 
 @Component({
   selector: 'app-product-list',
@@ -32,15 +43,24 @@ export class ProductoListComponent implements OnInit {
   searchTerm = '';
   selectedTipo = '';
   selectedSubTipo = '';
+  selectedMedida = '';
+  selectedModelo = ''; 
+  selectedColor = '';
   sinPrecio = false;   
 
   tipos: ProductoTipo[] = [];
+  medidas: ProductoMedida[] = [];
+  modelos: ProductoModelo[] = [];
   subTipos: ProductoSubTipo[] = [];
+  colores: ProductoColor[] = []; 
 
   constructor(
     private productoService: ProductoService,
     private productoTipoService: ProductoTipoService,
     private productoSubTipoService: ProductoSubTipoService,
+    private productoMedidaService: ProductoMedidaService,
+    private productoModeloService: ProductoModeloService,
+    private productoColorService: ProductoColorService,
     private router: Router,
     private cd: ChangeDetectorRef 
   ) {}
@@ -48,6 +68,9 @@ export class ProductoListComponent implements OnInit {
   ngOnInit(): void {
     this.loadTipos();
     this.loadSubTipos();
+    this.loadMedidas();
+    this.loadModelos(); 
+    this.loadColores();
     this.loadProducts();
   }
  
@@ -75,6 +98,9 @@ export class ProductoListComponent implements OnInit {
       nombre: filterNombre,
       tipo: this.selectedTipo || undefined,
       subTipo: this.selectedSubTipo || undefined,
+      medida: this.selectedMedida || undefined,
+      modelo: this.selectedModelo || undefined,
+      color: this.selectedColor || undefined,
       sinPrecio: this.sinPrecio
     }).subscribe({
       next: (data) => {
@@ -120,6 +146,48 @@ export class ProductoListComponent implements OnInit {
     });
   }
 
+  private loadMedidas(): void {
+    this.productoMedidaService.getAll().subscribe({
+      next: (data) => {
+        this.medidas = data || [];
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        console.error('[ProductList] failed to load medidas', err);
+        this.medidas = [];
+        this.cd.detectChanges();
+      }
+    });
+  }
+
+  private loadModelos(): void {
+    this.productoModeloService.getAll().subscribe({
+      next: (data) => {
+        this.modelos = data || [];
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        console.error('[ProductList] failed to load modelos', err);
+        this.modelos = [];
+        this.cd.detectChanges();
+      }
+    });
+  }
+
+  private loadColores(): void {
+    this.productoColorService.getAll().subscribe({
+      next: (data) => {
+        this.colores = data || [];
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        console.error('[ProductList] failed to load colores', err);
+        this.colores = [];
+        this.cd.detectChanges();
+      }
+    });
+  }
+
   onFilterChange(): void {
     this.loadProducts();
   }
@@ -128,6 +196,9 @@ export class ProductoListComponent implements OnInit {
     this.searchTerm = '';
     this.selectedTipo = '';
     this.selectedSubTipo = '';
+    this.selectedMedida = '';
+    this.selectedModelo = '';
+    this.selectedColor = '';   
     this.sinPrecio = false;
     this.loadProducts();
   }

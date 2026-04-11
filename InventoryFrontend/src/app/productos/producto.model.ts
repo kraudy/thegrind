@@ -4,6 +4,7 @@ export interface Producto {
   subTipoProducto: string; 
   medidaProducto: string;
   modeloProducto: string;
+  colorProducto: string;
   nombre: string;
   descripcion: string;
   fechaCreacion: Date;

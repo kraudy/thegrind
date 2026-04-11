@@ -34,9 +34,12 @@ public class ProductoController {
       @RequestParam(required = false) String nombre,
       @RequestParam(required = false) String tipo,
       @RequestParam(required = false) String subTipo,
+      @RequestParam(required = false) String medida,
+      @RequestParam(required = false) String modelo,
+      @RequestParam(required = false) String color,
       @RequestParam(required = false) Boolean sinPrecio
     ) {
-        return productoRepository.obtenerProductos(id, nombre, tipo, subTipo, sinPrecio);
+        return productoRepository.obtenerProductos(id, nombre, tipo, subTipo, medida, modelo, color, sinPrecio);
     }
 
     @GetMapping("/{id}")

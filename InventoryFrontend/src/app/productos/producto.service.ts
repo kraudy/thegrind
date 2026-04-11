@@ -34,6 +34,9 @@ export class ProductoService {
     nombre?: string;
     tipo?: string;
     subTipo?: string;
+    medida?: string;
+    modelo?: string;
+    color?: string;
     sinPrecio?: boolean;
   } = {}): Observable<Producto[]> {
     let params = new HttpParams();
@@ -49,6 +52,15 @@ export class ProductoService {
     }
     if (filters.subTipo) {
       params = params.set('subTipo', filters.subTipo);
+    }
+    if (filters.medida) {
+      params = params.set('medida', filters.medida);
+    }
+    if (filters.modelo) {
+      params = params.set('modelo', filters.modelo);
+    }
+    if (filters.color) {
+      params = params.set('color', filters.color);
     }
     if (filters.sinPrecio !== undefined) {
       params = params.set('sinPrecio', filters.sinPrecio.toString()); // true/false as string

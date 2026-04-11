@@ -16,6 +16,9 @@ import { ProductoMedidaService } from '../../productos-medidas/producto-medida.s
 import { ProductoModelo } from '../../productos-modelos/producto-modelo.model';
 import { ProductoModeloService } from '../../productos-modelos/producto-modelo.service';
 
+import { ProductoColor } from '../../productos-colores/producto-color.model';
+import { ProductoColorService } from '../../productos-colores/producto-color.service';
+
 import { ProductoService } from '../producto.service';
 import { Producto } from '../producto.model';
 
@@ -37,6 +40,7 @@ export class ProductoFormComponent implements OnChanges, OnInit {
   subTipos: ProductoSubTipo[] = [];
   medidas: ProductoMedida[] = [];
   modelos: ProductoModelo[] = [];
+  colores: ProductoColor[] = []; 
 
   constructor(
     private productoService: ProductoService,
@@ -44,6 +48,7 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     private productoSubTipoService: ProductoSubTipoService,
     private productoMedidaService: ProductoMedidaService,
     private productoModeloService: ProductoModeloService,
+    private productoColorService: ProductoColorService,
     private location: Location,
     private route: ActivatedRoute,
     private router: Router,
@@ -51,10 +56,14 @@ export class ProductoFormComponent implements OnChanges, OnInit {
   ) {}
 
   formProducto: Partial<Producto> = { 
-    tipoProducto: '', subTipoProducto: '', 
+    tipoProducto: '', 
+    subTipoProducto: '', 
     medidaProducto: '',
     modeloProducto: '',
-    nombre: '', descripcion: ''};
+    colorProducto: 'Ninguno', 
+    nombre: '', 
+    descripcion: ''
+  };
 
   ngOnInit(): void {
     if (!this.producto) { // If no id in route — ensure fresh form
@@ -62,17 +71,20 @@ export class ProductoFormComponent implements OnChanges, OnInit {
       this.isEdit = false;
     }
 
-    // Cargar tipos de producto siempre
+    // Cargar tipos de producto
     this.loadTipos();
 
-    // Cargar sub-tipos de producto siempre
+    // Cargar sub-tipos de producto
     this.loadSubTipos();
 
-    // Cargar medidas de producto siempre
+    // Cargar medidas de producto
     this.loadMedidas();
 
-    // Cargar modelos de producto siempre
+    // Cargar modelos de producto
     this.loadModelos();
+
+    // Cargar colores de producto
+    this.loadColores();
 
     const idParam = this.route.snapshot.paramMap.get('id');
     if (!idParam) {return;}
@@ -136,7 +148,6 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     });
   }
 
-  // NEW
   private loadMedidas(): void {
     this.productoMedidaService.getAll().subscribe({
       next: (data) => { this.medidas = data || []; this.cd.detectChanges(); },
@@ -144,7 +155,6 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     });
   }
 
-  // NEW
   private loadModelos(): void {
     this.productoModeloService.getAll().subscribe({
       next: (data) => { this.modelos = data || []; this.cd.detectChanges(); },
@@ -152,7 +162,16 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     });
   }
 
-
+  private loadColores(): void {
+    this.productoColorService.getAll().subscribe({
+      next: (data) => { this.colores = data || []; this.cd.detectChanges(); },
+      error: (err) => { 
+        console.error('[ProductoForm] failed to load colores', err); 
+        this.colores = []; 
+        this.cd.detectChanges(); 
+      }
+    });
+  }
 
   goBack(): void {
     this.location.back();
@@ -160,7 +179,7 @@ export class ProductoFormComponent implements OnChanges, OnInit {
 
   resetForm(): void {
     this.formProducto = {tipoProducto: '', subTipoProducto: '', medidaProducto: '',
-      modeloProducto: '', nombre: '', descripcion: ''};
+      modeloProducto: '', colorProducto: 'Ninguno', nombre: '', descripcion: ''};
   }
 
   onSubmit(): void {

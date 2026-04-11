@@ -26,12 +26,15 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
   //  "Where Cast(p.id as string) || ' ' || p.nombre || ' ' || p.descripcion Like '%' || :term || '%'")
   
   @Query(value ="""
-    SELECT id, tipo_producto, sub_tipo_producto, medida_producto, modelo_producto, nombre, descripcion, fecha_creacion, fecha_modificacion, activo
+    SELECT id, tipo_producto, sub_tipo_producto, medida_producto, modelo_producto, nombre, descripcion, fecha_creacion, fecha_modificacion, activo, color_producto
     FROM producto
     WHERE (:id IS NULL OR id = :id)
       AND (:nombre IS NULL OR LOWER(nombre) LIKE LOWER(CONCAT('%', :nombre, '%')))
       AND (:tipo IS NULL OR tipo_producto = :tipo)
       AND (:subTipo IS NULL OR sub_tipo_producto = :subTipo)
+      AND (:medida IS NULL OR medida_producto = :medida)
+      AND (:modelo IS NULL OR modelo_producto = :modelo)
+      AND (:color IS NULL OR color_producto = :color)
       AND (:sinPrecio IS NULL  OR :sinPrecio = false
                OR NOT EXISTS (
                    SELECT 1 
@@ -41,7 +44,9 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
                ))
     ORDER BY id
     """, nativeQuery = true)
-  List<Producto> obtenerProductos(@Param("id") Long id, @Param("nombre") String nombre, @Param("tipo") String tipo, @Param("subTipo") String subTipo, @Param("sinPrecio") Boolean sinPrecio);
+  List<Producto> obtenerProductos(@Param("id") Long id, @Param("nombre") String nombre, @Param("tipo") String tipo, @Param("subTipo") String subTipo, 
+   @Param("medida") String medida, @Param("modelo") String modelo, @Param("color") String color, 
+   @Param("sinPrecio") Boolean sinPrecio);
   
   @Query(value ="""
     SELECT p FROM Producto p
