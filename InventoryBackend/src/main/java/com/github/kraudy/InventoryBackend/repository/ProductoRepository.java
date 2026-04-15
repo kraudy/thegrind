@@ -1,5 +1,6 @@
 package com.github.kraudy.InventoryBackend.repository;
 
+import com.github.kraudy.InventoryBackend.dto.ProductoConfigDTO;
 import com.github.kraudy.InventoryBackend.model.Producto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,21 +10,6 @@ import java.util.List;
 
 /* This thing maps product */
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
-
-  //@Query("SELECT p FROM Producto p " +
-  //        "WHERE LOWER(p.nombre) LIKE LOWER(CONCAT('%', :term, '%')) " +
-  //        "OR LOWER(p.descripcion) LIKE LOWER(CONCAT('%', :term, '%')) " +
-  //        "OR CAST(p.id AS string) LIKE CONCAT('%', :term, '%')")
-
-  //@Query(
-  //  "SELECT p " +
-  //  "FROM Producto p " +
-  //  "Where Cast(p.id as Varchar (10)) || ' ' || p.nombre || ' ' || p.descripcion Like '%' || :term || '%'")
-
-  //@Query(
-  //  "SELECT p " +
-  //  "FROM Producto p " +
-  //  "Where Cast(p.id as string) || ' ' || p.nombre || ' ' || p.descripcion Like '%' || :term || '%'")
   
   @Query(value ="""
     SELECT id, tipo_producto, sub_tipo_producto, medida_producto, modelo_producto, nombre, descripcion, fecha_creacion, fecha_modificacion, activo, color_producto
@@ -71,4 +57,25 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
           AND p.id <> :id
       """, nativeQuery = true)
   boolean existeProductoDiferenteId(@Param("tipo") String tipo, @Param("subTipo") String subTipo, @Param("medida") String medida, @Param("modelo") String modelo, @Param("id") Long id);
+
+
+  @Query(value = """
+      SELECT tipo, sub_tipo, medida, modelo, color
+
+      FROM producto_config
+      
+      WHERE (:tipo IS NULL OR tipo = :tipo)
+        AND (:subTipo IS NULL OR sub_tipo = :subTipo)
+        AND (:medida IS NULL OR medida = :medida)
+        AND (:modelo IS NULL OR modelo = :modelo)
+        AND (:color IS NULL OR color = :color)
+
+      ORDER BY tipo, sub_tipo, medida, modelo, color
+      """, nativeQuery = true)
+  List<ProductoConfigDTO> obtenerConfiguracionesValidas(
+      @Param("tipo") String tipo,
+      @Param("subTipo") String subTipo,
+      @Param("medida") String medida,
+      @Param("modelo") String modelo,
+      @Param("color") String color);
 }

@@ -1,5 +1,6 @@
 package com.github.kraudy.InventoryBackend.controller;
 
+import com.github.kraudy.InventoryBackend.dto.ProductoConfigDTO;
 import com.github.kraudy.InventoryBackend.model.Producto;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecio;
 import com.github.kraudy.InventoryBackend.repository.ProductoPrecioRepository;
@@ -40,6 +41,17 @@ public class ProductoController {
       @RequestParam(required = false) Boolean sinPrecio
     ) {
         return productoRepository.obtenerProductos(id, nombre, tipo, subTipo, medida, modelo, color, sinPrecio);
+    }
+
+    @GetMapping("/config")
+    public List<ProductoConfigDTO> getConfiguracionesValidas(
+        @RequestParam(required = false) String tipo,
+        @RequestParam(required = false) String subTipo,
+        @RequestParam(required = false) String medida,
+        @RequestParam(required = false) String modelo,
+        @RequestParam(required = false) String color) {
+
+        return productoRepository.obtenerConfiguracionesValidas(tipo, subTipo, medida, modelo, color);
     }
 
     @GetMapping("/{id}")

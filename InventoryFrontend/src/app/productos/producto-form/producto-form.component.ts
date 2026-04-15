@@ -19,6 +19,9 @@ import { ProductoModeloService } from '../../productos-modelos/producto-modelo.s
 import { ProductoColor } from '../../productos-colores/producto-color.model';
 import { ProductoColorService } from '../../productos-colores/producto-color.service';
 
+import { ProductoConfig } from '../../productos-config/producto-config.model';
+import { ProductoConfigService } from '../../productos-config/producto-config.service';
+
 import { ProductoService } from '../producto.service';
 import { Producto } from '../producto.model';
 
@@ -42,6 +45,7 @@ export class ProductoFormComponent implements OnChanges, OnInit {
   modelos: ProductoModelo[] = [];
   colores: ProductoColor[] = []; 
 
+
   constructor(
     private productoService: ProductoService,
     private productoTipoService: ProductoTipoService,
@@ -49,6 +53,7 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     private productoMedidaService: ProductoMedidaService,
     private productoModeloService: ProductoModeloService,
     private productoColorService: ProductoColorService,
+    private productoConfigService: ProductoConfigService, 
     private location: Location,
     private route: ActivatedRoute,
     private router: Router,
@@ -74,18 +79,6 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     // Cargar tipos de producto
     this.loadTipos();
 
-    // Cargar sub-tipos de producto
-    this.loadSubTipos();
-
-    // Cargar medidas de producto
-    this.loadMedidas();
-
-    // Cargar modelos de producto
-    this.loadModelos();
-
-    // Cargar colores de producto
-    this.loadColores();
-
     const idParam = this.route.snapshot.paramMap.get('id');
     if (!idParam) {return;}
     const id = Number(idParam);
@@ -96,6 +89,7 @@ export class ProductoFormComponent implements OnChanges, OnInit {
       next: (data) => {
         this.formProducto = { ...data };
         this.isEdit = true;
+        this.refreshConfig();
         console.log('[ProductoForm] loaded producto for edit', data);
         this.cd.detectChanges();  // Force view update
       },
@@ -113,6 +107,7 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     if (this.producto) {
       this.formProducto = { ...this.producto };
       this.isEdit = !!this.producto.id;  // true if editing an existing producto
+      this.refreshConfig(); 
       this.cd.detectChanges();
     } else {
       this.resetForm();
@@ -122,55 +117,62 @@ export class ProductoFormComponent implements OnChanges, OnInit {
 
   private loadTipos(): void {
     this.productoTipoService.getAll().subscribe({
-      next: (data) => {
-        this.tipos = data || [];
+      next: (data) => { this.tipos = data || []; this.cd.detectChanges(); },
+      error: (err) => { console.error('[ProductoForm] failed to load tipos', err); this.tipos = []; this.cd.detectChanges(); }
+    });
+  }
+
+  private refreshConfig(): void {
+    this.productoConfigService.getConfig(
+      this.formProducto.tipoProducto || undefined,
+      this.formProducto.subTipoProducto || undefined,
+      this.formProducto.medidaProducto || undefined,
+      this.formProducto.modeloProducto || undefined,
+      this.formProducto.colorProducto || undefined
+    ).subscribe({
+      next: (config) => {
+        this.subTipos = [...new Set(config.map(c => c.subTipo))]
+          .map(st => ({ subTipo: st, descripcion: '' } as ProductoSubTipo));
+
+        this.medidas = [...new Set(config.map(c => c.medida))]
+          .map(m => ({ medida: m, descripcion: '' } as ProductoMedida));
+
+        this.modelos = [...new Set(config.map(c => c.modelo))]
+          .map(mod => ({ modelo: mod, descripcion: '' } as ProductoModelo));
+
+        this.colores = [...new Set(config.map(c => c.color))]
+          .map(col => ({ color: col, descripcion: '' } as ProductoColor));
+
         this.cd.detectChanges();
       },
-      error: (err) => {
-        console.error('[ProductoForm] failed to load tipo producto', err);
-        this.tipos = [];
-        this.cd.detectChanges();
-      }
+      error: (err) => console.error('[ProductoForm] failed to load config', err)
     });
   }
 
-  private loadSubTipos(): void {
-    this.productoSubTipoService.getAll().subscribe({
-      next: (data) => {
-        this.subTipos = data || [];
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        console.error('[ProductoForm] failed to load sub-tipos products', err);
-        this.tipos = [];
-        this.cd.detectChanges();
-      }
-    });
+  onTipoChange(): void {
+    this.formProducto.subTipoProducto = '';
+    this.formProducto.medidaProducto = '';
+    this.formProducto.modeloProducto = '';
+    this.formProducto.colorProducto = 'Ninguno';
+    this.refreshConfig();
   }
 
-  private loadMedidas(): void {
-    this.productoMedidaService.getAll().subscribe({
-      next: (data) => { this.medidas = data || []; this.cd.detectChanges(); },
-      error: (err) => { console.error('[ProductoForm] failed to load medidas', err); this.medidas = []; this.cd.detectChanges(); }
-    });
+  onSubTipoChange(): void {
+    this.formProducto.medidaProducto = '';
+    this.formProducto.modeloProducto = '';
+    this.formProducto.colorProducto = 'Ninguno';
+    this.refreshConfig();
   }
 
-  private loadModelos(): void {
-    this.productoModeloService.getAll().subscribe({
-      next: (data) => { this.modelos = data || []; this.cd.detectChanges(); },
-      error: (err) => { console.error('[ProductoForm] failed to load modelos', err); this.modelos = []; this.cd.detectChanges(); }
-    });
+  onMedidaChange(): void {
+    this.formProducto.modeloProducto = '';
+    this.formProducto.colorProducto = 'Ninguno';
+    this.refreshConfig();
   }
 
-  private loadColores(): void {
-    this.productoColorService.getAll().subscribe({
-      next: (data) => { this.colores = data || []; this.cd.detectChanges(); },
-      error: (err) => { 
-        console.error('[ProductoForm] failed to load colores', err); 
-        this.colores = []; 
-        this.cd.detectChanges(); 
-      }
-    });
+  onModeloChange(): void {
+    this.formProducto.colorProducto = 'Ninguno';
+    this.refreshConfig();
   }
 
   goBack(): void {
