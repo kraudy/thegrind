@@ -45,6 +45,9 @@ export class ProductoFormComponent implements OnChanges, OnInit {
   modelos: ProductoModelo[] = [];
   colores: ProductoColor[] = []; 
 
+  imagenFile: File | null = null;
+  previewUrl: string | null = null;
+
 
   constructor(
     private productoService: ProductoService,
@@ -184,17 +187,54 @@ export class ProductoFormComponent implements OnChanges, OnInit {
       modeloProducto: '', colorProducto: 'Ninguno', nombre: '', descripcion: ''};
   }
 
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+      this.imagenFile = file;
+      this.previewUrl = URL.createObjectURL(file);   // ← add this line
+    } else {
+      alert('Solo PNG o JPG');
+      this.imagenFile = null;
+      this.previewUrl = null;
+    }
+  }
+
   onSubmit(): void {
+    const formData = new FormData();
+
+    // Build the JSON payload that Spring expects under the key "producto"
+    const productoPayload: any = {
+      tipoProducto: this.formProducto.tipoProducto,
+      subTipoProducto: this.formProducto.subTipoProducto,
+      medidaProducto: this.formProducto.medidaProducto,
+      modeloProducto: this.formProducto.modeloProducto,
+      colorProducto: this.formProducto.colorProducto,
+      nombre: this.formProducto.nombre?.trim(),
+      descripcion: this.formProducto.descripcion?.trim(),
+      activo: this.formProducto.activo ?? true
+    };
+
+    // Add the PRODUCTO as JSON (this is what @RequestPart("producto") expects)
+    formData.append(
+      'producto',
+      new Blob([JSON.stringify(productoPayload)], { type: 'application/json' })
+    );
+
+    // Add the image (if user selected one)
+    if (this.imagenFile) {
+      formData.append('imagen', this.imagenFile);
+    }
+
     if (this.formProducto.id) {
       console.log('Updating producto: ' + this.formProducto.id);
-      this.productoService.update(this.formProducto.id, this.formProducto).subscribe(() => {
+      this.productoService.update(this.formProducto.id, formData).subscribe(() => {
         this.productoSaved.emit();
         this.resetForm();
         this.location.back();
       });
     } else {
       console.log('Creating producto: ');
-      this.productoService.create(this.formProducto).subscribe((createdProducto) => {
+      this.productoService.create(formData).subscribe((createdProducto) => {
         this.productoSaved.emit();
         this.resetForm();
         // Navigate to the newly created product's detail page

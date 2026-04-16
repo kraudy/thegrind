@@ -10,9 +10,11 @@ import com.github.kraudy.InventoryBackend.service.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import org.springframework.http.MediaType;
 
 @RestController
 @RequestMapping("/api/productos")
@@ -59,15 +61,20 @@ public class ProductoController {
         return productoRepository.findById(id).orElseThrow();
     }
 
-    @PostMapping
-    public Producto create(@RequestBody Producto product) {
-        return productoService.create(product);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Producto create(
+            @RequestPart("producto") Producto product,
+            @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        return productoService.create(product, imagen);
     }
 
-    @PutMapping("/{id}")
-    public Producto update(@PathVariable Long id, @RequestBody Producto product) {
-      product.setId(id);
-      return productoService.update(product);
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Producto update(
+            @PathVariable Long id,
+            @RequestPart("producto") Producto product,
+            @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        product.setId(id);
+        return productoService.update(product, imagen);
     }
 
     @DeleteMapping("/{id}")
@@ -84,6 +91,7 @@ public class ProductoController {
       return productoPrecioRepository.getAllProductoPrecios(id);
     }
 
+    //TODO: Remover este, creo que ya no se ocupa
     @GetMapping("/search")
     public List<Producto> search(@RequestParam("q") String q, // @PathVariable("q") String q,
                                  @RequestParam(value = "limit", defaultValue = "20") int limit) {

@@ -12,7 +12,7 @@ import java.util.List;
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
   
   @Query(value ="""
-    SELECT id, tipo_producto, sub_tipo_producto, medida_producto, modelo_producto, nombre, descripcion, fecha_creacion, fecha_modificacion, activo, color_producto
+    SELECT id, tipo_producto, sub_tipo_producto, medida_producto, modelo_producto, nombre, descripcion, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, activo, color_producto, imagen
     FROM producto
     WHERE (:id IS NULL OR id = :id)
       AND (:nombre IS NULL OR LOWER(nombre) LIKE LOWER(CONCAT('%', :nombre, '%')))

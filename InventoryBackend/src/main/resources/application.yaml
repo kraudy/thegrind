@@ -40,3 +40,7 @@ spring:
 jwt:
   secret: superSecretKeyForInventoryApp2026MakeItAtLeast256BitsLongForHS512
   expiration-ms: 86400000   # 24 hours
+
+app:
+  upload:
+    dir: /app/images

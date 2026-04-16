@@ -9,5 +9,8 @@ export interface Producto {
   descripcion: string;
   fechaCreacion: Date;
   fechaModificacion: Date;
+  usuarioCreacion: string;
+  usuarioModificacion: string;
+  imagen: string;
   activo: boolean;
 }

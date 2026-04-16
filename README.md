@@ -538,6 +538,12 @@ docker compose logs backend
 docker compose logs db
 ```
 
+Images
+```bash
+# check images
+docker exec -it thegrind-backend ls -l /app/images/
+```
+
 Set timezone
 ```bash
 # 1. Check current timezone and NTP status

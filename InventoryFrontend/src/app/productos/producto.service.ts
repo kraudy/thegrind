@@ -17,12 +17,13 @@ export class ProductoService {
     return this.http.get<Producto>(`${this.apiUrl}/${id}`);
   }
 
-  create(producto: Partial<Producto>): Observable<Producto> {
-    return this.http.post<Producto>(this.apiUrl, producto);
+  create(formData: FormData): Observable<Producto> {
+    return this.http.post<Producto>(this.apiUrl, formData);
   }
 
-  update(id: number, producto: Partial<Producto>): Observable<Producto> {
-    return this.http.put<Producto>(`${this.apiUrl}/${id}`, producto);
+  // ✅ NEW: accepts FormData for image upload
+  update(id: number, formData: FormData): Observable<Producto> {
+    return this.http.put<Producto>(`${this.apiUrl}/${id}`, formData);
   }
 
   delete(id: number): Observable<void> {

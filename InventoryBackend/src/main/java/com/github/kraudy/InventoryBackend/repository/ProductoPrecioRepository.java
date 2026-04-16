@@ -31,7 +31,7 @@ public interface ProductoPrecioRepository extends JpaRepository<ProductoPrecio, 
     List<ProductoPrecioDTO> getAll();
 
     @Query(value ="""
-      SELECT producto_id, precio, descripcion, cantidad_requerida, fecha_creacion, fecha_modificacion, activo
+      SELECT producto_id, precio, descripcion, cantidad_requerida, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, activo
       FROM producto_precio pp
       WHERE pp.producto_id = :idProducto
       """, nativeQuery = true)

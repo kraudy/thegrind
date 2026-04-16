@@ -58,6 +58,9 @@ public class Producto {
   @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(50)")
   private String usuarioModificacion;
 
+  @Column(nullable = true, columnDefinition = "VARCHAR(255)")
+  private String imagen;
+
   @Column(nullable = false)
   private boolean activo = true;
 
