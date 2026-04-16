@@ -52,6 +52,12 @@ public class Producto {
   @Column(nullable = false, columnDefinition = "TIMESTAMP")
   private LocalDateTime fechaModificacion;
 
+  @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(50)")
+  private String usuarioCreacion;
+
+  @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(50)")
+  private String usuarioModificacion;
+
   @Column(nullable = false)
   private boolean activo = true;
 

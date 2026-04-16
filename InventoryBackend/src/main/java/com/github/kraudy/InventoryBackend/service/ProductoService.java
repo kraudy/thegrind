@@ -17,14 +17,16 @@ public class ProductoService {
     @Transactional
     public Producto create(Producto producto) {
       // Check duplicate on create
+      //TODO: Creo que este lo voy a tener que quitar.
       if (productoRepository.existeProducto(
             producto.getTipoProducto(),
             producto.getSubTipoProducto(),
             producto.getMedidaProducto(),
-            producto.getModeloProducto())) {
+            producto.getModeloProducto(),
+          producto.getColorProducto())) {
 
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Ya existe un producto con el mismo tipo, subtipo, medida y modelo");
+                "Ya existe un producto con el mismo tipo, subtipo, medida, modelo y color");
       }
 
       producto.setNombre(toTitleCase(producto.getNombre()));
@@ -36,15 +38,17 @@ public class ProductoService {
     @Transactional
     public Producto update(Producto producto) {
         // Check duplicate on update (allow same product to keep its own values)
+        //TODO: Creo que este lo voy a tener que quitar.
         if (productoRepository.existeProductoDiferenteId(
               producto.getTipoProducto(),
               producto.getSubTipoProducto(),
               producto.getMedidaProducto(),
               producto.getModeloProducto(),
+              producto.getColorProducto(),
               producto.getId())) {
 
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                  "Ya existe otro producto con el mismo tipo, subtipo, medida y modelo");
+                  "Ya existe otro producto con el mismo tipo, subtipo, medida, modelo y color");
         }
 
         producto.setNombre(toTitleCase(producto.getNombre()));
@@ -60,6 +64,7 @@ public class ProductoService {
         existente.setSubTipoProducto(producto.getSubTipoProducto());
         existente.setMedidaProducto(producto.getMedidaProducto());
         existente.setModeloProducto(producto.getModeloProducto());
+        existente.setColorProducto(producto.getColorProducto());
         existente.setActivo(producto.isActivo());
 
         return productoRepository.save(existente);

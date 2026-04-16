@@ -45,18 +45,18 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
   @Query(value ="""
       SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Producto p
       WHERE p.tipo_producto = :tipo AND p.sub_tipo_producto = :subTipo
-          AND p.medida_producto = :medida AND p.modelo_producto = :modelo
+          AND p.medida_producto = :medida AND p.modelo_producto = :modelo and p.color_producto = :color
       """, nativeQuery = true)
-  boolean existeProducto(@Param("tipo") String tipo, @Param("subTipo") String subTipo, @Param("medida") String medida, @Param("modelo") String modelo);
+  boolean existeProducto(@Param("tipo") String tipo, @Param("subTipo") String subTipo, @Param("medida") String medida, @Param("modelo") String modelo, @Param("color") String color);
 
   @Query(value = """
       SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END 
       FROM Producto p
       WHERE p.tipo_producto = :tipo AND p.sub_tipo_producto = :subTipo
-          AND p.medida_producto = :medida AND p.modelo_producto = :modelo
+          AND p.medida_producto = :medida AND p.modelo_producto = :modelo and p.color_producto = :color
           AND p.id <> :id
       """, nativeQuery = true)
-  boolean existeProductoDiferenteId(@Param("tipo") String tipo, @Param("subTipo") String subTipo, @Param("medida") String medida, @Param("modelo") String modelo, @Param("id") Long id);
+  boolean existeProductoDiferenteId(@Param("tipo") String tipo, @Param("subTipo") String subTipo, @Param("medida") String medida, @Param("modelo") String modelo, @Param("color") String color, @Param("id") Long id);
 
 
   @Query(value = """

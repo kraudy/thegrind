@@ -33,14 +33,14 @@ public class ProductoSubTipo {
   @Column(updatable = false, nullable = false)
   private LocalDateTime fechaCreacion;
 
-  @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
+  @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(50)")
   private String usuarioCreacion;
 
   @UpdateTimestamp
   @Column(nullable = false)
   private LocalDateTime fechaModificacion;
 
-  @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(100)")
+  @Column(updatable = false, nullable = false, columnDefinition = "VARCHAR(50)")
   private String usuarioModificacion;
 
   // Bi-directional relationship to Producto, get all products of this sub type
