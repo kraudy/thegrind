@@ -2,7 +2,7 @@ package com.github.kraudy.InventoryBackend.controller;
 
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajo;
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajoPK;
-import com.github.kraudy.InventoryBackend.dto.UsuarioDTO;
+import com.github.kraudy.InventoryBackend.dto.UsuarioNombreDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenDetalle;
 import com.github.kraudy.InventoryBackend.model.OrdenDetallePK;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
@@ -127,7 +127,7 @@ public class OrdenTrabajoController {
   }
 
   @GetMapping("/obtener-reparador/{idOrden}/{idOrdenDetalle}")
-  public UsuarioDTO getReparadores(
+  public UsuarioNombreDTO getReparadores(
             @PathVariable Long idOrden, 
             @PathVariable Long idOrdenDetalle) {
 
@@ -135,7 +135,7 @@ public class OrdenTrabajoController {
   }
 
   @GetMapping("/obtener-normal/{idOrden}/{idOrdenDetalle}")
-  public UsuarioDTO getNormal(
+  public UsuarioNombreDTO getNormal(
             @PathVariable Long idOrden, 
             @PathVariable Long idOrdenDetalle) {
 

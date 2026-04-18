@@ -7,7 +7,6 @@ import com.github.kraudy.InventoryBackend.repository.*;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,6 +17,7 @@ public class FacturaDetalleService {
   private final OrdenCalendarioRepository ordenCalendarioRepository;
 
   private final FacturaDetalleRepository facturaDetalleRepository;
+  private final CurrentUserService currentUserService;
   private final FacturaRepository facturaRepository;
 
   private final OrdenTrabajoRepository ordenTrabajoRepository;
@@ -47,7 +47,7 @@ public class FacturaDetalleService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se puede crear la factura porque no hay pagos aprobados");
     }
 
-    String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+    String currentUser = currentUserService.getCurrentUser();
 
     Factura factura = new Factura();
     factura.setIdCliente(orden.getIdCliente());

@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.util.Set;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class ProductoService {
 
     private final ProductoRepository productoRepository;
+    private final CurrentUserService currentUserService;
 
     @Value("${app.upload.dir:/app/images}")
     private String uploadDir;
@@ -57,7 +57,7 @@ public class ProductoService {
                 "Ya existe un producto con el mismo tipo, subtipo, medida, modelo y color");
       }
 
-      String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+      String currentUser = currentUserService.getCurrentUser();
 
       producto.setNombre(toTitleCase(producto.getNombre()));
       producto.setDescripcion(toTitleCase(producto.getDescripcion()));
@@ -98,7 +98,7 @@ public class ProductoService {
         Producto existente = productoRepository.findById(producto.getId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
 
-        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        String currentUser = currentUserService.getCurrentUser();
 
         // Solo copiamos los campos que queremos actualizar
         existente.setNombre(producto.getNombre());

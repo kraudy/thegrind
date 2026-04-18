@@ -48,7 +48,11 @@ import { OrdenFacturacionListComponent } from './ordenes-facturacion/orden-factu
 
 import { FacturaListComponent } from './facturas/factura-list/factura-list.component';
 
+import { UsuarioListComponent } from './usuarios/usuario-list/usuario-list.component';
+import { UsuarioFormComponent } from './usuarios/usuario-form/usuario-form.component';
+
 import { authGuard } from './auth/auth.guard';
+
 
 
 export const routes: Routes = [
@@ -118,6 +122,11 @@ export const routes: Routes = [
 
   // Facturas
   { path: 'facturas', component: FacturaListComponent, canActivate: [authGuard] },
+
+  // Usuarios
+  { path: 'usuarios', component: UsuarioListComponent, canActivate: [authGuard] },
+  { path: 'usuarios/new', component: UsuarioFormComponent, canActivate: [authGuard] },
+  { path: 'usuarios/:usuario/edit', component: UsuarioFormComponent, canActivate: [authGuard] },
 
   // Catch-all → must be LAST
   { path: '**', redirectTo: '' }

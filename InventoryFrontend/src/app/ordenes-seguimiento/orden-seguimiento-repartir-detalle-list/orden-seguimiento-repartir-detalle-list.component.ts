@@ -10,7 +10,7 @@ import { takeUntil } from 'rxjs/operators';
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimientoDetalle } from '../orden-seguimiento-detalle.model';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
-import { Usuario } from '../../usuarios/usuario.model';
+import { UsuarioNombre } from '../../usuarios/usuario-nombre.model';
 import { UsuarioTrabajo } from '../../usuarios/usuario-trabajo.model';
 import { UsuarioService } from '../../usuarios/usuario.service';
 import { NotificationService } from '../../shared/notification.service';

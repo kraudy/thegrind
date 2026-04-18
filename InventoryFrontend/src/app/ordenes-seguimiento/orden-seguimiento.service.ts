@@ -7,7 +7,7 @@ import { OrdenSeguimientoDetalleImpresion } from './orden-seguimiento-detalle-im
 import { ProductoTipoEstado } from '../productos-tipo-estados/producto-tipo-estado.model';
 import { OrdenSeguimiento } from './orden-seguimiento.model';
 import { EstadosPorDetalleDTO } from './estados-por-detalle.model';
-import { Usuario } from '../usuarios/usuario.model';
+import { UsuarioNombre } from '../usuarios/usuario-nombre.model';
 import { OrdenSeguimientoDetallePreparacion } from './orden-seguimiento-detalle-preparacion.model';
 import { OrdenSeguimientoDetalleEntrega } from './orden-seguimiento-detalle-entrega.model';
 import { OrdenSeguimientoDetalleGeneral } from './orden-seguimiento-detalle-general.model';
@@ -110,23 +110,23 @@ export class OrdenSeguimientoService {
     return this.http.post<OrdenSeguimientoDetalle>(`${this.apiUrl}/regresar/${idOrden}/${idOrdenDetalle}`, {});
   }
 
-  assignTrabajo(idOrden: number, idOrdenDetalle: number, trabajador: string): Observable<Usuario> {
-    return this.http.post<Usuario>(`/api/ordenes-trabajo/asignar-trabajo/${idOrden}/${idOrdenDetalle}/${encodeURIComponent(trabajador)}`, {});
+  assignTrabajo(idOrden: number, idOrdenDetalle: number, trabajador: string): Observable<UsuarioNombre> {
+    return this.http.post<UsuarioNombre>(`/api/ordenes-trabajo/asignar-trabajo/${idOrden}/${idOrdenDetalle}/${encodeURIComponent(trabajador)}`, {});
   }
 
-  getReparador(idOrden: number, idOrdenDetalle: number): Observable<Usuario | null> {
-    return this.http.get<Usuario | null>(`/api/ordenes-trabajo/obtener-reparador/${idOrden}/${idOrdenDetalle}`);
+  getReparador(idOrden: number, idOrdenDetalle: number): Observable<UsuarioNombre | null> {
+    return this.http.get<UsuarioNombre | null>(`/api/ordenes-trabajo/obtener-reparador/${idOrden}/${idOrdenDetalle}`);
   }
 
-  getNormal(idOrden: number, idOrdenDetalle: number): Observable<Usuario | null> {
-    return this.http.get<Usuario | null>(`/api/ordenes-trabajo/obtener-normal/${idOrden}/${idOrdenDetalle}`);
+  getNormal(idOrden: number, idOrdenDetalle: number): Observable<UsuarioNombre | null> {
+    return this.http.get<UsuarioNombre | null>(`/api/ordenes-trabajo/obtener-normal/${idOrden}/${idOrdenDetalle}`);
   }
 
   progresoTrabajo(idOrden: number, idOrdenDetalle: number, cantidadTrabajada: number): Observable<any> {
     return this.http.post(`/api/ordenes-trabajo/progreso-trabajo/${idOrden}/${idOrdenDetalle}/${cantidadTrabajada}`, {});
   }
 
-  getPegadores(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(`/api/usuarios/pegadores`);
+  getPegadores(): Observable<UsuarioNombre[]> {
+    return this.http.get<UsuarioNombre[]>(`/api/usuarios/pegadores`);
   }
 }

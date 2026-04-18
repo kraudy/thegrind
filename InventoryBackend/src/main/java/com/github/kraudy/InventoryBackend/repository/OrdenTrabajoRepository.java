@@ -1,7 +1,7 @@
 package com.github.kraudy.InventoryBackend.repository;
 
 import com.github.kraudy.InventoryBackend.dto.TrabajoEntregadoDTO;
-import com.github.kraudy.InventoryBackend.dto.UsuarioDTO;
+import com.github.kraudy.InventoryBackend.dto.UsuarioNombreDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajo;
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajoPK;
 
@@ -34,7 +34,7 @@ public interface OrdenTrabajoRepository extends JpaRepository<OrdenTrabajo, Orde
       AND trabajo.id_orden_detalle = :idOrdenDetalle
       AND trabajo.estado = 'Reparacion'
     """, nativeQuery = true)
-  UsuarioDTO getReparador(Long idOrden, Long idOrdenDetalle);
+  UsuarioNombreDTO getReparador(Long idOrden, Long idOrdenDetalle);
 
   @Query(value = """
     SELECT
@@ -45,7 +45,7 @@ public interface OrdenTrabajoRepository extends JpaRepository<OrdenTrabajo, Orde
       AND trabajo.id_orden_detalle = :idOrdenDetalle
       AND trabajo.estado = 'Normal'
     """, nativeQuery = true)
-  UsuarioDTO getNormal(Long idOrden, Long idOrdenDetalle);
+  UsuarioNombreDTO getNormal(Long idOrden, Long idOrdenDetalle);
 
   @Modifying
   @Transactional
