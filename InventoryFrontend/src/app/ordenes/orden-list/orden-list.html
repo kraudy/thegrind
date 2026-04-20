@@ -55,17 +55,17 @@
               class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
         Repartida
       </button>
-      <button (click)="selectedEstadoFilter = 'Lista'; onFilterChange()" 
-              [class.bg-indigo-600]="selectedEstadoFilter === 'Lista'" 
-              [class.text-white]="selectedEstadoFilter === 'Lista'"
+      <button (click)="selectedEstadoFilter = 'Listo'; onFilterChange()" 
+              [class.bg-indigo-600]="selectedEstadoFilter === 'Listo'" 
+              [class.text-white]="selectedEstadoFilter === 'Listo'"
               class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
-        Lista
+        Listo
       </button>
-      <button (click)="selectedEstadoFilter = 'Entregada'; onFilterChange()" 
-              [class.bg-indigo-600]="selectedEstadoFilter === 'Entregada'" 
-              [class.text-white]="selectedEstadoFilter === 'Entregada'"
+      <button (click)="selectedEstadoFilter = 'Entregado'; onFilterChange()" 
+              [class.bg-indigo-600]="selectedEstadoFilter === 'Entregado'" 
+              [class.text-white]="selectedEstadoFilter === 'Entregado'"
               class="px-6 py-2 text-sm font-medium rounded-xl border transition-colors">
-        Entregada
+        Entregado
       </button>
     </div>
 
@@ -110,11 +110,11 @@
             <td class="px-6 py-4 whitespace-nowrap">
               <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
                     [ngClass]="{
-                      'bg-blue-100 text-blue-800': orden.estado.toLowerCase() === 'repartida',
-                      'bg-yellow-100 text-yellow-800': orden.estado.toLowerCase() === 'lista',
-                      'bg-green-100 text-green-800': orden.estado.toLowerCase() === 'entregada',
-                      'bg-red-100 text-red-800': orden.estado.toLowerCase() === 'cancelada',
-                      'bg-gray-100 text-gray-800': orden.estado.toLowerCase() === 'recibida'
+                      'bg-gray-100 text-gray-800': orden.estado === 'Recibida',
+                      'bg-blue-100 text-blue-800': orden.estado === 'Repartida',
+                      'bg-yellow-100 text-yellow-800': orden.estado === 'Listo',
+                      'bg-green-100 text-green-800': orden.estado === 'Entregado',
+                      'bg-purple-100 text-purple-800': orden.estado === 'Facturado',
                     }">
                 {{ orden.estado | uppercase }}
               </span>

@@ -10,6 +10,9 @@ import { Orden } from '../orden.model';
 import { ClienteService } from '../../clientes/cliente.service';
 import { Cliente } from '../../clientes/cliente.model';
 
+import { NotificationService } from '../../shared/notification.service'; 
+import { ToastService } from '../../shared/toast/toast.service';
+
 import { Subject, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
@@ -39,7 +42,8 @@ export class OrdenFormComponent implements OnChanges, OnInit{
     private location: Location,
     private route: ActivatedRoute,
     private router: Router,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private toastService: ToastService
   ) {}
 
   formOrden: Partial<Orden> = { 
@@ -189,6 +193,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
 
       this.ordenService.update(this.formOrden.id, payload).subscribe({
         next: () => {
+          this.toastService.showToast('success', 'Orden actualizada', `La orden #${this.formOrden.id} para ${this.selectedCliente?.nombre || 'cliente'} ha sido actualizada exitosamente`, 4000);
           this.ordenSaved.emit();
           this.goBack();
         },
@@ -197,13 +202,14 @@ export class OrdenFormComponent implements OnChanges, OnInit{
         },
         error: (err) => {
           console.error('Failed to update orden', err);
-          alert('Error updating orden: ' + (err?.message || 'Unknown error'));
+          this.toastService.showToast('error', 'Error al actualizar orden', err?.error?.message || 'No se pudo actualizar la orden', 7000);
         }
       });
     } else {
       // Create new Orden
       this.ordenService.create(payload).subscribe({
         next: (createdOrden) => {
+          this.toastService.showToast('success', 'Orden creada', `La orden #${createdOrden.id} para ${this.selectedCliente?.nombre || 'cliente'} ha sido creada exitosamente`, 4000);
           this.ordenSaved.emit();
           this.resetForm();
           // Navigate to orden-detalle to add details
@@ -214,7 +220,7 @@ export class OrdenFormComponent implements OnChanges, OnInit{
         },
         error: (err) => {
           console.error('Failed to create orden', err);
-          alert('Error creating orden: ' + (err?.message || 'Unknown error'));
+          this.toastService.showToast('error', 'Error al crear orden', err?.error?.message || 'No se pudo crear la orden', 7000);
         }
       });
     }
