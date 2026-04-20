@@ -19,6 +19,15 @@ import { ProductoSubTipo } from '../../productos-sub-tipos/producto-sub-tipo.mod
 import { ProductoTipoService } from '../../productos-tipos/producto-tipo.service';
 import { ProductoSubTipoService } from '../../productos-sub-tipos/producto-sub-tipo.service';
 
+import { ProductoColor } from '../../productos-colores/producto-color.model';
+import { ProductoModelo } from '../../productos-modelos/producto-modelo.model';
+import { ProductoMedida } from '../../productos-medidas/producto-medida.model';
+
+import { ProductoConfigService } from '../../productos-config/producto-config.service';
+
+import { NotificationService } from '../../shared/notification.service';
+import { ToastService } from '../../shared/toast/toast.service';
+
 @Component({
   selector: 'app-orden-detalle-form',
   standalone: true,
@@ -33,11 +42,19 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
   isEdit = false;
   clienteNombre: string = '';
 
-  // Filters
+  // Dynamic filter dropdowns (valid combinations only)
   tipos: ProductoTipo[] = [];
   subTipos: ProductoSubTipo[] = [];
+  medidas: ProductoMedida[] = [];
+  modelos: ProductoModelo[] = [];
+  colores: ProductoColor[] = [];
+
+  // Selected filter values
   selectedTipo: string = '';
   selectedSubTipo: string = '';
+  selectedMedida: string = '';
+  selectedModelo: string = '';
+  selectedColor: string = '';
 
   constructor(
     private ordenDetalleService: OrdenDetalleService,
@@ -45,9 +62,11 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     private productoPrecioService: ProductoPrecioService,
     private productoTipoService: ProductoTipoService,
     private productoSubTipoService: ProductoSubTipoService,
+    private productoConfigService: ProductoConfigService,
     private location: Location,
     private route: ActivatedRoute,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private toastService: ToastService
   ) {}
 
   formOrdenDetalle: Partial<OrdenDetalle> = { 
@@ -83,7 +102,8 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     
     if (isNaN(this.formOrdenDetalle.idOrden) || this.formOrdenDetalle.idOrden <= 0) {
       console.error('ordenId inválido:', this.formOrdenDetalle.idOrden);
-      alert('ID de orden inválido. Regresando...');
+      this.toastService.showToast('error', 'ID inválido', 'ID de orden inválido. Regresando...', 6000);
+      this.goBack();
     }
 
     const idOrdenDetalleStr = params.get('idOrdenDetalle');
@@ -108,11 +128,11 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
       // Modo creación
       this.resetForm();  // conserva el idOrden
       this.isEdit = false;
+      this.refreshConfig(); 
     }
 
     // Load filter options (always - harmless in edit mode)
     this.loadTipos();
-    this.loadSubTipos();
   }
 
   ngOnChanges(): void {
@@ -129,11 +149,61 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     });
   }
 
-  private loadSubTipos(): void {
-    this.productoSubTipoService.getAll().subscribe({
-      next: (data) => { this.subTipos = data || []; this.cd.detectChanges(); },
-      error: (err) => { console.error('[OrdenDetalleForm] failed to load sub-tipos', err); this.subTipos = []; }
+  private refreshConfig(): void {
+    this.productoConfigService.getConfig(
+      this.selectedTipo || undefined,
+      this.selectedSubTipo || undefined,
+      this.selectedMedida || undefined,
+      this.selectedModelo || undefined,
+      this.selectedColor || undefined
+    ).subscribe({
+      next: (config) => {
+        this.subTipos = [...new Set(config.map(c => c.subTipo))]
+          .map(st => ({ subTipo: st, descripcion: '' } as ProductoSubTipo));
+
+        this.medidas = [...new Set(config.map(c => c.medida))]
+          .map(m => ({ medida: m, descripcion: '' } as ProductoMedida));
+
+        this.modelos = [...new Set(config.map(c => c.modelo))]
+          .map(mod => ({ modelo: mod, descripcion: '' } as ProductoModelo));
+
+        this.colores = [...new Set(config.map(c => c.color))]
+          .map(col => ({ color: col, descripcion: '' } as ProductoColor));
+
+        this.cd.detectChanges();
+
+        // Auto-clean any selection that is no longer valid
+        let anyReset = false;
+
+        if (this.selectedSubTipo && !this.subTipos.some(s => s.subTipo === this.selectedSubTipo)) {
+          this.selectedSubTipo = '';
+          anyReset = true;
+        }
+        if (this.selectedMedida && !this.medidas.some(m => m.medida === this.selectedMedida)) {
+          this.selectedMedida = '';
+          anyReset = true;
+        }
+        if (this.selectedModelo && !this.modelos.some(mod => mod.modelo === this.selectedModelo)) {
+          this.selectedModelo = '';
+          anyReset = true;
+        }
+        if (this.selectedColor && !this.colores.some(col => col.color === this.selectedColor)) {
+          this.selectedColor = '';
+          anyReset = true;
+        }
+
+        if (anyReset) {
+          this.refreshConfig();   // re-run with cleaned values
+        } else {
+          this.performProductSearch();   // ← refresh product list
+        }
+      },
+      error: (err) => console.error('[OrdenDetalleForm] failed to load config', err)
     });
+  }
+
+  onAnyFilterChange(): void {
+    this.refreshConfig();
   }
 
 
@@ -161,10 +231,6 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
   // Centralized search with filters + intelligent ID/name logic
   private performProductSearch(): void {
     const term = (this.searchProducto || '').trim();
-    if (!term) {
-      this.productosFiltrados = [];
-      return;
-    }
 
     let filterId: number | undefined;
     let filterNombre: string | undefined;
@@ -180,24 +246,29 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
       id: filterId,
       nombre: filterNombre,
       tipo: this.selectedTipo || undefined,
-      subTipo: this.selectedSubTipo || undefined
+      subTipo: this.selectedSubTipo || undefined,
+      medida: this.selectedMedida || undefined,
+      modelo: this.selectedModelo || undefined,
+      color: this.selectedColor || undefined
     }).subscribe({
       next: (data) => {
         this.productosFiltrados = data || [];
+        if (this.productosFiltrados.length === 0 && term) {
+          this.toastService.showToast('warning', 'Sin resultados', 'No se encontraron productos que coincidan con la búsqueda', 5000);
+        }
+        this.cd.detectChanges(); 
       },
       error: (err) => {
         console.error('[OrdenDetalleForm] failed to search products', err);
         this.productosFiltrados = [];
+        this.toastService.showToast('error', 'Error en búsqueda', 'Ocurrió un error al buscar productos', 7000);
       }
     });
+
   }
 
   onSearchChange(newValue: string): void {
     this.searchProducto = newValue;
-    this.performProductSearch();
-  }
-
-  onFilterChange(): void {
     this.performProductSearch();
   }
 
@@ -246,7 +317,10 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
   clearFilters(): void {
     this.selectedTipo = '';
     this.selectedSubTipo = '';
-    this.performProductSearch();   // refreshes the list with current search term (if any)
+    this.selectedMedida = '';
+    this.selectedModelo = '';
+    this.selectedColor = '';
+    this.refreshConfig();   // resets dropdowns + triggers search
   }
 
   resetForm(): void {
@@ -266,6 +340,9 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     // Also reset filters when creating a new line
     this.selectedTipo = '';
     this.selectedSubTipo = '';
+    this.selectedMedida = '';
+    this.selectedModelo = '';
+    this.selectedColor = '';
   }
 
   /** Helper: devuelve el objeto ProductoPrecio que coincide con el precio seleccionado */
@@ -280,7 +357,7 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     const selectedPrecio = this.getSelectedPrecio();
 
     if ((this.formOrdenDetalle.cantidad || 0) <= 0) {
-      alert('La cantidad debe ser mayor a cero.');
+      this.toastService.showToast('error', 'Cantidad inválida', 'La cantidad debe ser mayor a cero', 6000);
       return; // ← detiene el envío
     }
 
@@ -288,9 +365,11 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
       const cantidadUsuario = this.formOrdenDetalle.cantidad || 0;
 
       if (cantidadUsuario < selectedPrecio.cantidadRequerida) {
-        alert(
-          `La cantidad debe ser al menos ${selectedPrecio.cantidadRequerida} ` +
-          `para el precio seleccionado (${selectedPrecio.precio}).`
+        this.toastService.showToast(
+          'error',
+          'Cantidad insuficiente',
+          `La cantidad debe ser al menos ${selectedPrecio.cantidadRequerida} para el precio seleccionado (${selectedPrecio.precio})`,
+          7000
         );
         return; // ← detiene el envío
       }
@@ -309,10 +388,15 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
         updatePayload
       ).subscribe({
         next: () => {
+          this.toastService.showToast('success', 'Detalle actualizado', 'El detalle de la orden ha sido actualizado exitosamente', 4000);
           this.ordenDetalleSaved.emit();
-          this.goBack();
+          // Delay navigation slightly to ensure toast is visible
+          setTimeout(() => this.goBack(), 100);
         },
-        error: (err) => console.error('Error actualizando detalle', err)
+        error: (err) => {
+          console.error('Error actualizando detalle', err);
+          this.toastService.showToast('error', 'Error al actualizar', 'No se pudo actualizar el detalle de la orden', 7000);
+        }
       });
 
     } else {
@@ -324,10 +408,15 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
 
       this.ordenDetalleService.create(this.formOrdenDetalle.idOrden!, this.formOrdenDetalle.idProducto!, createPayload).subscribe({
         next: () => {
+          this.toastService.showToast('success', 'Detalle creado', 'El detalle de la orden ha sido creado exitosamente', 4000);
           this.ordenDetalleSaved.emit();
-          this.goBack();
+          // Delay navigation slightly to ensure toast is visible
+          setTimeout(() => this.goBack(), 100);
         },
-        error: (err) => console.error('Error creando detalle', err)
+        error: (err) => {
+          console.error('Error creando detalle', err);
+          this.toastService.showToast('error', 'Error al crear', 'No se pudo crear el detalle de la orden', 7000);
+        }
       });
     }
   }

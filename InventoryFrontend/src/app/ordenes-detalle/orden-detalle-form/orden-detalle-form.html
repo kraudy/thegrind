@@ -32,38 +32,78 @@
             <!-- Modo creación: filters + autocomplete -->
             <div *ngIf="!isEdit; else editModeProducto">
               
-              <!-- Filter bar (compact - Tipo + SubTipo only) -->
-              <div class="flex flex-wrap gap-3 mb-4 p-4 bg-gray-50 rounded-2xl border border-gray-200">
-                <!-- Tipo -->
-                <div class="flex-1 min-w-[200px]">
-                  <select [(ngModel)]="selectedTipo" 
-                          (ngModelChange)="onFilterChange()"
-                          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-                    <option value="">Todos los tipos</option>
-                    <option *ngFor="let tipo of tipos" [value]="tipo.tipo">
-                      {{ tipo.tipo }} — {{ tipo.descripcion || 'Sin descripción' }}
-                    </option>
-                  </select>
+              <!-- Filter bar – now in TWO ROWS + better spacing -->
+              <div *ngIf="!isEdit" class="mb-6 p-5 bg-gray-50 rounded-3xl border border-gray-200">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-6">
+                  
+                  <!-- Tipo -->
+                  <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Tipo</label>
+                    <select [(ngModel)]="selectedTipo" (ngModelChange)="onAnyFilterChange()"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                      <option value="">Todos los tipos</option>
+                      <option *ngFor="let tipo of tipos" [value]="tipo.tipo">
+                        {{ tipo.tipo }} — {{ tipo.descripcion || 'Sin descripción' }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <!-- Sub Tipo -->
+                  <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Sub Tipo</label>
+                    <select [(ngModel)]="selectedSubTipo" (ngModelChange)="onAnyFilterChange()"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                      <option value="">Todos los subtipos</option>
+                      <option *ngFor="let subTipo of subTipos" [value]="subTipo.subTipo">
+                        {{ subTipo.subTipo }} — {{ subTipo.descripcion || 'Sin descripción' }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <!-- Medida -->
+                  <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Medida</label>
+                    <select [(ngModel)]="selectedMedida" (ngModelChange)="onAnyFilterChange()"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                      <option value="">Todas las medidas</option>
+                      <option *ngFor="let medida of medidas" [value]="medida.medida">
+                        {{ medida.medida }} — {{ medida.descripcion || 'Sin descripción' }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <!-- Modelo -->
+                  <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Modelo</label>
+                    <select [(ngModel)]="selectedModelo" (ngModelChange)="onAnyFilterChange()"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                      <option value="">Todos los modelos</option>
+                      <option *ngFor="let modelo of modelos" [value]="modelo.modelo">
+                        {{ modelo.modelo }} — {{ modelo.descripcion || 'Sin descripción' }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <!-- Color -->
+                  <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Color</label>
+                    <select [(ngModel)]="selectedColor" (ngModelChange)="onAnyFilterChange()"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                      <option value="">Todos los colores</option>
+                      <option *ngFor="let color of colores" [value]="color.color">
+                        {{ color.color }} — {{ color.descripcion || 'Sin descripción' }}
+                      </option>
+                    </select>
+                  </div>
                 </div>
 
-                <!-- SubTipo -->
-                <div class="flex-1 min-w-[200px]">
-                  <select [(ngModel)]="selectedSubTipo" 
-                          (ngModelChange)="onFilterChange()"
-                          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-                    <option value="">Todos los subtipos</option>
-                    <option *ngFor="let subTipo of subTipos" [value]="subTipo.subTipo">
-                      {{ subTipo.subTipo }} — {{ subTipo.descripcion || 'Sin descripción' }}
-                    </option>
-                  </select>
+                <!-- Clear button -->
+                <div class="mt-4 flex justify-end">
+                  <button type="button" (click)="clearFilters()"
+                          class="px-6 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2">
+                    <span>Limpiar filtros</span>
+                  </button>
                 </div>
-
-                <!-- Clear filters button - FIXED -->
-                <button type="button"
-                        (click)="clearFilters()"
-                        class="px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors flex-shrink-0">
-                  Limpiar filtros
-                </button>
               </div>
 
               <!-- Search input -->

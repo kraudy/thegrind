@@ -83,9 +83,13 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     this.loadTipos();
 
     const idParam = this.route.snapshot.paramMap.get('id');
-    if (!idParam) {return;}
+    if (!idParam) {
+      this.refreshConfig();   // populate full valid options for create form
+      return;
+    }
+
     const id = Number(idParam);
-    if (isNaN(id)) {return;}
+    if (isNaN(id)) return;
 
     this.productoId = id;
     this.productoService.getById(id).subscribe({
@@ -101,6 +105,7 @@ export class ProductoFormComponent implements OnChanges, OnInit {
         // Keep form reset so user can create, but mark not edit on failure
         this.resetForm();
         this.isEdit = false;
+        this.refreshConfig(); 
         this.cd.detectChanges();  // Force view update
       }
     });
@@ -125,6 +130,10 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     });
   }
 
+  onAnyFieldChange(): void {
+    this.refreshConfig();
+  }
+
   private refreshConfig(): void {
     this.productoConfigService.getConfig(
       this.formProducto.tipoProducto || undefined,
@@ -134,6 +143,7 @@ export class ProductoFormComponent implements OnChanges, OnInit {
       this.formProducto.colorProducto || undefined
     ).subscribe({
       next: (config) => {
+        // Backend returns ONLY valid combinations → we extract unique values
         this.subTipos = [...new Set(config.map(c => c.subTipo))]
           .map(st => ({ subTipo: st, descripcion: '' } as ProductoSubTipo));
 
@@ -147,10 +157,40 @@ export class ProductoFormComponent implements OnChanges, OnInit {
           .map(col => ({ color: col, descripcion: '' } as ProductoColor));
 
         this.cd.detectChanges();
+
+        // Clean any selection that is no longer valid after the change
+        let anyReset = false;
+
+        if (this.formProducto.subTipoProducto && 
+            !this.subTipos.some(s => s.subTipo === this.formProducto.subTipoProducto)) {
+          this.formProducto.subTipoProducto = '';
+          anyReset = true;
+        }
+        if (this.formProducto.medidaProducto && 
+            !this.medidas.some(m => m.medida === this.formProducto.medidaProducto)) {
+          this.formProducto.medidaProducto = '';
+          anyReset = true;
+        }
+        if (this.formProducto.modeloProducto && 
+            !this.modelos.some(mod => mod.modelo === this.formProducto.modeloProducto)) {
+          this.formProducto.modeloProducto = '';
+          anyReset = true;
+        }
+        if (this.formProducto.colorProducto && 
+            !this.colores.some(col => col.color === this.formProducto.colorProducto)) {
+          this.formProducto.colorProducto = '';
+          anyReset = true;
+        }
+
+        if (anyReset) {
+          // Re-fetch with cleaned values so all dropdowns show correct options
+          this.refreshConfig();
+        }
       },
       error: (err) => console.error('[ProductoForm] failed to load config', err)
     });
   }
+
 
   onTipoChange(): void {
     this.formProducto.subTipoProducto = '';
