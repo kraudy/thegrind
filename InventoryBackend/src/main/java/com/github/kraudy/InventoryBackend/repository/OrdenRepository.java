@@ -74,14 +74,31 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
   @Transactional
   @Query(value = """
     UPDATE orden
-    SET estado = :estado, 
-      CASE 
-        WHEN :estado = 'Listo'      THEN fecha_preparada = CURRENT_TIMESTAMP
-        WHEN :estado = 'Entregado'  THEN fecha_despachada = CURRENT_TIMESTAMP
-        WHEN :estado = 'Repartida'  THEN fecha_preparada = NULL, fecha_despachada = NULL
-        WHEN :estado = 'Recibida'   THEN fecha_preparada = NULL, fecha_despachada = NULL
-        ELSE fecha_modificacion = CURRENT_TIMESTAMP
-      END
+    SET 
+        estado = :estado,
+        
+        fecha_preparada = CASE 
+            WHEN :estado = 'Listo' 
+                THEN CURRENT_TIMESTAMP 
+            WHEN :estado IN ('Repartida', 'Recibida') 
+                THEN NULL 
+            ELSE fecha_preparada 
+        END,
+        
+        fecha_despachada = CASE 
+            WHEN :estado = 'Entregado' 
+                THEN CURRENT_TIMESTAMP 
+            WHEN :estado IN ('Repartida', 'Recibida') 
+                THEN NULL 
+            ELSE fecha_despachada 
+        END,
+        
+        fecha_modificacion = CASE 
+            WHEN :estado NOT IN ('Listo', 'Entregado', 'Repartida', 'Recibida') 
+                THEN CURRENT_TIMESTAMP 
+            ELSE fecha_modificacion 
+        END
+        
     WHERE id = :idOrden
     """, nativeQuery = true)
   void updateEstadoOrdenYFecha(Long idOrden, String estado);
@@ -145,4 +162,5 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
     ORDER BY ord.id
     """, nativeQuery = true)
   List<OrdenDTO> obtenerOrdenes(@Param("id") Long id, @Param("cliente") String cliente, @Param("recepcionista") String recepcionista, @Param("estado") String estado);
+
 }

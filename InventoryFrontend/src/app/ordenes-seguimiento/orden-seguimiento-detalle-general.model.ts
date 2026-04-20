@@ -12,6 +12,10 @@ export interface OrdenSeguimientoDetalleGeneral {
   tieneNormales: boolean;
   tieneReparacion: boolean;
   tieneImpresion: boolean;
+  tieneBodega: boolean;
+  tieneArmado: boolean;
+  tieneCalado: boolean;
+  tieneSublimacion: boolean;
   tieneEnmarcado: boolean;
   tienePegado: boolean;
   tieneListo: boolean;
@@ -21,6 +25,10 @@ export interface OrdenSeguimientoDetalleGeneral {
   countNormales: number;
   countReparacion: number;
   countImpresion: number;
+  countBodega: number;
+  countArmado: number;
+  countCalado: number;
+  countSublimacion: number;
   countEnmarcado: number;
   countPegado: number;
   countListo: number;

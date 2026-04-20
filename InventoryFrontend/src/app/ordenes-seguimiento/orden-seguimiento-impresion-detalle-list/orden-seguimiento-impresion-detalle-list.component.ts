@@ -9,7 +9,9 @@ import { takeUntil } from 'rxjs/operators';
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimientoDetalleImpresion } from '../orden-seguimiento-detalle-impresion.model';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
+
 import { NotificationService } from '../../shared/notification.service';
+import { ToastService } from '../../shared/toast/toast.service';  
 
 @Component({
   selector: 'app-orden-seguimiento-impresion-detalle-list',
@@ -40,13 +42,14 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, On
     private router: Router,
     private ordenSeguimientoService: OrdenSeguimientoService,
     private notificationService: NotificationService,
+    private toastService: ToastService,
     private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.notificationService.connect();   // still safe (idempotent now)
 
-    // ← CLEAN SIGNAL LOGIC: listen only to "seguimiento" refreshes
+    // listen only to "seguimiento" refreshes
     this.notificationService.refreshNeeded$
       .pipe(takeUntil(this.destroy$))
       .subscribe(view => {
@@ -83,7 +86,10 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, On
         
         this.cd.detectChanges();
       },
-      error: (err) => console.error('❌ Error cargando detalle de impresión', err),
+      error: (err) => {
+        console.error('❌ Error cargando detalle de impresión', err);
+        this.toastService.showToast('error', 'Error al cargar', 'No se pudo cargar el detalle de impresión', 6000);
+      },
     });
   }
 
@@ -116,8 +122,15 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, On
   advanceDetail(det: OrdenSeguimientoDetalleImpresion) {
     if (det.estadoActual === 'Normal' || det.estadoActual === 'Reparacion') {
       // Normal advancement
-      this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
-        this.load();
+      this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe({
+        next: () => {
+          this.toastService.showToast('success', 'Éxito', `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) - Estado avanzado correctamente`, 4000);
+          this.load();
+        },
+        error: (err) => {
+          console.error('Error al avanzar estado:', err);
+          this.toastService.showToast('error', 'Error al avanzar', 'No se pudo avanzar el estado del detalle', 7000);
+        }
       });
       return;
     }
@@ -125,62 +138,79 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, On
 
     // Impresion logic
     if (det.tipoProducto === 'Retablos') {
-      // Assign pegador first, then advance
       this.ordenSeguimientoService.getPegadores().subscribe({
         next: (pegadores) => {
           if (pegadores && pegadores.length > 0) {
             const pegador = pegadores[0]; // Take first pegador
             this.ordenSeguimientoService.assignTrabajo(det.idOrden, det.idOrdenDetalle, pegador.usuario).subscribe({
               next: () => {
+                this.toastService.showToast('success', 'Éxito', 'Pegador asignado correctamente', 4000);
                 // Assignment successful, now advance
-                this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
-                  this.load();
+                this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe({
+                  next: () => {
+                    this.toastService.showToast('success', 'Éxito', `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) - Estado avanzado correctamente`, 4000);
+                    this.load();
+                  },
+                  error: (err) => {
+                    console.error('Error al avanzar estado:', err);
+                    this.toastService.showToast('error', 'Error al avanzar', 'No se pudo avanzar el estado del detalle', 7000);
+                  }
                 });
               },
               error: (err) => {
                 console.error('Error assigning pegador:', err);
-                alert('Error al asignar pegador. No se puede avanzar.');
+                this.toastService.showToast('error', 'Error al asignar pegador', 'No se pudo asignar el pegador', 6000);
               }
             });
           } else {
-            alert('No hay pegadores disponibles. No se puede avanzar.');
+            this.toastService.showToast('error', 'Sin pegadores', 'No hay pegadores disponibles', 6000);
           }
         },
         error: (err) => {
           console.error('Error getting pegadores:', err);
-          alert('Error al obtener pegadores. No se puede avanzar.');
+          this.toastService.showToast('error', 'Error al obtener pegadores', 'No se pudo obtener la lista de pegadores', 6000);
         }
       });
     } else if (det.tipoProducto === 'Molduras') { //TODO: Notar como aqui se asinga primero y despues se avanza
         this.ordenSeguimientoService.assignTrabajo(det.idOrden, det.idOrdenDetalle, "alistador").subscribe({
           next: () => {
+            this.toastService.showToast('success', 'Éxito', 'Alistador asignado correctamente', 4000);
             // Assignment successful, now advance
-            this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
-              this.load();
+            this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe({
+              next: () => {
+                this.toastService.showToast('success', 'Éxito', `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) - Estado avanzado correctamente`, 4000);
+                this.load();
+              },
+              error: (err) => {
+                console.error('Error al avanzar estado:', err);
+                this.toastService.showToast('error', 'Error al avanzar', 'No se pudo avanzar el estado del detalle', 7000);
+              }
             });
           },
           error: (err) => {
             console.error('Error assigning alistador:', err);
-            alert('Error al asignar alistador. No se puede avanzar.');
+            this.toastService.showToast('error', 'Error al asignar alistador', 'No se pudo asignar el alistador', 6000);
           }
         });
     } else if (det.tipoProducto === 'Ampliaciones') { //TODO: Aqui se avance y despues se asigna
       this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe({
         next: () => {
+          this.toastService.showToast('success', 'Éxito', `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) - Estado avanzado correctamente`, 4000);
           this.load();
           this.ordenSeguimientoService.assignTrabajo(det.idOrden, det.idOrdenDetalle, "entregador").subscribe({
               next: () => {
+                this.toastService.showToast('success', 'Éxito', 'Entregador asignado correctamente', 4000);
                 console.log('Ampliacion asignada exitosamente a entregador');
               },
               error: (err) => {
                 console.error('Error assigning entregador:', err);
-                alert('Error al asignar entregador. No se puede avanzar.');
+                this.toastService.showToast('error', 'Error al asignar entregador', 'No se pudo asignar el entregador', 6000);
               }
           });
         },
         error: (err) => {
           console.error('Error avanzand estado para ampliaciones:');
-          alert('Error al avanzar estado para ampliaciones');
+          this.toastService.showToast('error', 'Error al avanzar', 'No se pudo avanzar el estado para ampliaciones', 7000);
         }
       });
     } else if (det.tipoProducto === 'Baner' || det.tipoProducto === 'Calado' || 
@@ -188,14 +218,22 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, On
 
       this.ordenSeguimientoService.assignTrabajo(det.idOrden, det.idOrdenDetalle, "alistador").subscribe({
         next: () => {
+          this.toastService.showToast('success', 'Éxito', 'Alistador asignado correctamente', 4000);
           // Assignment successful, now advance
-          this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
-            this.load();
+          this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe({
+            next: () => {
+              this.toastService.showToast('success', 'Éxito', `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) - Estado avanzado correctamente`, 4000);
+              this.load();
+            },
+            error: (err) => {
+              console.error('Error al avanzar estado:', err);
+              this.toastService.showToast('error', 'Error al avanzar', 'No se pudo avanzar el estado del detalle', 7000);
+            }
           });
         },
         error: (err) => {
           console.error('Error assigning alistador:', err);
-          alert('Error al asignar alistador. No se puede avanzar.');
+          this.toastService.showToast('error', 'Error al asignar alistador', 'No se pudo asignar el alistador', 6000);
         }
       });
     }
@@ -223,12 +261,19 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, On
   addProgress(det: OrdenSeguimientoDetalleImpresion) {
     const progressAmount = this.progressInputs[det.idOrdenDetalle] || 0;
     if (progressAmount <= 0 || progressAmount > det.cantidad) {
-      alert('Ingrese una cantidad válida para agregar progreso.');
+      this.toastService.showToast('error', 'Cantidad inválida', 'Ingrese una cantidad válida para agregar progreso', 6000);
       return;
     }
 
     this.ordenSeguimientoService.progresoTrabajo(det.idOrden, det.idOrdenDetalle, progressAmount).subscribe({
       next: () => {
+        this.toastService.showToast(
+          'info',
+          'Progreso agregado',
+          `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) - Se agregaron ${progressAmount} unidades correctamente`,
+          5500
+        );
+
         // Reset input
         this.progressInputs[det.idOrdenDetalle] = 0;
         // Reload data
@@ -237,7 +282,7 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, On
       },
       error: (err) => {
         console.error('Error adding progress:', err);
-        alert('Error al agregar progreso. Verifique la cantidad.');
+        this.toastService.showToast('error', 'Error al agregar progreso', 'Verifique la cantidad', 7000);
       }
     });
   }

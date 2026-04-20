@@ -10,7 +10,9 @@ import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimientoDetalle } from '../orden-seguimiento-detalle.model';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
 import { OrdenSeguimientoDetalleEntrega } from '../orden-seguimiento-detalle-entrega.model';
+
 import { NotificationService } from '../../shared/notification.service'; 
+import { ToastService } from '../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-orden-seguimiento-entrega-detalle-list',
@@ -36,7 +38,8 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDe
     private route: ActivatedRoute,
     private router: Router,
     private service: OrdenSeguimientoService,
-    private notificationService: NotificationService, 
+    private notificationService: NotificationService,
+    private toastService: ToastService,
     private cd: ChangeDetectorRef
   ) {}
 
@@ -70,7 +73,10 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDe
         this.loadStepperDataForAll();
         this.cd.detectChanges();
       },
-      error: (err) => console.error('❌ Error cargando detalle de entrega', err),
+      error: (err) => {
+        console.error('❌ Error cargando detalle de entrega', err);
+        this.toastService.showToast('error', 'Error al cargar', 'No se pudo cargar la información de la orden', 6000);
+      },
     });
   }
 
@@ -121,13 +127,24 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDe
       },
       error: (err) => {
         console.error('Error adding progress:', err);
-        alert('Error al agregar progreso. Verifique la cantidad.');
+        this.toastService.showToast(
+          'error',
+          'Error al agregar progreso',
+          'No se pudo registrar el progreso del trabajo. Verifique la cantidad.',
+          7000
+        );
         return;
       }
     });
 
     this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
       this.load();
+      this.toastService.showToast(
+        'success',
+        'Estado avanzado',
+        `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) avanzó a Entregado correctamente`,
+        4000
+      );
     });
   }
 

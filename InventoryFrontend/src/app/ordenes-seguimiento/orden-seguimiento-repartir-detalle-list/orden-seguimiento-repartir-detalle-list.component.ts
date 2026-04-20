@@ -13,7 +13,9 @@ import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-e
 import { UsuarioNombre } from '../../usuarios/usuario-nombre.model';
 import { UsuarioTrabajo } from '../../usuarios/usuario-trabajo.model';
 import { UsuarioService } from '../../usuarios/usuario.service';
+
 import { NotificationService } from '../../shared/notification.service';
+import { ToastService } from '../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-orden-seguimiento-repartir-detalle-list',
@@ -50,6 +52,7 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit, OnD
     private service: OrdenSeguimientoService,
     private usuarioService: UsuarioService,
     private notificationService: NotificationService,
+    private toastService: ToastService,
     private cd: ChangeDetectorRef
   ) {}
 
@@ -97,7 +100,10 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit, OnD
         this.loadReparadoresAsignados();
         this.cd.detectChanges();
       },
-      error: (err) => console.error('❌ Error cargando detalle de repartir', err),
+      error: (err) => {
+        console.error('❌ Error cargando detalle de repartir', err);
+        this.toastService.showToast('error', 'Error al cargar', 'No se pudo cargar el detalle de repartir', 6000);
+      },
     });
   }
 
@@ -170,7 +176,11 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit, OnD
       next: () => {
         this.assignedReparador.set(det.idOrdenDetalle, reparador);
         this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe({
-          next: () => this.load(),
+          next: () => {
+            this.load();
+            this.toastService.showToast('success', 'Reparador asignado', `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) x${det.cantidad} asignado a ${reparador} correctamente`, 4000);
+          },
+
           error: (err) => {
             console.error('❌ Error avanzando tras asignar', err);
             this.assignError[det.idOrdenDetalle] = 'No se pudo avanzar al estado Reparación';
@@ -182,6 +192,7 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit, OnD
         console.error('❌ Error asignando reparador', err);
         this.assignError[det.idOrdenDetalle] = 'No se pudo asignar el reparador';
         this.assigning.delete(det.idOrdenDetalle);
+        this.toastService.showToast('error', 'Error al asignar reparador', 'No se pudo asignar el reparador', 6000);
       },
     });
   }
@@ -198,7 +209,10 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit, OnD
       next: () => {
         this.assignedNormal.set(det.idOrdenDetalle, usuario);
         this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe({
-          next: () => this.load(),
+          next: () => {
+            this.load();
+            this.toastService.showToast('success', 'Usuario normal asignado', `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) x${det.cantidad} asignado a ${usuario} correctamente`, 4000);
+          },
           error: (err) => {
             console.error('❌ Error avanzando tras asignar normal', err);
             this.assignError[det.idOrdenDetalle] = 'No se pudo avanzar al siguiente estado';
@@ -210,6 +224,7 @@ export class OrdenSeguimientoRepartirDetalleListComponent implements OnInit, OnD
         console.error('❌ Error asignando usuario normal', err);
         this.assignError[det.idOrdenDetalle] = 'No se pudo asignar el usuario';
         this.assigning.delete(det.idOrdenDetalle);
+        this.toastService.showToast('error', 'Error al asignar normal', 'No se pudo asignar el usuario normal', 6000);
       },
     });
   }

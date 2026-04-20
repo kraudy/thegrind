@@ -180,8 +180,8 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
                         AND det.id_orden_detalle = seg.id_orden_detalle
     JOIN producto prod ON prod.id = det.id_producto
     WHERE seg.id_orden = :idOrden
-      AND seg.estado IN ('Repartida', 'Normal', 'Reparacion') -- Mostrar detalles en estado Repartida, Normal o Reparacion para dar visibilidad de lo que se tiene que repartir pero solo permitir mover los que están en Repartida
-      AND seg.sub_tipo IN ('Normal', 'Reparacion') -- Solo mostrar detalles que son de tipo Normal o Reparacion
+      AND seg.estado IN ('Repartida') -- Mostrar detalles en estado Repartida
+      AND seg.sub_tipo IN ('Normal', 'Reparacion') -- Solo mostrar detalles que son de tipo Normal o Reparacion TODO: Luego se podria ampliar para incluir molduras vacias y eso.
     ORDER BY seg.id_orden_detalle ASC
     """, nativeQuery = true)
   List<OrdenSeguimientoDetalleDTO> getSeguimientoDeOrdenParaRepartir(@Param("idOrden") Long idOrden);
@@ -361,6 +361,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
         COUNT(*) AS detalle_count
       FROM orden_seguimiento seg
       WHERE seg.estado IN ('Repartida', 'Normal', 'Reparacion', 'Impresion', 
+                          'Bodega', 'Armado', 'Calado', 'Sublimacion',
                           'Enmarcado', 'Pegado', 'Listo', 'Entregado')
       GROUP BY seg.id_orden, seg.estado
     ),
@@ -392,6 +393,11 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
       CASE WHEN normales.id_orden IS NOT NULL THEN true ELSE false END AS tieneNormales,
       CASE WHEN reparacion.id_orden IS NOT NULL THEN true ELSE false END AS tieneReparacion,
       CASE WHEN impresion.id_orden IS NOT NULL THEN true ELSE false END AS tieneImpresion,
+      CASE WHEN bodega.id_orden IS NOT NULL THEN true ELSE false END AS tieneBodega,
+      CASE WHEN armado.id_orden IS NOT NULL THEN true ELSE false END AS tieneArmado,
+      CASE WHEN calado.id_orden IS NOT NULL THEN true ELSE false END AS tieneCalado,
+      CASE WHEN sublimacion.id_orden IS NOT NULL THEN true ELSE false END AS tieneSublimacion,
+
       CASE WHEN enmarcado.id_orden IS NOT NULL THEN true ELSE false END AS tieneEnmarcado,
       CASE WHEN pegado.id_orden IS NOT NULL THEN true ELSE false END AS tienePegado,
       CASE WHEN listo.id_orden IS NOT NULL THEN true ELSE false END AS tieneListo,
@@ -402,16 +408,29 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
       COALESCE(normales.detalle_count, 0)   AS countNormales,
       COALESCE(reparacion.detalle_count, 0) AS countReparacion,
       COALESCE(impresion.detalle_count, 0)  AS countImpresion,
+      
+      COALESCE(bodega.detalle_count, 0)     AS countBodega,
+      COALESCE(armado.detalle_count, 0)     AS countArmado,
+      COALESCE(calado.detalle_count, 0)     AS countCalado,
+      COALESCE(sublimacion.detalle_count, 0) AS countSublimacion,
+
       COALESCE(enmarcado.detalle_count, 0)  AS countEnmarcado,
       COALESCE(pegado.detalle_count, 0)     AS countPegado,
       COALESCE(listo.detalle_count, 0)      AS countListo,
       COALESCE(entregado.detalle_count, 0)  AS countEntregado
 
     FROM cal
+
     LEFT JOIN seg repartidas  ON repartidas.id_orden  = cal.id_orden AND repartidas.estado  = 'Repartida'
     LEFT JOIN seg normales    ON normales.id_orden    = cal.id_orden AND normales.estado    = 'Normal'
     LEFT JOIN seg reparacion  ON reparacion.id_orden  = cal.id_orden AND reparacion.estado  = 'Reparacion'
     LEFT JOIN seg impresion   ON impresion.id_orden   = cal.id_orden AND impresion.estado   = 'Impresion'
+
+    LEFT JOIN seg bodega   ON bodega.id_orden   = cal.id_orden AND bodega.estado   = 'Bodega'
+    LEFT JOIN seg armado   ON armado.id_orden   = cal.id_orden AND armado.estado   = 'Armado'
+    LEFT JOIN seg calado   ON calado.id_orden   = cal.id_orden AND calado.estado   = 'Calado'
+    LEFT JOIN seg sublimacion   ON sublimacion.id_orden   = cal.id_orden AND sublimacion.estado   = 'Sublimacion'
+
     LEFT JOIN seg enmarcado   ON enmarcado.id_orden   = cal.id_orden AND enmarcado.estado   = 'Enmarcado'
     LEFT JOIN seg pegado      ON pegado.id_orden      = cal.id_orden AND pegado.estado      = 'Pegado'
     LEFT JOIN seg listo       ON listo.id_orden       = cal.id_orden AND listo.estado       = 'Listo'
@@ -559,6 +578,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
   @Query(value = "SELECT COUNT(*) = 0 FROM orden_seguimiento WHERE id_orden = :idOrden AND secuencia > 1", nativeQuery = true)
   boolean areAllDetailsInFirstState(@Param("idOrden") Long idOrden);
 
+  //TODO: Move thest two to a trigger in the database
   /* Verifica si todos los detalles de una orden están en estado Listo */
   @Query(value = "SELECT COUNT(*) = 0 FROM orden_seguimiento WHERE id_orden = :idOrden AND estado <> 'Listo'", nativeQuery = true)
   boolean estanTodosLosDetallesListos(@Param("idOrden") Long idOrden);

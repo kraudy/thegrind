@@ -97,6 +97,10 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
     if (orden.countNormales > 0)     states.push({ label: 'Normal',      count: orden.countNormales,     color: 'bg-indigo-100 text-indigo-700' });
     if (orden.countReparacion > 0)   states.push({ label: 'Reparación',  count: orden.countReparacion,   color: 'bg-orange-100 text-orange-700' });
     if (orden.countImpresion > 0)    states.push({ label: 'Impresión',   count: orden.countImpresion,    color: 'bg-purple-100 text-purple-700' });
+    if (orden.countBodega > 0)       states.push({ label: 'Bodega',      count: orden.countBodega,       color: 'bg-yellow-100 text-yellow-700' });
+    if (orden.countArmado > 0)       states.push({ label: 'Armado',      count: orden.countArmado,       color: 'bg-cyan-100 text-cyan-700' });
+    if (orden.countCalado > 0)       states.push({ label: 'Calado',      count: orden.countCalado,       color: 'bg-pink-100 text-pink-700' });
+    if (orden.countSublimacion > 0)  states.push({ label: 'Sublimación', count: orden.countSublimacion,  color: 'bg-lime-100 text-lime-700' });
     if (orden.countEnmarcado > 0)    states.push({ label: 'Enmarcado',   count: orden.countEnmarcado,    color: 'bg-amber-100 text-amber-700' });
     if (orden.countPegado > 0)       states.push({ label: 'Pegado',      count: orden.countPegado,       color: 'bg-teal-100 text-teal-700' });
     if (orden.countListo > 0)        states.push({ label: 'Listo',       count: orden.countListo,        color: 'bg-green-100 text-green-700' });

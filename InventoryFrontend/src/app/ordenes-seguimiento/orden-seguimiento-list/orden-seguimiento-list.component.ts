@@ -11,7 +11,9 @@ import { OrdenCalendarioService } from '../../ordenes-calendario/orden-calendari
 import { OrdenSeguimientoDetalle } from '../orden-seguimiento-detalle.model';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
 import { EstadosPorDetalleDTO } from '../estados-por-detalle.model';
-import { NotificationService } from '../../shared/notification.service';   // ← NEW
+
+import { NotificationService } from '../../shared/notification.service';
+import { ToastService } from '../../shared/toast/toast.service';  
 
 @Component({
   selector: 'app-orden-seguimiento-list',
@@ -36,12 +38,13 @@ export class OrdenSeguimientoListComponent implements OnInit, OnDestroy {
     private router: Router,
     private ordenSeguimientoService: OrdenSeguimientoService,
     private ordenCalendarioService: OrdenCalendarioService,
-    private notificationService: NotificationService,   // ← NEW
+    private notificationService: NotificationService,
+    private toastService: ToastService,
     private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.notificationService.connect();   // ← NEW (idempotent)
+    this.notificationService.connect(); 
 
     // Real-time refresh: listen only to "seguimiento" notifications
     this.notificationService.refreshNeeded$
@@ -70,7 +73,10 @@ export class OrdenSeguimientoListComponent implements OnInit, OnDestroy {
         this.loadEstadosPorDetalle();
         this.cd.detectChanges();
       },
-      error: (err) => console.error('❌ Error cargando seguimiento', err)
+      error: (err) => {
+        console.error('❌ Error cargando seguimiento', err);
+        this.toastService.showToast('error', 'Error al cargar', 'No se pudo cargar el seguimiento de la orden', 6000);
+      }
     });
   }
 
@@ -91,9 +97,10 @@ export class OrdenSeguimientoListComponent implements OnInit, OnDestroy {
     this.ordenSeguimientoService.reverse(det.idOrden, det.idOrdenDetalle).subscribe({
       next: () => {
         this.load();
+        this.toastService.showToast('warning', 'Estado regresado', `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) regresó correctamente`, 4000);
       },
       error: (error) => {
-        alert(error.error?.message || 'Error al regresar el estado');
+        this.toastService.showToast('error', 'Error al regresar estado', error.error?.message || 'No se pudo regresar el estado', 7000);
       }
     });
   }
@@ -125,14 +132,15 @@ export class OrdenSeguimientoListComponent implements OnInit, OnDestroy {
     if (confirm(`¿Estás seguro de que quieres eliminar la orden #${this.idOrden} del calendario?`)) {
       this.ordenCalendarioService.delete(this.idOrden).subscribe({
         next: () => {
+          this.toastService.showToast('success', 'Orden eliminada', `La orden #${this.idOrden} fue eliminada del calendario`, 4000);
           this.router.navigate(['/ordenes-calendario']);
         },
         error: (err) => {
           console.error('Error eliminando orden del calendario', err);
           if (err.status === 400) {
-            alert('No se puede eliminar la orden del calendario porque algunos detalles ya han avanzado en su proceso de producción');
+            this.toastService.showToast('error', 'No se puede eliminar', 'No se puede eliminar la orden del calendario porque algunos detalles ya han avanzado en su proceso de producción', 7000);
           } else {
-            alert('Error al eliminar la orden del calendario');
+            this.toastService.showToast('error', 'Error al eliminar', 'Ocurrió un error al eliminar la orden del calendario', 7000);
           }
         }
       });

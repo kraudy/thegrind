@@ -11,7 +11,9 @@ import { takeUntil } from 'rxjs/operators';
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-estado.model';
 import { OrdenSeguimientoDetallePreparacion } from '../orden-seguimiento-detalle-preparacion.model';
-import { NotificationService } from '../../shared/notification.service';   // ← NEW
+
+import { NotificationService } from '../../shared/notification.service';
+import { ToastService } from '../../shared/toast/toast.service'; 
 
 @Component({
   selector: 'app-orden-seguimiento-preparacion-detalle-list',
@@ -37,7 +39,8 @@ export class OrdenSeguimientoPreparacionDetalleListComponent implements OnInit, 
     private route: ActivatedRoute,
     private router: Router,
     private service: OrdenSeguimientoService,
-    private notificationService: NotificationService,   // ← NEW
+    private notificationService: NotificationService,
+    private toastService: ToastService, 
     private cd: ChangeDetectorRef
   ) {}
 
@@ -71,7 +74,10 @@ export class OrdenSeguimientoPreparacionDetalleListComponent implements OnInit, 
         this.loadStepperDataForAll();
         this.cd.detectChanges();
       },
-      error: (err) => console.error('❌ Error cargando detalle de preparación', err),
+      error: (err) => {
+        console.error('❌ Error cargando detalle de preparación', err);
+        this.toastService.showToast('error', 'Error al cargar', 'No se pudo cargar la información de la orden', 6000);
+      },
     });
   }
 
@@ -102,6 +108,11 @@ export class OrdenSeguimientoPreparacionDetalleListComponent implements OnInit, 
   }
 
   advanceDetail(det: OrdenSeguimientoDetallePreparacion) {
+    // Determine the next state before advancing
+    const possibleStates = this.getPossibleStates(det.idOrdenDetalle);
+    const currentIndex = possibleStates.findIndex(s => s.estado === det.estadoActual);
+    const nextState = possibleStates[currentIndex + 1]?.estado || 'Estado final';
+
     //TODO: Componer esto para que quede dinamico como en impresion
     if (det.estadoActual === 'Pegado' || det.estadoActual === 'Enmarcado' || 
         det.estadoActual === 'Armado' || det.estadoActual === 'Calado' || 
@@ -113,7 +124,12 @@ export class OrdenSeguimientoPreparacionDetalleListComponent implements OnInit, 
         },
         error: (err) => {
           console.error('Error adding progress for Pegado/Enmarcado state:', err);
-          alert('Error al agregar progreso. No se puede avanzar.');
+          this.toastService.showToast(
+            'error',
+            'Error al registrar progreso',
+            'No se pudo registrar el progreso del trabajo. Inténtalo nuevamente.',
+            7000
+          );
           return; // Stop further execution to prevent advancing if progress update fails
         }
       });
@@ -126,17 +142,35 @@ export class OrdenSeguimientoPreparacionDetalleListComponent implements OnInit, 
         this.service.assignTrabajo(det.idOrden, det.idOrdenDetalle, "entregador").subscribe({
           next: () => {
             console.log('Trabajo ' + det.idOrden + ' ' + det.idOrdenDetalle + ' ' + det.tipoProducto + ' ' + det.subTipoProducto + ' asignado exitosamente al entregador');
+
+            this.toastService.showToast(
+              'success',
+              'Estado avanzado',
+              `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) avanzó a ${nextState} correctamente y se asignó al entregador`,
+              4000
+            );
+
           },
           //TODO: Deberia resetear el progreso si hay error al asignar?
           error: (err) => {
             console.error('Error assigning entregador:', err);
-            alert('Error al asignar entregador. No se puede avanzar.');
+            this.toastService.showToast(
+              'error',
+              'Error al asignar entregador',
+              'No se pudo asignar el entregador. Inténtalo nuevamente.',
+              6000
+            );
           }
         });
       },
       error: (err) => {
         console.error('Error avanzando estado:', err);
-        alert('Error al avanzar estado');
+        this.toastService.showToast(
+          'error',
+          'Error al avanzar estado',
+          'No se pudo avanzar el estado del detalle.',
+          7000
+        );
       }
     });
   }

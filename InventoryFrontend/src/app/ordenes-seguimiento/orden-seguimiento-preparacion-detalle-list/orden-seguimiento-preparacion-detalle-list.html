@@ -2,11 +2,11 @@
   <div class="flex justify-between items-center mb-6">
     <button (click)="goBack()"
             class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-xl">
-      ← Volver a Preparación
+      ← Volver a órdenes para alistar
     </button>
   </div>
   <div class="text-center mb-10">
-    <h1 class="text-4xl font-bold text-gray-900">Preparación Orden #{{ idOrden }}</h1>
+    <h1 class="text-4xl font-bold text-gray-900">Alistar Orden #{{ idOrden }}</h1>
     <div class="text-2xl font-bold text-gray-800 mt-2">{{ clienteNombre }}</div>
   </div>
 
@@ -14,10 +14,10 @@
   <div *ngIf="isOrderCompleted" class="mb-12 bg-green-50 border border-green-200 rounded-3xl p-12 text-center">
     <div class="text-6xl mb-6">✅</div>
     <h2 class="text-4xl font-bold text-green-800 mb-4">¡Orden Completada!</h2>
-    <p class="text-xl text-green-700 mb-6">Todos los productos han completado el proceso de preparación.</p>
+    <p class="text-xl text-green-700 mb-6">Todos los productos han completado el proceso de listo.</p>
     <button (click)="goBack()"
             class="inline-flex items-center px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md transition">
-      Volver a Lista de Preparación
+      Volver a Lista de Alistamiento
     </button>
   </div>
 
