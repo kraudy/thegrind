@@ -47,12 +47,12 @@ public class UsuarioController {
 
   @GetMapping("/repara")
   public List<UsuarioTrabajoDTO> getReparadores() {
-    return usuarioRepository.getUsuariosReparacion();
+    return usuarioRepository.getUsuariosTrabajo("Reparacion", "repara");
   }
 
   @GetMapping("/normal")
   public List<UsuarioTrabajoDTO> getNormal() {
-    return usuarioRepository.getUsuariosNormal();
+    return usuarioRepository.getUsuariosTrabajo("Normal", "normal");
   }
 
   @GetMapping("/pegadores")

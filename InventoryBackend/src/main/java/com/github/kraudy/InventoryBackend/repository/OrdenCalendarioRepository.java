@@ -157,7 +157,7 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
                           seg.estado = 'Reparacion')      -- Queremos solo las  que quedaron en reparacion, no que pasaron por reparacion
                     INNER JOIN orden_calendario cal
                       ON (orden_trabajo.id_orden = cal.id_orden)
-                    WHERE estado = 'Reparacion' 
+                    WHERE seg.estado = 'Reparacion' 
                       AND cal.fecha = CURRENT_DATE        -- Usamos la fecha del calendario porque es la que se actualiza con el carry-over
                     GROUP BY trabajador
                 ) reparador),
@@ -178,7 +178,7 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
                           seg.estado = 'Normal')      -- Queremos solo las  que quedaron en estado normal, no que pasaron por normal
                     INNER JOIN orden_calendario cal
                       ON (orden_trabajo.id_orden = cal.id_orden)
-                    WHERE estado = 'Normal' 
+                    WHERE seg.estado = 'Normal' 
                       AND cal.fecha = CURRENT_DATE        -- Usamos la fecha del calendario porque es la que se actualiza con el carry-over
                     GROUP BY trabajador
                 ) normal),
