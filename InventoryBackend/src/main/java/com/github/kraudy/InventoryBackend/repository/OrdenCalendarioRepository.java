@@ -1,6 +1,7 @@
 package com.github.kraudy.InventoryBackend.repository;
 
 import com.github.kraudy.InventoryBackend.dto.OrdenCalendarioDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenCalendario.EstadisticasDistribucionHoyDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenCalendario;
 
 import java.time.LocalDate;
@@ -137,4 +138,63 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
   List<OrdenCalendarioDTO> getOrdersInTwoWeeks();
 
   List<OrdenCalendario> findByFechaBefore(LocalDate fecha);
+
+ @Query(value = """
+        SELECT 
+            (SELECT COUNT(*) FROM orden WHERE estado = 'Recibida') AS ordenes_recibidas,
+            
+            COALESCE(
+                (SELECT json_agg(json_build_object(
+                    'trabajador', trabajador,
+                    'cantidadDetalles', cantidad
+                ))
+                FROM (
+                    SELECT trabajador, COUNT(*) as cantidad 
+                    FROM orden_trabajo 
+                    INNER JOIN orden_seguimiento seg 
+                      ON (orden_trabajo.id_orden = seg.id_orden AND
+                          orden_trabajo.id_orden_detalle = seg.id_orden_detalle AND
+                          seg.estado = 'Reparacion')      -- Queremos solo las  que quedaron en reparacion, no que pasaron por reparacion
+                    INNER JOIN orden_calendario cal
+                      ON (orden_trabajo.id_orden = cal.id_orden)
+                    WHERE estado = 'Reparacion' 
+                      AND cal.fecha = CURRENT_DATE        -- Usamos la fecha del calendario porque es la que se actualiza con el carry-over
+                    GROUP BY trabajador
+                ) reparador),
+                '[]'::json
+            ) AS reparadores,
+            
+            COALESCE(
+                (SELECT json_agg(json_build_object(
+                    'trabajador', trabajador,
+                    'cantidadDetalles', cantidad
+                ))
+                FROM (
+                    SELECT trabajador, COUNT(*) as cantidad 
+                    FROM orden_trabajo 
+                    INNER JOIN orden_seguimiento seg 
+                      ON (orden_trabajo.id_orden = seg.id_orden AND
+                          orden_trabajo.id_orden_detalle = seg.id_orden_detalle AND
+                          seg.estado = 'Normal')      -- Queremos solo las  que quedaron en estado normal, no que pasaron por normal
+                    INNER JOIN orden_calendario cal
+                      ON (orden_trabajo.id_orden = cal.id_orden)
+                    WHERE estado = 'Normal' 
+                      AND cal.fecha = CURRENT_DATE        -- Usamos la fecha del calendario porque es la que se actualiza con el carry-over
+                    GROUP BY trabajador
+                ) normal),
+                '[]'::json
+            ) AS normales,
+            
+            (SELECT COUNT(*) 
+            FROM orden_seguimiento 
+            WHERE estado = 'Impresion' AND sub_tipo = 'Normal') AS impresion_normal,
+            
+            (SELECT COUNT(*) 
+            FROM orden_seguimiento 
+            WHERE estado = 'Impresion' AND sub_tipo = 'Reparacion') AS impresion_reparacion
+            
+        FROM (VALUES (1)) AS dummy
+        """, nativeQuery = true)
+    List<Object[]> getEstadisticasDistribucionHoyRaw();
+
 }

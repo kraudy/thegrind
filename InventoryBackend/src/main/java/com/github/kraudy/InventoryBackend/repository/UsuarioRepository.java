@@ -18,35 +18,78 @@ public interface UsuarioRepository extends JpaRepository<Usuario, String> {
 
   /* Obtiene listado de usuarios por rol */
 
+  //TODO: Estos dos se pueden unificar en uno pasando el estado y el rol como parametros
   @Query(value = """
+    With cantidades AS (
+      SELECT 
+        trab.trabajador,
+        SUM(COALESCE(trab.cantidad_asignada,0)) as cantidadAsignada,
+        SUM(COALESCE(trab.cantidad_trabajada,0)) as cantidadTrabajada 
+      FROM orden_calendario cal
+
+      INNER JOIN orden_seguimiento seg 
+        ON (cal.id_orden = seg.id_orden AND
+            seg.estado = 'Reparacion')      -- Queremos solo las  que quedaron en reparacion, no que pasaron por reparacion
+
+      INNER JOIN orden_trabajo trab 
+        ON (seg.id_orden = trab.id_orden AND
+            seg.id_orden_detalle = trab.id_orden_detalle AND
+            trab.estado = seg.estado)
+
+      WHERE cal.fecha = CURRENT_DATE
+
+      GROUP BY trab.trabajador
+    )
     SELECT
         usr.usuario,
-        SUM(COALESCE(ordTrab.cantidad_asignada,0)) as cantidadAsignada,
-        SUM(COALESCE(ordTrab.cantidad_trabajada,0)) as cantidadTrabajada
+        COALESCE(cantidades.cantidadAsignada,0) as cantidadAsignada,
+        COALESCE(cantidades.cantidadTrabajada,0) as cantidadTrabajada
 
     FROM usuario usr
-    JOIN usuario_rol usrRol ON usr.usuario = usrRol.usuario
-    LEFT JOIN orden_trabajo ordTrab  -- Permite mostrar reparadores sin trabajos asignados
-      ON usr.usuario = ordTrab.trabajador AND ordTrab.estado = 'Reparacion'
+    JOIN usuario_rol usrRol 
+      ON (usr.usuario = usrRol.usuario AND 
+          usrRol.rol = 'repara')
 
-    WHERE usrRol.rol = 'repara'
-    GROUP BY usr.usuario
+    LEFT JOIN cantidades  -- Permite mostrar reparadores sin trabajos asignados
+      ON (usr.usuario = cantidades.trabajador)
+
     """, nativeQuery = true)
   List<UsuarioTrabajoDTO> getUsuariosReparacion();
 
   @Query(value = """
+    With cantidades AS (
+      SELECT 
+        trab.trabajador,
+        SUM(COALESCE(trab.cantidad_asignada,0)) as cantidadAsignada,
+        SUM(COALESCE(trab.cantidad_trabajada,0)) as cantidadTrabajada 
+      FROM orden_calendario cal
+
+      INNER JOIN orden_seguimiento seg 
+        ON (cal.id_orden = seg.id_orden AND
+            seg.estado = 'Normal')      -- Queremos solo las  que quedaron en estado normal, no que pasaron por normal
+
+      INNER JOIN orden_trabajo trab 
+        ON (seg.id_orden = trab.id_orden AND
+            seg.id_orden_detalle = trab.id_orden_detalle AND
+            trab.estado = seg.estado)
+
+      WHERE cal.fecha = CURRENT_DATE
+
+      GROUP BY trab.trabajador
+    )
     SELECT
         usr.usuario,
-        SUM(COALESCE(ordTrab.cantidad_asignada,0)) as cantidadAsignada,
-        SUM(COALESCE(ordTrab.cantidad_trabajada,0)) as cantidadTrabajada
+        COALESCE(cantidades.cantidadAsignada,0) as cantidadAsignada,
+        COALESCE(cantidades.cantidadTrabajada,0) as cantidadTrabajada
 
     FROM usuario usr
-    JOIN usuario_rol usrRol ON usr.usuario = usrRol.usuario
-    LEFT JOIN orden_trabajo ordTrab  -- Permite mostrar normales sin trabajos asignados
-      ON usr.usuario = ordTrab.trabajador AND ordTrab.estado = 'Normal'
+    JOIN usuario_rol usrRol 
+      ON (usr.usuario = usrRol.usuario AND 
+          usrRol.rol = 'normal')
 
-    WHERE usrRol.rol = 'normal'
-    GROUP BY usr.usuario
+    LEFT JOIN cantidades  -- Permite mostrar normales sin trabajos asignados
+      ON (usr.usuario = cantidades.trabajador)
+
     """, nativeQuery = true)
   List<UsuarioTrabajoDTO> getUsuariosNormal();
 

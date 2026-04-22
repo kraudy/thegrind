@@ -20,6 +20,14 @@ export class OrdenCalendarioListComponent implements OnInit {
   thisWeekDays: CalendarioDiaDTO[] = [];
   nextWeekDays: CalendarioDiaDTO[] = [];
 
+  estadisticas: any = {
+    ordenesRecibidas: 0,
+    reparadores: [] as {trabajador: string, cantidadDetalles: number}[],
+    normales: [] as {trabajador: string, cantidadDetalles: number}[],
+    impresionNormal: 0,
+    impresionReparacion: 0
+  };
+
   constructor(
     private ordenCalendarioService: OrdenCalendarioService,
     private cd: ChangeDetectorRef,
@@ -45,6 +53,14 @@ export class OrdenCalendarioListComponent implements OnInit {
       },
       error: (err) => console.error('Error cargando calendario', err)
     });
+
+    this.ordenCalendarioService.getEstadisticasHoy().subscribe({
+      next: (stats) => {
+        this.estadisticas = stats;
+        this.cd.detectChanges();
+      },
+      error: (err) => console.error('Error cargando estadísticas', err)
+  });
   }
 
   goToScheduleDay(dateStr: string): void {

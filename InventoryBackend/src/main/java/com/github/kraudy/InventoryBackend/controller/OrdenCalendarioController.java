@@ -7,15 +7,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.github.kraudy.InventoryBackend.dto.CalendarioDiaDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenCalendarioDTO;
-import com.github.kraudy.InventoryBackend.dto.OrdenDetalleDTO;
-import com.github.kraudy.InventoryBackend.model.Orden;
-import com.github.kraudy.InventoryBackend.model.Producto;
-import com.github.kraudy.InventoryBackend.model.ProductoTipoEstado;
-import com.github.kraudy.InventoryBackend.model.ProductoTipoEstadoPK;
+import com.github.kraudy.InventoryBackend.dto.OrdenCalendario.EstadisticasDistribucionHoyDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenCalendario.TrabajadorCargaDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenCalendario;
-import com.github.kraudy.InventoryBackend.model.OrdenDetalle;
-import com.github.kraudy.InventoryBackend.model.OrdenDetallePK;
-import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
 import com.github.kraudy.InventoryBackend.repository.OrdenCalendarioRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenDetalleRepository;
 import com.github.kraudy.InventoryBackend.repository.OrdenRepository;
@@ -24,6 +18,9 @@ import com.github.kraudy.InventoryBackend.repository.OrdenTrabajoRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoTipoEstadoRepository;
 import com.github.kraudy.InventoryBackend.service.OrdenCalendarioService;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -42,15 +39,6 @@ public class OrdenCalendarioController {
 
   @Autowired
   private OrdenSeguimientoRepository ordenSeguimientoRepository;
-
-  @Autowired
-  private OrdenDetalleRepository ordenDetalleRepository;
-
-  @Autowired
-  private ProductoRepository productoRepository;
-
-  @Autowired
-  private ProductoTipoEstadoRepository productoTipoEstadoRepository;
 
   @Autowired
   private OrdenTrabajoRepository ordenTrabajoRepository;
@@ -94,6 +82,47 @@ public class OrdenCalendarioController {
             ordersByDate.getOrDefault(date, List.of())
         );
     }).toList();
+  }
+
+  @GetMapping("/estadisticas-hoy")
+  public EstadisticasDistribucionHoyDTO getEstadisticasHoy() {
+      List<Object[]> rawList = ordenCalendarioRepository.getEstadisticasDistribucionHoyRaw();
+
+      if (rawList == null || rawList.isEmpty()) {
+          return new EstadisticasDistribucionHoyDTO(0L, List.of(), List.of(), 0L, 0L);
+      }
+
+      Object[] raw = rawList.get(0);   // ← now we have the real row
+
+      long ordenesRecibidas     = raw[0] != null ? ((Number) raw[0]).longValue() : 0L;
+      String reparadoresJson    = raw[1] != null ? raw[1].toString() : "[]";
+      String normalesJson       = raw[2] != null ? raw[2].toString() : "[]";
+      long impresionNormal      = raw[3] != null ? ((Number) raw[3]).longValue() : 0L;
+      long impresionReparacion  = raw[4] != null ? ((Number) raw[4]).longValue() : 0L;
+
+      List<TrabajadorCargaDTO> reparadores = parseJsonList(reparadoresJson);
+      List<TrabajadorCargaDTO> normales    = parseJsonList(normalesJson);
+
+      return new EstadisticasDistribucionHoyDTO(
+          ordenesRecibidas,
+          reparadores,
+          normales,
+          impresionNormal,
+          impresionReparacion
+      );
+  }
+
+  private List<TrabajadorCargaDTO> parseJsonList(String json) {
+    if (json == null || json.isBlank() || "[]".equals(json)) {
+        return List.of();
+    }
+    try {
+        // ✅ No bean needed - we create it locally (fast and reliable)
+        return new ObjectMapper().readValue(json, 
+            new TypeReference<List<TrabajadorCargaDTO>>() {});
+    } catch (Exception e) {
+        throw new RuntimeException("Error parsing JSON estadísticas: " + json, e);
+    }
   }
 
   @PostMapping

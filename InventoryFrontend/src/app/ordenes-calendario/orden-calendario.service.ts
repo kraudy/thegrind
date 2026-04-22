@@ -26,6 +26,10 @@ export class OrdenCalendarioService {
     return this.http.get<CalendarioDiaDTO[]>(`${this.apiUrl}/calendario`);
   }
 
+  getEstadisticasHoy(): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/estadisticas-hoy`);
+}
+
   create(ordenCalendario: Partial<OrdenCalendario>): Observable<OrdenCalendario> {
     return this.http.post<OrdenCalendario>(`${this.apiUrl}`, ordenCalendario);
   }
