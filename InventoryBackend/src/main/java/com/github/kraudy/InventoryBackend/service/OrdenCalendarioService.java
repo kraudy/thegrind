@@ -1,6 +1,7 @@
 package com.github.kraudy.InventoryBackend.service;
 
 import com.github.kraudy.InventoryBackend.dto.OrdenDetalleDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenCalendario.EstadisticasDistribucionHoyDTO;
 import com.github.kraudy.InventoryBackend.model.*;
 import com.github.kraudy.InventoryBackend.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,17 @@ public class OrdenCalendarioService {
   private final ProductoRepository productoRepository;
   private final ProductoTipoEstadoRepository productoTipoEstadoRepository;
   private final OrdenSeguimientoRepository ordenSeguimientoRepository;
+
+  public EstadisticasDistribucionHoyDTO getEstadisticasDistribucionHoy() {
+      return new EstadisticasDistribucionHoyDTO(
+          ordenCalendarioRepository.countOrdenesRecibidas(),
+          ordenCalendarioRepository.getReparadoresHoy(),
+          ordenCalendarioRepository.getNormalesHoy(),
+          ordenCalendarioRepository.getRepartidasHoy(),
+          ordenCalendarioRepository.countImpresionNormal(),
+          ordenCalendarioRepository.countImpresionReparacion()
+      );
+  }
 
   @Transactional
   public OrdenCalendario create(OrdenCalendario ordenCalendario) {

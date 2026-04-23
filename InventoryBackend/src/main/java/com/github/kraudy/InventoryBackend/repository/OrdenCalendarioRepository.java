@@ -2,6 +2,7 @@ package com.github.kraudy.InventoryBackend.repository;
 
 import com.github.kraudy.InventoryBackend.dto.OrdenCalendarioDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenCalendario.EstadisticasDistribucionHoyDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenCalendario.TrabajadorCargaDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenCalendario;
 
 import java.time.LocalDate;
@@ -139,82 +140,75 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
 
   List<OrdenCalendario> findByFechaBefore(LocalDate fecha);
 
- @Query(value = """
-        SELECT 
-            (SELECT COUNT(*) FROM orden WHERE estado = 'Recibida') AS ordenes_recibidas,
-            
-            COALESCE(
-                (SELECT json_agg(json_build_object(
-                    'trabajador', trabajador,
-                    'cantidadDetalles', cantidad
-                ))
-                FROM (
-                    SELECT trabajador, COUNT(*) as cantidad 
-                    FROM orden_trabajo 
-                    INNER JOIN orden_seguimiento seg 
-                      ON (orden_trabajo.id_orden = seg.id_orden AND
-                          orden_trabajo.id_orden_detalle = seg.id_orden_detalle AND
-                          seg.estado = 'Reparacion')      -- Queremos solo las  que quedaron en reparacion, no que pasaron por reparacion
-                    INNER JOIN orden_calendario cal
-                      ON (orden_trabajo.id_orden = cal.id_orden)
-                    WHERE seg.estado = 'Reparacion' 
-                      AND cal.fecha = CURRENT_DATE        -- Usamos la fecha del calendario porque es la que se actualiza con el carry-over
-                    GROUP BY trabajador
-                ) reparador),
-                '[]'::json
-            ) AS reparadores,
-            
-            COALESCE(
-                (SELECT json_agg(json_build_object(
-                    'trabajador', trabajador,
-                    'cantidadDetalles', cantidad
-                ))
-                FROM (
-                    SELECT trabajador, COUNT(*) as cantidad 
-                    FROM orden_trabajo 
-                    INNER JOIN orden_seguimiento seg 
-                      ON (orden_trabajo.id_orden = seg.id_orden AND
-                          orden_trabajo.id_orden_detalle = seg.id_orden_detalle AND
-                          seg.estado = 'Normal')      -- Queremos solo las  que quedaron en estado normal, no que pasaron por normal
-                    INNER JOIN orden_calendario cal
-                      ON (orden_trabajo.id_orden = cal.id_orden)
-                    WHERE seg.estado = 'Normal' 
-                      AND cal.fecha = CURRENT_DATE        -- Usamos la fecha del calendario porque es la que se actualiza con el carry-over
-                    GROUP BY trabajador
-                ) normal),
-                '[]'::json
-            ) AS normales,
-            
-            COALESCE(
-                (SELECT json_agg(json_build_object(
-                    'trabajador', trabajador,
-                    'cantidadDetalles', cantidad
-                ))
-                FROM (
-                    SELECT seguimiento_por As trabajador, COUNT(*) as cantidad 
-                    FROM orden_seguimiento seg 
+  @Query(value = """
+      SELECT COUNT(*) 
+      FROM orden 
+      WHERE estado = 'Recibida'
+      """, nativeQuery = true)
+  long countOrdenesRecibidas();
 
-                    INNER JOIN orden_calendario cal
-                      ON (seg.id_orden = cal.id_orden)
+  @Query(value = """
+      SELECT 
+          trabajador,
+          COUNT(*)::bigint AS "cantidadDetalles"
+      FROM orden_trabajo 
+      INNER JOIN orden_seguimiento seg 
+          ON orden_trabajo.id_orden = seg.id_orden 
+        AND orden_trabajo.id_orden_detalle = seg.id_orden_detalle
+      INNER JOIN orden_calendario cal 
+          ON orden_trabajo.id_orden = cal.id_orden
+      WHERE seg.estado = 'Reparacion'
+        AND cal.fecha = CURRENT_DATE
+      GROUP BY trabajador
+      ORDER BY "cantidadDetalles" DESC
+      """, nativeQuery = true)
+  List<TrabajadorCargaDTO> getReparadoresHoy();
 
-                    WHERE seg.estado = 'Repartida' 
-                      AND cal.fecha = CURRENT_DATE
-                      
-                    GROUP BY seguimiento_por
-                ) repartida),
-                '[]'::json
-            ) AS repartidas,
-            
-            (SELECT COUNT(*) 
-            FROM orden_seguimiento 
-            WHERE estado = 'Impresion' AND sub_tipo = 'Normal') AS impresion_normal,
-            
-            (SELECT COUNT(*) 
-            FROM orden_seguimiento 
-            WHERE estado = 'Impresion' AND sub_tipo = 'Reparacion') AS impresion_reparacion
-            
-        FROM (VALUES (1)) AS dummy
-        """, nativeQuery = true)
-    List<Object[]> getEstadisticasDistribucionHoyRaw();
+  @Query(value = """
+      SELECT 
+          trabajador,
+          COUNT(*)::bigint AS "cantidadDetalles"
+      FROM orden_trabajo 
+      INNER JOIN orden_seguimiento seg 
+          ON orden_trabajo.id_orden = seg.id_orden 
+        AND orden_trabajo.id_orden_detalle = seg.id_orden_detalle
+      INNER JOIN orden_calendario cal 
+          ON orden_trabajo.id_orden = cal.id_orden
+      WHERE seg.estado = 'Normal'
+        AND cal.fecha = CURRENT_DATE
+      GROUP BY trabajador
+      ORDER BY "cantidadDetalles" DESC
+      """, nativeQuery = true)
+  List<TrabajadorCargaDTO> getNormalesHoy();
+
+  @Query(value = """
+      SELECT 
+          seguimiento_por AS "trabajador",
+          COUNT(*)::bigint AS "cantidadDetalles"
+      FROM orden_seguimiento seg 
+      INNER JOIN orden_calendario cal 
+          ON seg.id_orden = cal.id_orden
+      WHERE seg.estado = 'Repartida'
+        AND cal.fecha = CURRENT_DATE
+      GROUP BY seguimiento_por
+      ORDER BY "cantidadDetalles" DESC
+      """, nativeQuery = true)
+  List<TrabajadorCargaDTO> getRepartidasHoy();
+
+  @Query(value = """
+      SELECT COUNT(*) 
+      FROM orden_seguimiento 
+      WHERE estado = 'Impresion' 
+        AND sub_tipo = 'Normal'
+      """, nativeQuery = true)
+  long countImpresionNormal();
+
+  @Query(value = """
+      SELECT COUNT(*) 
+      FROM orden_seguimiento 
+      WHERE estado = 'Impresion' 
+        AND sub_tipo = 'Reparacion'
+      """, nativeQuery = true)
+  long countImpresionReparacion();
 
 }

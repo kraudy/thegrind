@@ -86,46 +86,7 @@ public class OrdenCalendarioController {
 
   @GetMapping("/estadisticas-hoy")
   public EstadisticasDistribucionHoyDTO getEstadisticasHoy() {
-      List<Object[]> rawList = ordenCalendarioRepository.getEstadisticasDistribucionHoyRaw();
-
-      if (rawList == null || rawList.isEmpty()) {
-          return new EstadisticasDistribucionHoyDTO(0L, List.of(), List.of(), List.of(), 0L, 0L);
-      }
-
-      Object[] raw = rawList.get(0);   // ← now we have the real row
-
-      long ordenesRecibidas     = raw[0] != null ? ((Number) raw[0]).longValue() : 0L;
-      String reparadoresJson    = raw[1] != null ? raw[1].toString() : "[]";
-      String normalesJson       = raw[2] != null ? raw[2].toString() : "[]";
-      String repartidasJson     = raw[3] != null ? raw[3].toString() : "[]";
-      long impresionNormal      = raw[4] != null ? ((Number) raw[4]).longValue() : 0L;
-      long impresionReparacion  = raw[5] != null ? ((Number) raw[5]).longValue() : 0L;
-
-      List<TrabajadorCargaDTO> reparadores = parseJsonList(reparadoresJson);
-      List<TrabajadorCargaDTO> normales    = parseJsonList(normalesJson);
-      List<TrabajadorCargaDTO> repartidas  = parseJsonList(repartidasJson);
-
-      return new EstadisticasDistribucionHoyDTO(
-          ordenesRecibidas,
-          reparadores,
-          normales,
-          repartidas,
-          impresionNormal,
-          impresionReparacion
-      );
-  }
-
-  private List<TrabajadorCargaDTO> parseJsonList(String json) {
-    if (json == null || json.isBlank() || "[]".equals(json)) {
-        return List.of();
-    }
-    try {
-        // ✅ No bean needed - we create it locally (fast and reliable)
-        return new ObjectMapper().readValue(json, 
-            new TypeReference<List<TrabajadorCargaDTO>>() {});
-    } catch (Exception e) {
-        throw new RuntimeException("Error parsing JSON estadísticas: " + json, e);
-    }
+    return ordenCalendarioService.getEstadisticasDistribucionHoy();
   }
 
   @PostMapping
