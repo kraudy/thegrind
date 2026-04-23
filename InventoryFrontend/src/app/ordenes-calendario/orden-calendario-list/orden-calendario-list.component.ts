@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -8,6 +8,10 @@ import { OrdenCalendario } from '../orden-calendario.model';
 import { CalendarioDiaDTO } from '../calendario-dia.model';
 import { OrdenCalendarioService } from '../orden-calendario.service';
 
+import { NotificationService } from '../../shared/notification.service';
+import { takeUntil } from 'rxjs/internal/operators/takeUntil';
+import { Subject } from 'rxjs/internal/Subject';
+
 @Component({
   selector: 'app-orden-calendario-list',
   standalone: true,
@@ -15,8 +19,10 @@ import { OrdenCalendarioService } from '../orden-calendario.service';
   templateUrl: './orden-calendario-list.html',
   styleUrls: ['./orden-calendario-list.css'],
 })
-export class OrdenCalendarioListComponent implements OnInit {
+export class OrdenCalendarioListComponent implements OnInit, OnDestroy {
 
+  private destroy$ = new Subject<void>();
+  
   thisWeekDays: CalendarioDiaDTO[] = [];
   nextWeekDays: CalendarioDiaDTO[] = [];
 
@@ -24,6 +30,7 @@ export class OrdenCalendarioListComponent implements OnInit {
     ordenesRecibidas: 0,
     reparadores: [] as {trabajador: string, cantidadDetalles: number}[],
     normales: [] as {trabajador: string, cantidadDetalles: number}[],
+    repartidas: [] as {trabajador: string, cantidadDetalles: number}[],
     impresionNormal: 0,
     impresionReparacion: 0
   };
@@ -31,11 +38,32 @@ export class OrdenCalendarioListComponent implements OnInit {
   constructor(
     private ordenCalendarioService: OrdenCalendarioService,
     private cd: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService,
   ) {}
 
   ngOnInit(): void {
+    this.notificationService.connect();
+    
+        // Real-time refresh
+        this.notificationService.refreshNeeded$
+          .pipe(takeUntil(this.destroy$))
+          .subscribe(view => {
+            if (view === 'calendario') {
+              console.log('🔄 Real-time refresh triggered for Calendario');
+              this.loadEstadisticas();
+            } else if (view === 'seguimiento') {
+              console.log('🔄 Real-time refresh triggered for Seguimiento');
+              this.loadCalendario();
+            }
+          });
+          
     this.loadCalendario();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadCalendario() {
@@ -54,13 +82,17 @@ export class OrdenCalendarioListComponent implements OnInit {
       error: (err) => console.error('Error cargando calendario', err)
     });
 
+    this.loadEstadisticas();
+  }
+
+  loadEstadisticas() {
     this.ordenCalendarioService.getEstadisticasHoy().subscribe({
       next: (stats) => {
         this.estadisticas = stats;
         this.cd.detectChanges();
       },
       error: (err) => console.error('Error cargando estadísticas', err)
-  });
+    });
   }
 
   goToScheduleDay(dateStr: string): void {

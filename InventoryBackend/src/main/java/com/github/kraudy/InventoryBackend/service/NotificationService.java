@@ -17,6 +17,7 @@ public class NotificationService {
         messagingTemplate.convertAndSend("/topic/ordenes-seguimiento", "REFRESH");
     }
 
+    /* Actualiza el calendario */
     public void notifyCalendarioChanged() {
         messagingTemplate.convertAndSend("/topic/ordenes-calendario", "REFRESH");
     }

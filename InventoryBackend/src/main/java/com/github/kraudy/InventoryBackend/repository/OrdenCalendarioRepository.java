@@ -185,6 +185,26 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
                 '[]'::json
             ) AS normales,
             
+            COALESCE(
+                (SELECT json_agg(json_build_object(
+                    'trabajador', trabajador,
+                    'cantidadDetalles', cantidad
+                ))
+                FROM (
+                    SELECT seguimiento_por As trabajador, COUNT(*) as cantidad 
+                    FROM orden_seguimiento seg 
+
+                    INNER JOIN orden_calendario cal
+                      ON (seg.id_orden = cal.id_orden)
+
+                    WHERE seg.estado = 'Repartida' 
+                      AND cal.fecha = CURRENT_DATE
+                      
+                    GROUP BY seguimiento_por
+                ) repartida),
+                '[]'::json
+            ) AS repartidas,
+            
             (SELECT COUNT(*) 
             FROM orden_seguimiento 
             WHERE estado = 'Impresion' AND sub_tipo = 'Normal') AS impresion_normal,

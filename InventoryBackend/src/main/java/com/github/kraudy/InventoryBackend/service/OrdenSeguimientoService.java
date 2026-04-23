@@ -24,10 +24,12 @@ public class OrdenSeguimientoService {
     private final OrdenSeguimientoHistoricoRepository ordenSeguimientoHistoricoRepository;
     private final NotificationService notificationService;
 
+    private final CurrentUserService currentUserService;
+
     @Transactional
     public OrdenSeguimiento reverseState(Long idOrden, Long idOrdenDetalle) {
 
-        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        String currentUser = currentUserService.getCurrentUser();
 
         OrdenSeguimientoPK pk = new OrdenSeguimientoPK(idOrden, idOrdenDetalle);
         OrdenSeguimiento actual = ordenSeguimientoRepository.findById(pk)
@@ -75,7 +77,7 @@ public class OrdenSeguimientoService {
     @Transactional
     public OrdenSeguimiento advanceState(Long idOrden, Long idOrdenDetalle) {
 
-        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        String currentUser = currentUserService.getCurrentUser();
 
         OrdenSeguimientoPK pk = new OrdenSeguimientoPK(idOrden, idOrdenDetalle);
         OrdenSeguimiento actual = ordenSeguimientoRepository.findById(pk)
@@ -102,8 +104,16 @@ public class OrdenSeguimientoService {
 
         // === Business validations after advance ===
         validateAdvanceRules(actual, siguiente);
+        validarActualizarEstadoOrden(actual, siguiente);
 
         notificationService.notifyOrdenesSeguimientoChanged();
+
+        /* Actualiza informacion relevante para el calendario */
+        if (!List.of(EstadoSeguimientoEnum.REPARTIDA, EstadoSeguimientoEnum.REPARACION, 
+          EstadoSeguimientoEnum.NORMAL, EstadoSeguimientoEnum.IMPRESION
+        ).contains(EstadoSeguimientoEnum.fromString(actual.getEstado()))) {
+          notificationService.notifyCalendarioChanged();
+        }
 
         return actual;
     }
@@ -194,45 +204,37 @@ public class OrdenSeguimientoService {
         h.setUsuarioCreacion(currentUser);
         return h;
     }
-
+    
+    /* Cierra el historico de seguimiento */
     private void finishHistorico(OrdenSeguimientoHistorico historico, OrdenSeguimiento actual) {
-        historico.setFechaFinalizacion(actual.getFechaModificacion());
-        historico.setUsuarioFinalizacion(actual.getSeguimientoPor());
-        historico.setDuracion(Duration.between(
-                historico.getFechaCreacion(), historico.getFechaFinalizacion()).toMinutes());
-        ordenSeguimientoHistoricoRepository.save(historico);
+      historico.setFechaFinalizacion(actual.getFechaModificacion());
+      historico.setUsuarioFinalizacion(actual.getSeguimientoPor());
+      historico.setDuracion(Duration.between(
+              historico.getFechaCreacion(), historico.getFechaFinalizacion()).toMinutes());
+      ordenSeguimientoHistoricoRepository.save(historico);
     }
 
     private void validateAdvanceRules(OrdenSeguimiento actual, ProductoTipoEstado siguiente) {
-        if (siguiente.getEstado().equals(EstadoSeguimientoEnum.REPARACION.toString())) {
-            if (!ordenTrabajoRepository.detalleEstaAsignado(
-                    actual.getIdOrden(), actual.getIdOrdenDetalle(), siguiente.getEstado())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "No se puede avanzar a reparacion sin asignar detalle a reparador");
-            }
-        }
+      if (!List.of(EstadoSeguimientoEnum.REPARACION,
+                  EstadoSeguimientoEnum.PEGADO).contains(EstadoSeguimientoEnum.fromString(siguiente.getEstado()))) {
+        return;
+      }
+      if (!ordenTrabajoRepository.detalleEstaAsignado(actual.getIdOrden(), actual.getIdOrdenDetalle(), siguiente.getEstado())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se puede avanzar a " + siguiente.getEstado() + " sin asignar detalle a trabajador");
+      }
+    }
 
-        if (siguiente.getEstado().equals(EstadoSeguimientoEnum.PEGADO.toString())) {
-            if (!ordenTrabajoRepository.detalleEstaAsignado(
-                    actual.getIdOrden(), actual.getIdOrdenDetalle(), siguiente.getEstado())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "No se puede avanzar a pegado sin asignar detalle a pegador");
-            }
-        }
+    private void validarActualizarEstadoOrden(OrdenSeguimiento actual, ProductoTipoEstado siguiente) {
+      //TODO: Aqui, una vez la orden esta entregada, agregar nuevo registro para facturacion, puede generarse aqui y caer en lista como ordenes para facturar
+      // o incluso un nuevo estado en orden trabajo. Luego, una vez se factura la orden, se genera la factura en su propia tabla y se le relaciona la orden correspondiente  
+      //TODO: Mover esto a un trigger
+      if (!List.of(EstadoSeguimientoEnum.LISTO,
+                  EstadoSeguimientoEnum.ENTREGADO).contains(EstadoSeguimientoEnum.fromString(actual.getEstado()))) {
+        return;
+      }
 
-        if (siguiente.getEstado().equals(EstadoSeguimientoEnum.LISTO.toString())) {
-            if (ordenSeguimientoRepository.estanTodosLosDetallesListos(actual.getIdOrden())) {
-                ordenRepository.updateEstadoOrdenYFecha(actual.getIdOrden(), siguiente.getEstado());
+      if (!ordenSeguimientoRepository.estanTodosLosDetallesListos(actual.getIdOrden())) return;
 
-            }
-        }
-
-        if (siguiente.getEstado().equals(EstadoSeguimientoEnum.ENTREGADO.toString())) {
-            //TODO: Aqui, una vez la orden esta entregada, agregar nuevo registro para facturacion, puede generarse aqui y caer en lista como ordenes para facturar
-            // o incluso un nuevo estado en orden trabajo. Luego, una vez se factura la orden, se genera la factura en su propia tabla y se le relaciona la orden correspondiente
-            if (ordenSeguimientoRepository.estanTodosLosDetallesEntregados(actual.getIdOrden())) {
-                ordenRepository.updateEstadoOrdenYFecha(actual.getIdOrden(), siguiente.getEstado());
-            }
-        }
+      ordenRepository.updateEstadoOrdenYFecha(actual.getIdOrden(), siguiente.getEstado());
     }
 }
