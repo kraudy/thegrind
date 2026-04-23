@@ -1,10 +1,18 @@
 package com.github.kraudy.InventoryBackend.service;
 
+import com.github.kraudy.InventoryBackend.dto.CalendarioDiaDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenCalendarioDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenCalendario.EstadisticasDistribucionHoyDTO;
 import com.github.kraudy.InventoryBackend.model.*;
 import com.github.kraudy.InventoryBackend.repository.*;
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -22,6 +30,27 @@ public class OrdenCalendarioService {
   private final ProductoTipoEstadoRepository productoTipoEstadoRepository;
   private final OrdenSeguimientoRepository ordenSeguimientoRepository;
 
+  public List<CalendarioDiaDTO> getCalendarioSemanal() {
+    List<Object[]> rawDays = ordenCalendarioRepository.getCalendarDaysWithCountsRaw();
+    List<OrdenCalendarioDTO> allOrders = ordenCalendarioRepository.getOrdersInTwoWeeks();
+
+    // Group orders by date
+    Map<LocalDate, List<OrdenCalendarioDTO>> ordersByDate = allOrders.stream()
+            .collect(Collectors.groupingBy(OrdenCalendarioDTO::fecha));
+
+    return rawDays.stream().map(row -> {
+        LocalDate date = (LocalDate) row[0];
+        return new CalendarioDiaDTO(
+            date,
+            (String) row[1],
+            (String) row[2],
+            (String) row[3],
+            ((Number) row[4]).intValue(),
+            ordersByDate.getOrDefault(date, List.of())
+        );
+    }).toList();
+  }
+  
   public EstadisticasDistribucionHoyDTO getEstadisticasDistribucionHoy() {
       return new EstadisticasDistribucionHoyDTO(
           ordenCalendarioRepository.countOrdenesRecibidas(),

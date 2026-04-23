@@ -64,24 +64,7 @@ public class OrdenCalendarioController {
 
   @GetMapping("/calendario")
   public List<CalendarioDiaDTO> getCalendarioSemanal() {
-    List<Object[]> rawDays = ordenCalendarioRepository.getCalendarDaysWithCountsRaw();
-    List<OrdenCalendarioDTO> allOrders = ordenCalendarioRepository.getOrdersInTwoWeeks();
-
-    // Group orders by date
-    Map<LocalDate, List<OrdenCalendarioDTO>> ordersByDate = allOrders.stream()
-            .collect(Collectors.groupingBy(OrdenCalendarioDTO::fecha));
-
-    return rawDays.stream().map(row -> {
-        LocalDate date = (LocalDate) row[0];
-        return new CalendarioDiaDTO(
-            date,
-            (String) row[1],
-            (String) row[2],
-            (String) row[3],
-            ((Number) row[4]).intValue(),
-            ordersByDate.getOrDefault(date, List.of())
-        );
-    }).toList();
+    return ordenCalendarioService.getCalendarioSemanal();
   }
 
   @GetMapping("/estadisticas-hoy")
