@@ -9,6 +9,8 @@ import { OrdenCalendarioService } from '../orden-calendario.service';
 import { Orden } from '../../ordenes/orden.model';
 import { OrdenService } from '../../ordenes/orden.service';
 
+import { ToastService } from '../../shared/toast/toast.service';
+
 @Component({
   selector: 'app-orden-calendario-form',
   standalone: true,
@@ -28,7 +30,8 @@ export class OrdenCalendarioFormComponent implements OnInit {
     private router: Router,
     private ordenService: OrdenService,
     private calendarioService: OrdenCalendarioService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -49,6 +52,7 @@ export class OrdenCalendarioFormComponent implements OnInit {
       error: (err) => {
         console.error('❌ Error cargando recibidas', err);
         this.pendingOrders = [];
+        this.toastService.showToast('error', 'Error al cargar', 'No se pudieron cargar las órdenes pendientes', 6000);
         this.cd.detectChanges();
       }
     });
@@ -62,6 +66,7 @@ export class OrdenCalendarioFormComponent implements OnInit {
       },
       error: () => {
         this.alreadyScheduledCount = 0;
+        this.toastService.showToast('error', 'Error al cargar', 'No se pudo cargar el conteo de órdenes programadas', 6000);
         this.cd.detectChanges();
       }
     });
@@ -117,10 +122,11 @@ export class OrdenCalendarioFormComponent implements OnInit {
     });
 
     Promise.all(requests.map(r => r.toPromise())).then(() => {
+      this.toastService.showToast('success', 'Órdenes programadas', `Se programaron ${this.selectedOrderIds.length} órdenes para el ${this.formatFullDate()}`, 4000);
       this.router.navigate(['/ordenes-calendario']);
     }).catch(err => {
       console.error(err);
-      alert('Error al guardar en el calendario, contactar profesional.');
+      this.toastService.showToast('error', 'Error al guardar', 'No se pudieron guardar las órdenes en el calendario', 7000);
     });
   }
 
