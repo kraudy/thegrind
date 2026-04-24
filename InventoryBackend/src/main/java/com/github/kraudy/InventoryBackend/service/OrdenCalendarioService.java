@@ -57,8 +57,15 @@ public class OrdenCalendarioService {
           ordenCalendarioRepository.getReparadoresHoy(),
           ordenCalendarioRepository.getNormalesHoy(),
           ordenCalendarioRepository.getRepartidasHoy(),
-          ordenCalendarioRepository.countImpresionNormal(),
-          ordenCalendarioRepository.countImpresionReparacion()
+          ordenCalendarioRepository.getCountHoy("Impresion", "Normal"),
+          ordenCalendarioRepository.getCountHoy("Impresion", "Reparacion"),
+
+          ordenCalendarioRepository.getCountHoy("Bodega", null),
+          ordenCalendarioRepository.getCountHoy("Armado", null),
+          ordenCalendarioRepository.getCountHoy("Calado", null),
+          ordenCalendarioRepository.getCountHoy("Pegado", null),
+          ordenCalendarioRepository.getCountHoy("Enmarcado", null),
+          ordenCalendarioRepository.getCountHoy("Alistado", null)
       );
   }
 

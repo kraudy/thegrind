@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario, Long> {
 
@@ -151,14 +152,18 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
       SELECT 
           trabajador,
           COUNT(*)::bigint AS "cantidadDetalles"
-      FROM orden_trabajo 
-      INNER JOIN orden_seguimiento seg 
-          ON orden_trabajo.id_orden = seg.id_orden 
-        AND orden_trabajo.id_orden_detalle = seg.id_orden_detalle
+      FROM orden_trabajo
+
       INNER JOIN orden_calendario cal 
-          ON orden_trabajo.id_orden = cal.id_orden
+          ON (orden_trabajo.id_orden = cal.id_orden AND 
+              cal.fecha = CURRENT_DATE)
+
+      INNER JOIN orden_seguimiento seg 
+          ON (orden_trabajo.id_orden = seg.id_orden AND 
+              orden_trabajo.id_orden_detalle = seg.id_orden_detalle)
+
       WHERE seg.estado = 'Reparacion'
-        AND cal.fecha = CURRENT_DATE
+        
       GROUP BY trabajador
       ORDER BY "cantidadDetalles" DESC
       """, nativeQuery = true)
@@ -169,13 +174,16 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
           trabajador,
           COUNT(*)::bigint AS "cantidadDetalles"
       FROM orden_trabajo 
-      INNER JOIN orden_seguimiento seg 
-          ON orden_trabajo.id_orden = seg.id_orden 
-        AND orden_trabajo.id_orden_detalle = seg.id_orden_detalle
+
       INNER JOIN orden_calendario cal 
-          ON orden_trabajo.id_orden = cal.id_orden
+          ON (orden_trabajo.id_orden = cal.id_orden AND
+              cal.fecha = CURRENT_DATE)
+
+      INNER JOIN orden_seguimiento seg 
+          ON (orden_trabajo.id_orden = seg.id_orden AND 
+              orden_trabajo.id_orden_detalle = seg.id_orden_detalle)
+
       WHERE seg.estado = 'Normal'
-        AND cal.fecha = CURRENT_DATE
       GROUP BY trabajador
       ORDER BY "cantidadDetalles" DESC
       """, nativeQuery = true)
@@ -186,10 +194,13 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
           seguimiento_por AS "trabajador",
           COUNT(*)::bigint AS "cantidadDetalles"
       FROM orden_seguimiento seg 
+
       INNER JOIN orden_calendario cal 
-          ON seg.id_orden = cal.id_orden
+          ON (seg.id_orden = cal.id_orden AND
+              cal.fecha = CURRENT_DATE)
+
       WHERE seg.estado = 'Repartida'
-        AND cal.fecha = CURRENT_DATE
+
       GROUP BY seguimiento_por
       ORDER BY "cantidadDetalles" DESC
       """, nativeQuery = true)
@@ -197,18 +208,17 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
 
   @Query(value = """
       SELECT COUNT(*) 
-      FROM orden_seguimiento 
-      WHERE estado = 'Impresion' 
-        AND sub_tipo = 'Normal'
-      """, nativeQuery = true)
-  long countImpresionNormal();
 
-  @Query(value = """
-      SELECT COUNT(*) 
-      FROM orden_seguimiento 
-      WHERE estado = 'Impresion' 
-        AND sub_tipo = 'Reparacion'
+      FROM orden_seguimiento seg
+
+      INNER JOIN orden_calendario cal 
+          ON (seg.id_orden = cal.id_orden AND
+              cal.fecha = CURRENT_DATE)
+
+      WHERE seg.estado = :estado AND
+            (:subTipo IS NULL OR seg.sub_tipo = :subTipo)
       """, nativeQuery = true)
-  long countImpresionReparacion();
+  long getCountHoy(@Param("estado") String estado, @Param("subTipo") String subTipo);
+
 
 }
