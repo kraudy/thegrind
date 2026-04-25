@@ -4,6 +4,7 @@ package com.github.kraudy.InventoryBackend.controller;
 import com.github.kraudy.InventoryBackend.model.ProductoCosto;
 import com.github.kraudy.InventoryBackend.model.ProductoCostoPK;
 import com.github.kraudy.InventoryBackend.repository.ProductoCostoRepository;
+import com.github.kraudy.InventoryBackend.service.CurrentUserService;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,6 +20,9 @@ import org.springframework.web.server.ResponseStatusException;
 public class ProductoCostoController {
   @Autowired
   private ProductoCostoRepository productoCostoRepository;
+
+  @Autowired
+  private CurrentUserService currentUserService;
 
   @GetMapping("/{idProducto}")
   public List<ProductoCosto> getByProducto(
@@ -37,7 +41,11 @@ public class ProductoCostoController {
 
   @PostMapping
   public ProductoCosto create(@RequestBody ProductoCosto productoCosto) {
-      return productoCostoRepository.save(productoCosto);
+    String currentUser = currentUserService.getCurrentUser();
+    productoCosto.setUsuarioCreacion(currentUser);
+    productoCosto.setUsuarioModificacion(currentUser);
+      
+    return productoCostoRepository.save(productoCosto);
   }
 
   @PutMapping("/{productoId}/{tipoCosto}")
@@ -53,7 +61,8 @@ public class ProductoCostoController {
       existing.setDescripcion(updates.getDescripcion());
       existing.setCantidadRequerida(updates.getCantidadRequerida());
       existing.setActivo(updates.isActivo());
-
+      existing.setUsuarioModificacion(currentUserService.getCurrentUser());
+      
       return productoCostoRepository.save(existing);
   }
 

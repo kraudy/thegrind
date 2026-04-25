@@ -12,6 +12,8 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { ProductoCosto } from '../producto-costo.model';
 import { ProductoCostoService } from '../producto-costo.service';
 
+import { ToastService } from '../../shared/toast/toast.service';
+
 
 @Component({
   selector: 'app-producto-costo-form',
@@ -40,7 +42,8 @@ export class ProductoCostoFormComponent implements OnChanges, OnInit {
     private productoService: ProductoService,
     private location: Location,
     private route: ActivatedRoute,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -72,6 +75,9 @@ export class ProductoCostoFormComponent implements OnChanges, OnInit {
     }
 
     // === MODO CREACIÓN (viene de detalle del producto con ?productoId=XXX) ===
+    // Reset only once at the beginning, then apply productoId if it exists
+    this.resetForm();
+
     if (queryProductoId) {
       const productoId = Number(queryProductoId);
       if (!isNaN(productoId)) {
@@ -79,8 +85,6 @@ export class ProductoCostoFormComponent implements OnChanges, OnInit {
         this.loadProductoForDisplay(productoId);
       }
     }
-
-    if (!this.isEdit) this.resetForm();
   }
 
   ngOnChanges(): void {
@@ -125,7 +129,10 @@ export class ProductoCostoFormComponent implements OnChanges, OnInit {
   }
 
   onSubmit(): void {
-    if (!this.formProductoCosto.productoId) return;
+    if (!this.formProductoCosto.productoId) {
+      this.toastService.showToast('error', 'Error', 'No se ha asociado un producto.', 4000);
+      return;
+    }
 
     if (this.isEdit) {
       const originalTipoCosto = this.formProductoCosto.tipoCosto!;
@@ -133,14 +140,28 @@ export class ProductoCostoFormComponent implements OnChanges, OnInit {
         this.formProductoCosto.productoId!,
         originalTipoCosto,
         this.formProductoCosto
-      ).subscribe(() => {
-        this.productoCostoSaved.emit();
-        this.location.back();
+      ).subscribe({
+        next: () => {
+          this.toastService.showToast('success', 'Costo actualizado', 'El costo del producto ha sido actualizado correctamente.', 4000);
+          this.productoCostoSaved.emit();
+          this.location.back();
+        },
+        error: (err) => {
+          console.error('Error updating costo', err);
+          this.toastService.showToast('error', 'Error al actualizar', 'No se pudo actualizar el costo del producto.', 6000);
+        }
       });
     } else {
-      this.productoCostoService.create(this.formProductoCosto as ProductoCosto).subscribe(() => {
-        this.productoCostoSaved.emit();
-        this.location.back();
+      this.productoCostoService.create(this.formProductoCosto as ProductoCosto).subscribe({
+        next: () => {
+          this.toastService.showToast('success', 'Costo creado', 'El costo del producto ha sido creado correctamente.', 4000);
+          this.productoCostoSaved.emit();
+          this.location.back();
+        },
+        error: (err) => {
+          console.error('Error creating costo', err);
+          this.toastService.showToast('error', 'Error al crear', 'No se pudo crear el costo del producto.', 6000);
+        }
       });
     }
   }

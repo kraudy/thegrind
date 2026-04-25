@@ -10,6 +10,8 @@ import { ProductoService } from '../../productos/producto.service';
 import { ProductoPrecioService } from '../producto-precio.service';
 import { ProductoPrecio } from '../producto-precio.model';
 
+import { ToastService } from '../../shared/toast/toast.service';
+
 import { Subject, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
@@ -32,7 +34,8 @@ export class ProductoPrecioFormComponent  implements OnChanges, OnInit {
     private productoService: ProductoService,
     private location: Location,
     private route: ActivatedRoute,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private toastService: ToastService
   ) {}
 
   formProductoPrecio: Partial<ProductoPrecio> = { precio: 0.00, descripcion: '', cantidadRequerida: 0};
@@ -157,17 +160,31 @@ export class ProductoPrecioFormComponent  implements OnChanges, OnInit {
     if (this.isEdit) {
       console.log('Updating producto precio: ' + this.formProductoPrecio.productoId);
       const originalPrecio = this.formProductoPrecio.precio!;
-      this.productoPrecioService.updateComposite(this.formProductoPrecio.productoId!, originalPrecio, this.formProductoPrecio).subscribe(() => {
-        this.productoPrecioSaved.emit();
-        this.resetForm();
-        this.location.back();
+      this.productoPrecioService.updateComposite(this.formProductoPrecio.productoId!, originalPrecio, this.formProductoPrecio).subscribe({
+        next: () => {
+          this.toastService.showToast('success', 'Precio actualizado', 'El precio del producto ha sido actualizado correctamente.', 4000);
+          this.productoPrecioSaved.emit();
+          this.resetForm();
+          this.location.back();
+        },
+        error: (err) => {
+          console.error('Error updating precio', err);
+          this.toastService.showToast('error', 'Error al actualizar', 'No se pudo actualizar el precio del producto.', 6000);
+        }
       });
     } else {
       console.log('Creating producto precio: ');
-      this.productoPrecioService.create(this.formProductoPrecio as ProductoPrecio).subscribe(() => {
-        this.productoPrecioSaved.emit();
-        this.resetForm();
-        this.location.back();
+      this.productoPrecioService.create(this.formProductoPrecio as ProductoPrecio).subscribe({
+        next: () => {
+          this.toastService.showToast('success', 'Precio creado', 'El precio del producto ha sido creado correctamente.', 4000);
+          this.productoPrecioSaved.emit();
+          this.resetForm();
+          this.location.back();
+        },
+        error: (err) => {
+          console.error('Error creating precio', err);
+          this.toastService.showToast('error', 'Error al crear', 'No se pudo crear el precio del producto.', 6000);
+        }
       });
     }
   }

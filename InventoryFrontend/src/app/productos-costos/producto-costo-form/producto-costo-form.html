@@ -72,7 +72,7 @@
       <!-- Botones -->
       <div class="flex justify-center space-x-6 pt-6">
         <button type="submit"
-                [disabled]="!formProductoCosto.productoId || !formProductoCosto.tipoCosto"
+                [disabled]="!formProductoCosto.costo || !formProductoCosto.tipoCosto || formProductoCosto.costo <= 0"
                 class="px-8 py-4 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
           {{ isEdit ? 'Actualizar Costo' : 'Crear Costo' }}
         </button>

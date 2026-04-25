@@ -11,6 +11,8 @@ import { ProductoPrecio } from '../../productos-precios/producto-precio.model';
 import { ProductoCostoService } from '../../productos-costos/producto-costo.service';
 import { ProductoCosto } from '../../productos-costos/producto-costo.model'; 
 
+import { ToastService } from '../../shared/toast/toast.service';
+
 @Component({
   selector: 'app-producto-detalle',
   standalone: true,
@@ -28,7 +30,8 @@ export class ProductoDetalleComponent implements OnInit {
     private productoService: ProductoService,
     private precioService: ProductoPrecioService,
     private costoService: ProductoCostoService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -61,8 +64,14 @@ export class ProductoDetalleComponent implements OnInit {
   deletePrecio(productoId: number, precio: number): void {
     if (confirm('¿Seguro que deseas eliminar este precio?')) {
       this.precioService.deleteComposite(productoId, precio).subscribe({
-        next: () => this.loadPrecios(this.producto!.id!),
-        error: (err) => console.error('Error eliminando precio', err),
+        next: () => {
+          this.toastService.showToast('warning', 'Precio eliminado', 'El precio ha sido eliminado correctamente.', 4000);
+          this.loadPrecios(this.producto!.id!);
+        },
+        error: (err) => {
+          console.error('Error eliminando precio', err);
+          this.toastService.showToast('error', 'Error al eliminar', 'No se pudo eliminar el precio.', 6000);
+        },
       });
     }
   }
@@ -81,8 +90,14 @@ export class ProductoDetalleComponent implements OnInit {
   deleteCosto(productoId: number, tipoCosto: string): void {
     if (confirm('¿Seguro que deseas eliminar este costo?')) {
       this.costoService.deleteComposite(productoId, tipoCosto).subscribe({
-        next: () => this.loadCostos(this.producto!.id!),
-        error: (err) => console.error('Error eliminando costo', err),
+        next: () => {
+          this.toastService.showToast('warning', 'Costo eliminado', 'El costo ha sido eliminado correctamente.', 4000);
+          this.loadCostos(this.producto!.id!);
+        },
+        error: (err) => {
+          console.error('Error eliminando costo', err);
+          this.toastService.showToast('error', 'Error al eliminar', 'No se pudo eliminar el costo.', 6000);
+        },
       });
     }
   }
