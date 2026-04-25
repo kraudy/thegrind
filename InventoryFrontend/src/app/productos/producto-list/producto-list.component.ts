@@ -24,6 +24,7 @@ import { ProductoModeloService } from '../../productos-modelos/producto-modelo.s
 import { ProductoColor } from '../../productos-colores/producto-color.model';
 import { ProductoColorService } from '../../productos-colores/producto-color.service';
 
+import { ProductoConfigService } from '../../productos-config/producto-config.service';
 
 @Component({
   selector: 'app-product-list',
@@ -57,24 +58,17 @@ export class ProductoListComponent implements OnInit {
   constructor(
     private productoService: ProductoService,
     private productoTipoService: ProductoTipoService,
-    private productoSubTipoService: ProductoSubTipoService,
-    private productoMedidaService: ProductoMedidaService,
-    private productoModeloService: ProductoModeloService,
-    private productoColorService: ProductoColorService,
+    private productoConfigService: ProductoConfigService,
     private router: Router,
     private cd: ChangeDetectorRef 
   ) {}
 
   ngOnInit(): void {
     this.loadTipos();
-    this.loadSubTipos();
-    this.loadMedidas();
-    this.loadModelos(); 
-    this.loadColores();
-    this.loadProducts();
+    this.refreshConfig(); // ← initial load of ALL valid attribute combinations
   }
  
-  // Load list
+  // Load list (unchanged – now triggered by refreshConfig)
   loadProducts(): void {
     this.loading = true;
     this.errorMessage = '';
@@ -132,64 +126,73 @@ export class ProductoListComponent implements OnInit {
     });
   }
 
-  private loadSubTipos(): void {
-    this.productoSubTipoService.getAll().subscribe({
-      next: (data) => {
-        this.subTipos = data || [];
+  /** 
+   * When any attribute is selected, the backend returns ONLY valid combinations for the other dropdowns.
+   */
+  private refreshConfig(): void {
+    this.productoConfigService.getConfig(
+      this.selectedTipo || undefined,
+      this.selectedSubTipo || undefined,
+      this.selectedMedida || undefined,
+      this.selectedModelo || undefined,
+      this.selectedColor || undefined
+    ).subscribe({
+      next: (config) => {
+        // Build dynamic dropdown options from valid combinations only
+        this.subTipos = [...new Set(config.map(c => c.subTipo))]
+          .map(st => ({ subTipo: st, descripcion: '' } as ProductoSubTipo));
+
+        this.medidas = [...new Set(config.map(c => c.medida))]
+          .map(m => ({ medida: m, descripcion: '' } as ProductoMedida));
+
+        this.modelos = [...new Set(config.map(c => c.modelo))]
+          .map(mod => ({ modelo: mod, descripcion: '' } as ProductoModelo));
+
+        this.colores = [...new Set(config.map(c => c.color))]
+          .map(col => ({ color: col, descripcion: '' } as ProductoColor));
+
         this.cd.detectChanges();
+
+        // Auto-clean any selection that is no longer valid after the filter change
+        let anyReset = false;
+
+        if (this.selectedSubTipo && !this.subTipos.some(s => s.subTipo === this.selectedSubTipo)) {
+          this.selectedSubTipo = '';
+          anyReset = true;
+        }
+        if (this.selectedMedida && !this.medidas.some(m => m.medida === this.selectedMedida)) {
+          this.selectedMedida = '';
+          anyReset = true;
+        }
+        if (this.selectedModelo && !this.modelos.some(mod => mod.modelo === this.selectedModelo)) {
+          this.selectedModelo = '';
+          anyReset = true;
+        }
+        if (this.selectedColor && !this.colores.some(col => col.color === this.selectedColor)) {
+          this.selectedColor = '';
+          anyReset = true;
+        }
+
+        if (anyReset) {
+          this.refreshConfig();   // re-run with cleaned values (recursive, safe)
+        } else {
+          this.loadProducts();    // ← refresh the product list with current (valid) filters
+        }
       },
       error: (err) => {
-        console.error('[ProductList] failed to load sub-tipos', err);
+        console.error('[ProductoList] failed to load config', err);
+        // Fallback: clear dynamic lists so user can still search without filters
         this.subTipos = [];
-        this.cd.detectChanges();
-      }
-    });
-  }
-
-  private loadMedidas(): void {
-    this.productoMedidaService.getAll().subscribe({
-      next: (data) => {
-        this.medidas = data || [];
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        console.error('[ProductList] failed to load medidas', err);
         this.medidas = [];
-        this.cd.detectChanges();
-      }
-    });
-  }
-
-  private loadModelos(): void {
-    this.productoModeloService.getAll().subscribe({
-      next: (data) => {
-        this.modelos = data || [];
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        console.error('[ProductList] failed to load modelos', err);
         this.modelos = [];
-        this.cd.detectChanges();
-      }
-    });
-  }
-
-  private loadColores(): void {
-    this.productoColorService.getAll().subscribe({
-      next: (data) => {
-        this.colores = data || [];
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        console.error('[ProductList] failed to load colores', err);
         this.colores = [];
-        this.cd.detectChanges();
+        this.loadProducts();
       }
     });
   }
 
   onFilterChange(): void {
-    this.loadProducts();
+    this.refreshConfig();   // ← now triggers the full cascading logic
   }
 
   clearFilters(): void {
@@ -200,7 +203,7 @@ export class ProductoListComponent implements OnInit {
     this.selectedModelo = '';
     this.selectedColor = '';   
     this.sinPrecio = false;
-    this.loadProducts();
+    this.refreshConfig();   // ← uses the new dynamic logic
   }
 
 
@@ -217,5 +220,6 @@ export class ProductoListComponent implements OnInit {
       this.productoService.delete(id).subscribe(() => this.loadProducts());
     }
   }
+
 
 }
