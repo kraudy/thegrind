@@ -1,18 +1,18 @@
 export interface OrdenEstadisticas {
-  ordenesRecibidas: 0,
+  ordenesRecibidas: number;
 
-  reparadores: TrabajadorEstadisticas;
-  normales: TrabajadorEstadisticas;
-  repartidas: TrabajadorEstadisticas;
-  
-  impresionNormal: 0;
-  impresionReparacion: 0;
-  bodega: 0;
-  armado: 0;
-  calado: 0;
-  pegado: 0;
-  enmarcado: 0;
-  alistado: 0
+  reparadores: TrabajadorEstadisticas[];
+  normales: TrabajadorEstadisticas[];
+  repartidas: TrabajadorEstadisticas[];
+
+  impresionNormal: number;
+  impresionReparacion: number;
+  bodega: number;
+  armado: number;
+  calado: number;
+  pegado: number;
+  enmarcado: number;
+  alistado: number;
 }
 
 export interface TrabajadorEstadisticas {

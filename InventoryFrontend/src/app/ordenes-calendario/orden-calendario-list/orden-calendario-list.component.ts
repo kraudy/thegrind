@@ -6,6 +6,7 @@ import { RouterLink, Router } from '@angular/router';
 
 import { OrdenCalendario } from '../orden-calendario.model';
 import { CalendarioDiaDTO } from '../calendario-dia.model';
+import { OrdenEstadisticas } from '../orden-estadisticas.model';
 import { OrdenCalendarioService } from '../orden-calendario.service';
 
 import { NotificationService } from '../../shared/notification.service';
@@ -26,7 +27,7 @@ export class OrdenCalendarioListComponent implements OnInit, OnDestroy {
   thisWeekDays: CalendarioDiaDTO[] = [];
   nextWeekDays: CalendarioDiaDTO[] = [];
 
-  estadisticas: any = {
+  estadisticas: OrdenEstadisticas = {
     ordenesRecibidas: 0,
     reparadores: [] as {trabajador: string, cantidadDetalles: number}[],
     normales: [] as {trabajador: string, cantidadDetalles: number}[],
