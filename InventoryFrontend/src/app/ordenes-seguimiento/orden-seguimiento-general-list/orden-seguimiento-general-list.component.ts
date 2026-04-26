@@ -6,6 +6,10 @@ import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+import { OrdenCalendarioService } from '../../ordenes-calendario/orden-calendario.service';
+import { OrdenEstadisticas } from '../../ordenes-calendario/orden-estadisticas.model';
+import { EstadisticasOrdenComponent } from '../../shared/estadisticas-orden/estadisticas-orden.component';
+
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimientoDetalleGeneral } from '../orden-seguimiento-detalle-general.model';
 import { NotificationService } from '../../shared/notification.service';
@@ -13,7 +17,7 @@ import { NotificationService } from '../../shared/notification.service';
 @Component({
   selector: 'app-orden-seguimiento-general-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, EstadisticasOrdenComponent],
   templateUrl: './orden-seguimiento-general-list.html',
   styleUrls: ['./orden-seguimiento-general-list.css'],
 })
@@ -28,10 +32,26 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
   searchTerm = '';
   selectedStateFilter = ''; // '' = all, or 'Recibida' / 'Repartida' / 'Listo'
 
+  estadisticas: OrdenEstadisticas = {
+    ordenesRecibidas: 0,
+    reparadores: [] as {trabajador: string, cantidadDetalles: number}[],
+    normales: [] as {trabajador: string, cantidadDetalles: number}[],
+    repartidas: [] as {trabajador: string, cantidadDetalles: number}[],
+    impresionNormal: 0,
+    impresionReparacion: 0,
+    bodega: 0,
+    armado: 0,
+    calado: 0,
+    pegado: 0,
+    enmarcado: 0,
+    alistado: 0
+  };
+
   constructor(
     private ordenSeguimientoService: OrdenSeguimientoService,
     private notificationService: NotificationService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private ordenCalendarioService: OrdenCalendarioService 
   ) {}
 
   ngOnInit(): void {
@@ -40,10 +60,16 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
     this.notificationService.refreshNeeded$
       .pipe(takeUntil(this.destroy$))
       .subscribe(view => {
-        if (view === 'seguimiento') this.loadOrdenesGeneral();
+        if (view === 'seguimiento') {
+          this.loadOrdenesGeneral();
+          this.loadEstadisticas();
+        } else if (view === 'calendario') {
+          this.loadEstadisticas();
+        }
       });
 
     this.loadOrdenesGeneral();
+    this.loadEstadisticas();
   }
 
   ngOnDestroy() {
@@ -70,6 +96,16 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
           this.cd.detectChanges();
         }
       });
+  }
+
+  loadEstadisticas() {
+    this.ordenCalendarioService.getEstadisticasHoy().subscribe({
+      next: (stats) => {
+        this.estadisticas = stats;
+        this.cd.detectChanges();
+      },
+      error: (err) => console.error('Error cargando estadísticas', err)
+    });
   }
 
   // Called when user types or changes filter

@@ -13,10 +13,12 @@ import { NotificationService } from '../../shared/notification.service';
 import { takeUntil } from 'rxjs/internal/operators/takeUntil';
 import { Subject } from 'rxjs/internal/Subject';
 
+import { EstadisticasOrdenComponent } from '../../shared/estadisticas-orden/estadisticas-orden.component';
+
 @Component({
   selector: 'app-orden-calendario-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, EstadisticasOrdenComponent],
   templateUrl: './orden-calendario-list.html',
   styleUrls: ['./orden-calendario-list.css'],
 })
