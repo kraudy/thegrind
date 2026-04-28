@@ -190,6 +190,16 @@
         </a>
       </div>
 
+      <div class="bg-white rounded-3xl shadow-xl p-8 flex flex-col hover:shadow-2xl transition group" *ngIf="hasAccess('admin') || hasAccess('contador') || hasAccess('supervisor')">
+        <div class="text-6xl mb-6">💰</div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">Pagar Costos</h3>
+        <p class="text-gray-600 flex-1">Reparación y Pegado • Marcar como pagados</p>
+        <a routerLink="/ordenes-costo/pagar" 
+          class="mt-auto inline-flex items-center justify-center px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl transition">
+          Pagar Costos Órdenes
+        </a>
+      </div>
+
     </div>
   </div>
 </div>

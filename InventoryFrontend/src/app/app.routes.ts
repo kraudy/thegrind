@@ -46,6 +46,9 @@ import { OrdenPagoAprobarListComponent } from './ordenes-pago/orden-pago-list/or
 import { OrdenFacturacionDetalleListComponent } from './ordenes-facturacion/orden-facturacion-detalle-list/orden-facturacion-detalle-list.component';
 import { OrdenFacturacionListComponent } from './ordenes-facturacion/orden-facturacion-list/orden-facturacion-list.component';
 
+import { OrdenCostoListComponent } from './ordenes-costo/orden-costo-list/orden-costo-list.component';
+import { OrdenCostoFormComponent } from './ordenes-costo/orden-costo-form/orden-costo-form.component';
+
 import { FacturaListComponent } from './facturas/factura-list/factura-list.component';
 
 import { UsuarioListComponent } from './usuarios/usuario-list/usuario-list.component';
@@ -92,6 +95,10 @@ export const routes: Routes = [
   /* Pago de ordenes */
 
   { path: 'ordenes-pago/aprobar', component: OrdenPagoAprobarListComponent, canActivate: [authGuard] },
+
+  /* Costo de ordenes */
+  { path: 'ordenes-costo/pagar', component: OrdenCostoListComponent, canActivate: [authGuard] },
+  { path: 'ordenes-costo/pagar/confirmar', component: OrdenCostoFormComponent, canActivate: [authGuard] },
 
   /* Facturacion de ordenes */
 

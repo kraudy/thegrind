@@ -2,10 +2,8 @@ package com.github.kraudy.InventoryBackend.service;
 
 import com.github.kraudy.InventoryBackend.model.*;
 import com.github.kraudy.InventoryBackend.repository.*;
-import com.github.kraudy.InventoryBackend.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,6 +21,8 @@ public class OrdenSeguimientoService {
     private final OrdenTrabajoRepository ordenTrabajoRepository;
     private final OrdenSeguimientoHistoricoRepository ordenSeguimientoHistoricoRepository;
     private final NotificationService notificationService;
+    private final OrdenCostoService ordenCostoService;
+    private final OrdenCostoRepository ordenCostoRepository;
 
     private final CurrentUserService currentUserService;
 
@@ -65,6 +65,22 @@ public class OrdenSeguimientoService {
         actual.setSecuencia(previo.getSecuencia());
 
         actual = ordenSeguimientoRepository.save(actual);
+
+        /* Remueve costos segun el estado reversado */
+        if (List.of(EstadoSeguimientoEnum.REPARACION, EstadoSeguimientoEnum.PEGADO).
+            contains(EstadoSeguimientoEnum.fromString(actual.getEstado()))) {
+          final String estadoActual = actual.getEstado();
+          OrdenCostoPK ordenCostoPK = new OrdenCostoPK(idOrden, idOrdenDetalle, estadoActual);
+          OrdenCosto ordenCosto = ordenCostoRepository.findById(ordenCostoPK)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontró el costo asociado al detalle: " + estadoActual));
+
+          /* Si el detalle de la orden ya se pago, no se puede reversar */
+          if (ordenCosto.isPagado()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se puede eliminar un costo ya pagado");
+          }
+          
+          ordenCostoRepository.deleteById(ordenCostoPK);
+        }
 
         // Finish historical record
         finishHistorico(historico, actual);
@@ -113,6 +129,12 @@ public class OrdenSeguimientoService {
           EstadoSeguimientoEnum.NORMAL, EstadoSeguimientoEnum.IMPRESION
         ).contains(EstadoSeguimientoEnum.fromString(actual.getEstado()))) {
           notificationService.notifyCalendarioChanged();
+        }
+
+        /* Asigna costo de orden a ser pagado o cobrado */
+        if (!List.of(EstadoSeguimientoEnum.REPARACION, EstadoSeguimientoEnum.PEGADO
+        ).contains(EstadoSeguimientoEnum.fromString(actual.getEstado()))) {
+          ordenCostoService.asignarOrdenCosto(idOrden, idOrdenDetalle, actual.getEstado());
         }
 
         return actual;

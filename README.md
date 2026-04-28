@@ -116,6 +116,10 @@ ng generate component ordenes-detalle/orden-detalle-list
 ng generate component ordenes-detalle/orden-detalle-form
 ng generate service ordenes-detalle/orden-detalle
 
+ng generate component ordenes-costo/orden-costo-list
+ng generate component ordenes-costo/orden-costo-form
+ng generate service ordenes-costo/orden-costo
+
 ng generate component ordenes-calendario/orden-calendario-list
 ng generate component ordenes-calendario/orden-calendario-form
 ng generate service ordenes-calendario/orden-calendario

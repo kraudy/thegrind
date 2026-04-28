@@ -1,0 +1,70 @@
+<div class="max-w-7xl mx-auto px-4 py-12">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <button 
+      (click)="cancelar()" 
+      class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-md transition">
+      ← Volver
+    </button>
+    
+    <h1 class="text-4xl font-bold text-gray-900">Confirmar Pago de Costos</h1>
+  </div>
+
+  <!-- Resumen -->
+  <div class="bg-white shadow-xl rounded-2xl p-8 mb-8">
+    <h2 class="text-2xl font-semibold mb-6">Resumen de lo que se pagará</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Filters -->
+      <div class="space-y-4">
+        <div>
+          <strong class="text-gray-500">Tipo Costo:</strong> 
+          <span class="font-medium">{{ filters.tipoCosto || 'Todos' }}</span>
+        </div>
+        <div>
+          <strong class="text-gray-500">Trabajador a pagar:</strong> 
+          <span class="font-medium text-emerald-600">{{ filters.trabajador || 'Todos los trabajadores' }}</span>
+        </div>
+        <div>
+          <strong class="text-gray-500">Período:</strong> 
+          <span class="font-medium">{{ filters.fechaInicio || '—' }} → {{ filters.fechaFin || '—' }}</span>
+        </div>
+        <div>
+          <strong class="text-gray-500">ID Orden:</strong> 
+          <span class="font-medium">{{ filters.idOrden || 'Todos' }}</span>
+        </div>
+        <div>
+          <strong class="text-gray-500">ID Detalle:</strong> 
+          <span class="font-medium">{{ filters.idOrdenDetalle || 'Todos' }}</span>
+        </div>
+      </div>
+
+      <!-- Total Amount -->
+      <div class="flex flex-col justify-center items-center bg-emerald-50 rounded-3xl p-8 border border-emerald-200">
+        <div class="text-emerald-600 text-sm font-medium tracking-widest mb-2">TOTAL A PAGAR</div>
+        <div class="text-7xl font-bold text-emerald-700">{{ totalMonto }}</div>
+        <div class="text-emerald-600 text-xl mt-1">unidades trabajadas</div>
+        <div class="text-xs text-emerald-500 mt-6">Este es el monto calculado en el backend con los filtros aplicados</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="flex justify-end gap-4">
+    <button 
+      (click)="cancelar()" 
+      class="px-10 py-4 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-2xl transition">
+      Cancelar
+    </button>
+    
+    <button 
+      (click)="confirmarPago()" 
+      [disabled]="totalMonto <= 0"
+      class="px-12 py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-2xl flex items-center gap-3 transition">
+      <span>Pagar Ahora ({{ totalMonto }})</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7" />
+      </svg>
+    </button>
+  </div>
+</div>

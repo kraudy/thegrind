@@ -7,6 +7,7 @@ import { takeUntil } from 'rxjs/operators';
 
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimiento } from '../orden-seguimiento.model';
+
 import { NotificationService } from '../../shared/notification.service';
 
 @Component({
