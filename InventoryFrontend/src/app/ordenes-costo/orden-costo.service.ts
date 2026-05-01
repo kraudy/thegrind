@@ -85,4 +85,29 @@ export class OrdenCostoService {
     );
   }
 
+  generarReciboPDF(
+    tipoCosto: string,
+    trabajador: string,
+    filters: {
+      fechaInicio?: string;
+      fechaFin?: string;
+      idOrden?: number;
+      idOrdenDetalle?: number;
+    } = {}
+  ): Observable<Blob> {
+    const params = new HttpParams()
+      .set('fechaInicio', filters.fechaInicio || '')
+      .set('fechaFin', filters.fechaFin || '')
+      .set('idOrden', filters.idOrden?.toString() || '')
+      .set('idOrdenDetalle', filters.idOrdenDetalle?.toString() || '');
+
+    return this.http.get(
+      `${this.apiUrl}/recibo/${encodeURIComponent(tipoCosto)}/${encodeURIComponent(trabajador)}`,
+      {
+        params,
+        responseType: 'blob'
+      }
+    );
+  }
+
 }

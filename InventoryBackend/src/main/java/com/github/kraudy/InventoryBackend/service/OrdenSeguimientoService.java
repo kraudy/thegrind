@@ -59,6 +59,8 @@ public class OrdenSeguimientoService {
         // Reset previous trabajo when going back from certain states
         resetPreviousTrabajoIfNeeded(actual);
 
+        EstadoSeguimientoEnum estadoActual = EstadoSeguimientoEnum.fromString(actual.getEstado());
+
         // === Create historical record ===
         OrdenSeguimientoHistorico historico = createHistorico(actual, currentUser);
 
@@ -76,7 +78,8 @@ public class OrdenSeguimientoService {
         // Finish historical record
         finishHistorico(historico, reversado);
 
-        notificationService.notifyOrdenesSeguimientoChanged();
+        // Usamos el estado previo a reversarse para simplificar la logica
+        notificarCambioEstados(estadoActual, reversado.getTipo(), reversado.getSubTipo());
 
         return reversado;
     }
@@ -150,22 +153,41 @@ public class OrdenSeguimientoService {
         validateAdvanceRules(avanzado, siguiente);
         validarActualizarEstadoOrden(avanzado, siguiente);
 
-        notificationService.notifyOrdenesSeguimientoChanged();
-
-        //TODO: VAlidar este, creo que tambien el afecta el cambio de estado pero al negarlo muestra el mensaje 
-        /* Actualiza informacion relevante para el calendario */
-        if (!List.of(EstadoSeguimientoEnum.REPARTIDA, EstadoSeguimientoEnum.REPARACION, 
-          EstadoSeguimientoEnum.NORMAL, EstadoSeguimientoEnum.IMPRESION
-        ).contains(EstadoSeguimientoEnum.fromString(avanzado.getEstado()))) {
-          notificationService.notifyCalendarioChanged();
-        }
+        EstadoSeguimientoEnum estadoAvanzado = EstadoSeguimientoEnum.fromString(avanzado.getEstado());
 
         // Crea registro de costo
-        if (List.of(EstadoSeguimientoEnum.PEGADO).contains(EstadoSeguimientoEnum.fromString(avanzado.getEstado()))) {
+        if (List.of(EstadoSeguimientoEnum.PEGADO).contains(estadoAvanzado)) {
           ordenCostoService.asignarOrdenCosto(idOrden, idOrdenDetalle, avanzado.getEstado());
         }
 
+        notificarCambioEstados(estadoAvanzado, avanzado.getTipo(), avanzado.getSubTipo());
+
         return avanzado;
+    }
+
+    private void notificarCambioEstados(EstadoSeguimientoEnum estado, String tipo, String subTipo) {
+
+      notificationService.notifyOrdenesSeguimientoChanged();
+
+      //TODO: VAlidar este, creo que tambien el aecta el cambio de estado pero al negarlo muestra el mensaje 
+      if (!List.of(EstadoSeguimientoEnum.REPARTIDA, EstadoSeguimientoEnum.REPARACION, 
+          EstadoSeguimientoEnum.NORMAL, EstadoSeguimientoEnum.IMPRESION
+        ).contains(estado)) {
+          notificationService.notifyCalendarioChanged();
+      }
+
+      if (EstadoSeguimientoEnum.IMPRESION.equals(estado) && "Reparacion".equals(subTipo)) {
+        notificationService.notifyOrdenesCostoChanged();
+      }
+
+      if (EstadoSeguimientoEnum.PEGADO.equals(estado) && "Retablos".equals(tipo)) {
+        notificationService.notifyOrdenesCostoChanged();
+      }
+
+      if (EstadoSeguimientoEnum.LISTO.equals(estado) && "Retablos".equals(tipo)) {
+        notificationService.notifyOrdenesCostoChanged();
+      }
+
     }
 
     // ==================== Private helper methods ====================

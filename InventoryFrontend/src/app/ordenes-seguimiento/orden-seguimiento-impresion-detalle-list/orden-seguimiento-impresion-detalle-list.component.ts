@@ -327,12 +327,15 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, On
 
     this.ordenSeguimientoService.progresoTrabajo(det.idOrden, det.idOrdenDetalle, progressAmount).subscribe({
       next: () => {
-        this.toastService.showToast(
-          'info',
-          'Progreso agregado',
-          `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) - Se agregaron ${progressAmount} unidades correctamente`,
-          5500
-        );
+        // Solo mostramos un toast si se agregó progreso pero aún queda pendiente, para no saturar con mensajes cuando se completa el trabajo.
+        if (progressAmount < det.cantidad) {
+          this.toastService.showToast(
+            'info',
+            'Progreso agregado',
+            `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) - Se agregaron ${progressAmount} unidades correctamente`,
+            5500
+          );
+        }
 
         // Reset input
         this.progressInputs[det.idOrdenDetalle] = 0;

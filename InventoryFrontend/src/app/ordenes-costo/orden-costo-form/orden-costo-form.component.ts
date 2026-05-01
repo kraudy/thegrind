@@ -92,4 +92,24 @@ export class OrdenCostoFormComponent implements OnInit {
   cancelar(): void {
     this.navigateToList();
   }
+
+  generarReciboPDF() {
+    this.ordenCostoService
+      .generarReciboPDF(this.filters.tipoCosto, this.filters.trabajador, this.getQueryFilters())
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Recibo-${this.filters.trabajador}-${new Date().toISOString().slice(0,10)}.pdf`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+        },
+        error: (err) => {
+          console.error(err);
+          alert('❌ Error al generar el recibo PDF');
+        }
+      });
+  }
+  
 }

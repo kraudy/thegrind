@@ -26,6 +26,11 @@ public class NotificationService {
         messagingTemplate.convertAndSend("/topic/ordenes-trabajo", "REFRESH");
     }
 
+    /* Notifica de nuevo costo agregado a reparacion o pegado para que se actualice el componente correspondiente */
+    public void notifyOrdenesCostoChanged() {
+        messagingTemplate.convertAndSend("/topic/ordenes-costo", "REFRESH");
+    }
+
     public void notifyOrdenesPagoChanged() {
         messagingTemplate.convertAndSend("/topic/ordenes-pago", "REFRESH");
     }

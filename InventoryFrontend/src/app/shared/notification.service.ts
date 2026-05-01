@@ -37,6 +37,11 @@ export class NotificationService {
         this.refreshSubject.next('trabajo');
       });
 
+      this.stompClient!.subscribe('/topic/ordenes-costo', () => {
+        console.log('🔴 Ordenes Costo changed → notifying subscribers');
+        this.refreshSubject.next('costo');
+      });
+
       this.stompClient!.subscribe('/topic/ordenes-pago', () => {
         console.log('🔴 Ordenes Pago changed → notifying subscribers');
         this.refreshSubject.next('pago');

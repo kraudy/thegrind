@@ -80,12 +80,14 @@
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Orden / Detalle</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Tipo</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Trabajador</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Rol</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">ID Orden</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">ID Detalle</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Cliente</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Cant. Orden</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Cant. Asignada</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Cant. Trabajada</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Costo</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">SubTotal</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Fecha Trabajo</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Comentario</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Estado</th>
@@ -93,12 +95,19 @@
         </thead>
         <tbody class="bg-white divide-y divide-gray-100">
           <tr *ngFor="let c of ordenesCosto">
-            <td class="px-6 py-4 font-semibold">#{{ c.idOrden }} / {{ c.idOrdenDetalle }}</td>
-            <td class="px-6 py-4"><span class="px-3 py-1 text-xs rounded-2xl" [ngClass]="{'bg-orange-100 text-orange-700': c.tipoCosto==='Reparacion', 'bg-teal-100 text-teal-700': c.tipoCosto==='Pegado'}">{{ c.tipoCosto }}</span></td>
-            <td class="px-6 py-4">{{ c.trabajador }}</td>
-            <td class="px-6 py-4 text-gray-500">{{ c.rol }}</td>
+            <td class="px-6 py-4 font-semibold">{{ c.idOrden }}</td>
+            <td class="px-6 py-4">{{ c.idOrdenDetalle }}</td>
+            <td class="px-6 py-4">{{ c.clienteNombre }}</td>
             <td class="px-6 py-4 text-center">{{ c.cantidadOrden }}</td>
-            <td class="px-6 py-4 text-center">{{ c.cantidadTrabajada }}</td>
+            <td class="px-6 py-4 text-center">{{ c.cantidadAsignada }}</td>
+            <td
+              class="px-6 py-4 text-center"
+              [ngClass]="{ 'bg-yellow-100 text-yellow-800 font-semibold rounded-lg': c.cantidadTrabajada < c.cantidadAsignada }"
+            >
+              {{ c.cantidadTrabajada }}
+            </td>
+            <td class="px-6 py-4">{{ c.costo | number:'1.2-2' }}</td>
+            <td class="px-6 py-4 font-semibold">{{ c.subTotal | number:'1.2-2' }}</td>
             <td class="px-6 py-4">{{ c.fechaTrabajo | date:'dd/MM/yyyy' }}</td>
             <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">{{ c.comentario }}</td>
             <td class="px-6 py-4">
@@ -112,7 +121,19 @@
     </div>
 
     <!-- Confirm button -->
-    <div class="p-8 bg-gray-50 border-t flex justify-end">
+    <div class="p-6 bg-gray-50 border-t flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 min-w-45">
+          <p class="text-xs font-medium text-emerald-800 uppercase tracking-wide">Total a pagar</p>
+          <p class="text-xl font-bold text-emerald-700 leading-tight">{{ totalMonto | number:'1.2-2' }}</p>
+        </div>
+
+        <div class="bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3 min-w-55">
+          <p class="text-xs font-medium text-indigo-800 uppercase tracking-wide">Trabajador</p>
+          <p class="text-base font-semibold text-indigo-700 truncate">{{ filters.trabajador || 'Sin seleccionar' }}</p>
+        </div>
+      </div>
+
       <button (click)="confirmarPago()" [disabled]="ordenesCosto.length === 0" class="px-12 py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-semibold rounded-2xl text-lg flex items-center gap-3 transition">
         <span>Confirmar Pago ({{ ordenesCosto.length }} costos)</span>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

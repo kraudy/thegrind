@@ -21,11 +21,18 @@ public interface OrdenCostoRepository extends JpaRepository<OrdenCosto, OrdenCos
       oc.tipoCosto,
       oc.trabajador,
       oc.rol,
+      cte.id As idCliente,
+      CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
       oc.idProducto,
       oc.cantidadOrden,
       oc.cantidadAsignada,
       oc.cantidadTrabajada,
       oc.costo,
+      CASE oc.tipoCosto
+        WHEN 'Reparacion' THEN (oc.costo * oc.cantidadTrabajada)
+        WHEN 'Pegado' THEN (oc.costo * oc.cantidadAsignada)
+        ELSE 0
+      END AS subTotal,
       oc.pagado,
       oc.usuarioPaga,
       oc.fechaPago,
@@ -35,7 +42,13 @@ public interface OrdenCostoRepository extends JpaRepository<OrdenCosto, OrdenCos
       oc.usuarioCreacion,
       oc.fechaModificacion
     )
+      
     FROM OrdenCosto oc
+    INNER JOIN Orden ord 
+      ON (oc.idOrden = ord.id)
+    INNER JOIN Cliente cte
+      ON (ord.idCliente = cte.id)
+
     WHERE  oc.trabajador = :trabajador
       AND  oc.tipoCosto = :tipoCosto
       AND  oc.idOrden = COALESCE(:idOrden, oc.idOrden)
@@ -78,7 +91,16 @@ public interface OrdenCostoRepository extends JpaRepository<OrdenCosto, OrdenCos
 
 
    @Query(value = """
-    SELECT COALESCE(SUM(oc.cantidad_trabajada * oc.costo), 0)
+    SELECT COALESCE(
+      SUM(
+        CASE
+          WHEN oc.tipo_costo = 'Reparacion' THEN oc.cantidad_trabajada * oc.costo
+          WHEN oc.tipo_costo = 'Pegado' THEN oc.cantidad_asignada * oc.costo
+          ELSE 0
+        END
+      ), 0
+    ) AS total
+
     FROM orden_costo oc
     WHERE  oc.trabajador = :trabajador
       AND  oc.tipo_costo = :tipoCosto

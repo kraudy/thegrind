@@ -43,10 +43,25 @@
       <div class="flex flex-col justify-center items-center bg-emerald-50 rounded-3xl p-8 border border-emerald-200">
         <div class="text-emerald-600 text-sm font-medium tracking-widest mb-2">TOTAL A PAGAR</div>
         <div class="text-7xl font-bold text-emerald-700">{{ totalMonto }}</div>
-        <div class="text-emerald-600 text-xl mt-1">unidades trabajadas</div>
-        <div class="text-xs text-emerald-500 mt-6">Este es el monto calculado en el backend con los filtros aplicados</div>
       </div>
     </div>
+  </div>
+
+  <!-- PDF Section -->
+  <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-8">
+    <h3 class="text-lg font-semibold text-amber-800 mb-3 flex items-center gap-2">
+      📄 Recibo para Firma del Trabajador
+    </h3>
+    
+    <button 
+      (click)="generarReciboPDF()"
+      class="w-full sm:w-auto px-8 py-4 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-2xl flex items-center justify-center gap-3 transition">
+      <span>📄 Generar PDF Recibo para Firma</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17l-4-4m0 0l-4 4m4-4V3" />
+      </svg>
+    </button>
+    
   </div>
 
   <!-- Action buttons -->

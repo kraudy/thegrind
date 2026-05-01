@@ -54,18 +54,18 @@ export class OrdenCalendarioListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.notificationService.connect();
     
-        // Real-time refresh
-        this.notificationService.refreshNeeded$
-          .pipe(takeUntil(this.destroy$))
-          .subscribe(view => {
-            if (view === 'calendario') {
-              console.log('🔄 Real-time refresh triggered for Calendario');
-              this.loadEstadisticas();
-            } else if (view === 'seguimiento') {
-              console.log('🔄 Real-time refresh triggered for Seguimiento');
-              this.loadCalendario();
-            }
-          });
+    // Real-time refresh
+    this.notificationService.refreshNeeded$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(view => {
+        if (view === 'calendario') {
+          console.log('🔄 Real-time refresh triggered for Calendario');
+          this.loadEstadisticas();
+        } else if (view === 'seguimiento') {
+          console.log('🔄 Real-time refresh triggered for Seguimiento');
+          this.loadCalendario();
+        }
+      });
           
     this.loadCalendario();
   }

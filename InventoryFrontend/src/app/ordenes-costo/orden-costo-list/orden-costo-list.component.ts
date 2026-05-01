@@ -8,6 +8,11 @@ import { OrdenCosto } from '../orden-costo.model';
 import { UsuarioService } from '../../usuarios/usuario.service';
 import { UsuarioNombre } from '../../usuarios/usuario-nombre.model';
 
+import { NotificationService } from '../../shared/notification.service';
+import { takeUntil } from 'rxjs/internal/operators/takeUntil';
+import { Subject } from 'rxjs/internal/Subject';
+
+
 @Component({
   selector: 'app-orden-costo-list',
   standalone: true,
@@ -16,6 +21,9 @@ import { UsuarioNombre } from '../../usuarios/usuario-nombre.model';
   styleUrls: ['./orden-costo-list.css']
 })
 export class OrdenCostoListComponent implements OnInit {
+
+  private destroy$ = new Subject<void>();
+
   ordenesCosto: OrdenCosto[] = [];
   totalMonto: number = 0;
   loading = false;
@@ -39,10 +47,13 @@ export class OrdenCostoListComponent implements OnInit {
     private usuarioService: UsuarioService,
     private route: ActivatedRoute,
     private router: Router,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private notificationService: NotificationService,
   ) {}
 
   ngOnInit(): void {
+    this.notificationService.connect();
+
     const tipoCostoParam = this.route.snapshot.queryParamMap.get('tipoCosto');
     const trabajadorParam = this.route.snapshot.queryParamMap.get('trabajador');
 
@@ -59,6 +70,15 @@ export class OrdenCostoListComponent implements OnInit {
 
     this.filters.tipoCosto = tipoCostoParam;
     this.filters.trabajador = trabajadorParam;
+    
+    // Real-time refresh
+    this.notificationService.refreshNeeded$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(view => {
+        console.log('🔄 Real-time refresh triggered for Calendario');
+        this.loadTrabajadoresByTipo(this.filters.tipoCosto, true);
+      });
+
     this.loadTrabajadoresByTipo(this.filters.tipoCosto, true);
   }
 
