@@ -54,4 +54,12 @@ export class UsuarioService {
   getNormales(): Observable<UsuarioTrabajo[]> {
     return this.http.get<UsuarioTrabajo[]>(`${this.apiUrl}/normal`);
   }
+
+  getPegadoresNombres(): Observable<UsuarioNombre[]> {
+    return this.http.get<UsuarioNombre[]>(`${this.apiUrl}/pegadores/nombres`);
+  }
+
+  getReparadoresNombre(): Observable<UsuarioNombre[]> {
+    return this.http.get<UsuarioNombre[]>(`${this.apiUrl}/reparadores/nombres`);
+  }
 }

@@ -45,6 +45,7 @@ public class UsuarioController {
       return usuarioRepository.getAllUsuariosConRolesPorId(usuario);
   }
 
+  //TODO: Cambiar endpoint a reparadores/trabajo o algo asi y lo mismo para normal
   @GetMapping("/repara")
   public List<UsuarioTrabajoDTO> getReparadores() {
     return usuarioRepository.getUsuariosTrabajo("Reparacion", "repara");
@@ -55,9 +56,14 @@ public class UsuarioController {
     return usuarioRepository.getUsuariosTrabajo("Normal", "normal");
   }
 
-  @GetMapping("/pegadores")
-  public List<UsuarioNombreDTO> getPegadores() {
-    return usuarioRepository.getUsuariosPegadores();
+  @GetMapping("/pegadores/nombres")
+  public List<UsuarioNombreDTO> getPegadoresNombre() {
+    return usuarioRepository.getUsuarios("pega");
+  }
+
+  @GetMapping("/reparadores/nombres")
+  public List<UsuarioNombreDTO> getReparadoresNombre() {
+    return usuarioRepository.getUsuarios("repara");
   }
 
   // Crear usuario con roles

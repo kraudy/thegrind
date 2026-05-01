@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { OrdenCostoService } from '../orden-costo.service';
@@ -51,6 +52,12 @@ export class OrdenCostoFormComponent implements OnInit {
     };
   }
 
+  private getListRoute(): any[] {
+    const tipoCosto = this.filters.tipoCosto || 'Reparacion';
+    const trabajador = this.filters.trabajador || localStorage.getItem('usuario') || 'admin';
+    return ['/ordenes-costo/pagar', tipoCosto, trabajador];
+  }
+
   confirmarPago(): void {
     if (this.totalMonto <= 0) return;
 
@@ -67,7 +74,7 @@ export class OrdenCostoFormComponent implements OnInit {
       ).subscribe({
         next: () => {
           alert('✅ Costos pagados correctamente');
-          this.router.navigate(['/ordenes-costo/pagar']);
+          this.router.navigate(this.getListRoute());
         },
         error: (err) => {
           console.error(err);
@@ -78,6 +85,6 @@ export class OrdenCostoFormComponent implements OnInit {
   }
 
   cancelar(): void {
-    this.router.navigate(['/ordenes-costo/pagar']);
+    this.router.navigate(this.getListRoute());
   }
 }

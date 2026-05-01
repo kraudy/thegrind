@@ -1,5 +1,6 @@
 package com.github.kraudy.InventoryBackend.repository;
 
+import com.github.kraudy.InventoryBackend.dto.OrdenCostoDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenCosto;
 import com.github.kraudy.InventoryBackend.model.OrdenCostoPK;
 
@@ -8,27 +9,50 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 
 public interface OrdenCostoRepository extends JpaRepository<OrdenCosto, OrdenCostoPK> {
+  @Query("""
+    SELECT new com.github.kraudy.InventoryBackend.dto.OrdenCostoDTO(
+      oc.idOrden,
+      oc.idOrdenDetalle,
+      oc.tipoCosto,
+      oc.trabajador,
+      oc.rol,
+      oc.idProducto,
+      oc.cantidadOrden,
+      oc.cantidadAsignada,
+      oc.cantidadTrabajada,
+      oc.costo,
+      oc.pagado,
+      oc.usuarioPaga,
+      oc.fechaPago,
+      oc.comentario,
+      oc.fechaTrabajo,
+      oc.fechaCreacion,
+      oc.usuarioCreacion,
+      oc.fechaModificacion
+    )
+    FROM OrdenCosto oc
+    WHERE  oc.trabajador = :trabajador
+      AND  oc.tipoCosto = :tipoCosto
+      AND  oc.idOrden = COALESCE(:idOrden, oc.idOrden)
+      AND  oc.pagado = COALESCE(:pagado, oc.pagado)
+      AND  oc.fechaTrabajo >= COALESCE(:fechaInicio, oc.fechaTrabajo)
+      AND  oc.fechaTrabajo <= COALESCE(:fechaFin, oc.fechaTrabajo)
+      AND  oc.idOrdenDetalle = COALESCE(:idOrdenDetalle, oc.idOrdenDetalle)
+    ORDER BY oc.trabajador, oc.fechaTrabajo DESC
+    """)
+  List<OrdenCostoDTO> obtenerOrdenesDTO(
+      @Param("tipoCosto") String tipoCosto, @Param("trabajador") String trabajador,
+      @Param("fechaInicio") LocalDate fechaInicio, @Param("fechaFin") LocalDate fechaFin,
+      @Param("idOrden") Long idOrden, @Param("idOrdenDetalle") Long idOrdenDetalle,
+      @Param("pagado") Boolean pagado);
+
   @Query(value = """
-    SELECT 
-      oc.id_orden AS idOrden,
-      oc.id_orden_detalle AS idOrdenDetalle,
-      oc.tipo_costo AS tipoCosto,
-      oc.trabajador AS trabajador,
-      oc.rol AS rol,
-      oc.id_producto AS idProducto,
-      oc.cantidad_orden AS cantidadOrden,
-      oc.cantidad_trabajada AS cantidadTrabajada,
-      oc.pagado AS pagado,
-      oc.usuario_paga AS usuarioPaga,
-      oc.fecha_pago AS fechaPago,
-      oc.comentario AS comentario,
-      oc.fecha_trabajo AS fechaTrabajo
+    SELECT oc.*
 
     FROM orden_costo oc
 

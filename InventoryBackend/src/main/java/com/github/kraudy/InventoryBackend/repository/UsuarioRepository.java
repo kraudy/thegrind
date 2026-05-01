@@ -61,9 +61,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, String> {
 
     FROM usuario usr
     JOIN usuario_rol usrRol ON usr.usuario = usrRol.usuario
-    WHERE usrRol.rol = 'pega'
+    WHERE usrRol.rol = :rol
     """, nativeQuery = true)
-  List<UsuarioNombreDTO> getUsuariosPegadores();
+  List<UsuarioNombreDTO> getUsuarios(@Param("rol") String rol);
 
   /* Valida roles */
 

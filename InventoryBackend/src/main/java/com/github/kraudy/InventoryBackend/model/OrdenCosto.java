@@ -47,6 +47,9 @@ public class OrdenCosto {
   private int cantidadOrden;
 
   @Column(nullable = false, columnDefinition = "INTEGER")
+  private int cantidadAsignada;
+
+  @Column(nullable = false, columnDefinition = "INTEGER")
   private int cantidadTrabajada;
 
   @Column(nullable = false, columnDefinition = "NUMERIC(12,4)")

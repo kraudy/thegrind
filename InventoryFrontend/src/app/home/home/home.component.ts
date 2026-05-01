@@ -32,4 +32,9 @@ export class HomeComponent implements OnInit {
     this.authService.logout();           // clear token & roles
     this.router.navigate(['']);    // redirect to login
   }
+
+  getPagoCostosRoute(): any[] {
+    const usuarioActual = localStorage.getItem('usuario') || 'admin';
+    return ['/ordenes-costo/pagar', 'Reparacion', usuarioActual];
+  }
 }

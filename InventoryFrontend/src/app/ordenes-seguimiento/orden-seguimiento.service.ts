@@ -125,8 +125,4 @@ export class OrdenSeguimientoService {
   progresoTrabajo(idOrden: number, idOrdenDetalle: number, cantidadTrabajada: number): Observable<any> {
     return this.http.post(`/api/ordenes-trabajo/progreso-trabajo/${idOrden}/${idOrdenDetalle}/${cantidadTrabajada}`, {});
   }
-
-  getPegadores(): Observable<UsuarioNombre[]> {
-    return this.http.get<UsuarioNombre[]>(`/api/usuarios/pegadores`);
-  }
 }

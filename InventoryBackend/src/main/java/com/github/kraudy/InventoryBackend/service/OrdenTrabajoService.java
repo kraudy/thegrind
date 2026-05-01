@@ -59,7 +59,7 @@ public class OrdenTrabajoService {
 
         OrdenTrabajo trabajo = ordenTrabajoRepository.findById(trabajoPK)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "No hay trabajo asignado para este estado: " + trabajoPK));
+                        "No hay trabajo asignado para este estado en progreso trabajo: " + trabajoPK));
 
         if (cantidadTrabajada <= 0 ||
                 cantidadTrabajada + trabajo.getCantidadTrabajada() > trabajo.getCantidadAsignada()) {

@@ -97,6 +97,7 @@ export const routes: Routes = [
   { path: 'ordenes-pago/aprobar', component: OrdenPagoAprobarListComponent, canActivate: [authGuard] },
 
   /* Costo de ordenes */
+  { path: 'ordenes-costo/pagar/:tipoCosto/:trabajador', component: OrdenCostoListComponent, canActivate: [authGuard] },
   { path: 'ordenes-costo/pagar', component: OrdenCostoListComponent, canActivate: [authGuard] },
   { path: 'ordenes-costo/pagar/confirmar', component: OrdenCostoFormComponent, canActivate: [authGuard] },
 

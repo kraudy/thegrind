@@ -2,17 +2,17 @@ package com.github.kraudy.InventoryBackend.service;
 
 import com.github.kraudy.InventoryBackend.model.OrdenDetallePK;
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajoPK;
-import com.github.kraudy.InventoryBackend.model.Producto;
 import com.github.kraudy.InventoryBackend.model.ProductoCosto;
 import com.github.kraudy.InventoryBackend.model.ProductoCostoPK;
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajo;
 import com.github.kraudy.InventoryBackend.model.OrdenDetalle;
 import com.github.kraudy.InventoryBackend.model.OrdenCosto;
-
+import com.github.kraudy.InventoryBackend.model.OrdenCostoPK;
 import com.github.kraudy.InventoryBackend.repository.*;
 
 import lombok.RequiredArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -47,9 +47,7 @@ public class OrdenCostoService {
                       "No se encontró el detalle de orden: " + ordenDetallePk));
 
       ProductoCostoPK productoCostoPk  = new ProductoCostoPK(trabajo.getIdProducto(), estadoTrabajo);
-      ProductoCosto productoCosto = productoCostoRepository.findById(productoCostoPk)
-              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                      "No se encontró el costo para el producto y tipo de trabajo: " + productoCostoPk));
+      ProductoCosto productoCosto = productoCostoRepository.findById(productoCostoPk).orElse(null);
 
       OrdenCosto ordenCosto = new OrdenCosto();
       ordenCosto.setIdOrden(idOrden);
@@ -61,8 +59,10 @@ public class OrdenCostoService {
       ordenCosto.setIdProducto(trabajo.getIdProducto());
 
       ordenCosto.setCantidadOrden(ordenDetalle.getCantidad());
-      ordenCosto.setCantidadTrabajada(trabajo.getCantidadTrabajada());
-      ordenCosto.setCosto(productoCosto.getCosto());
+      ordenCosto.setCantidadAsignada(trabajo.getCantidadAsignada());
+      // Esta agregarla aparte, en otro servicio cuando el estado actual sea IMPRESION y se avance bien, y solo actualizar la cantidad trabajada.
+      //ordenCosto.setCantidadTrabajada(trabajo.getCantidadTrabajada());
+                        ordenCosto.setCosto(productoCosto != null ? productoCosto.getCosto() : BigDecimal.ZERO);
 
       ordenCosto.setComentario(trabajo.getComentario());
       ordenCosto.setFechaTrabajo(trabajo.getFechaTrabajo());
@@ -71,6 +71,25 @@ public class OrdenCostoService {
 
       return ordenCostoRepository.save(ordenCosto);
         
+    }
+
+    @Transactional
+    public OrdenCosto asignarOrdenCostoCantidadTrabajada(Long idOrden, Long idOrdenDetalle, String estadoTrabajo) {
+
+      OrdenTrabajoPK trabajoPK = new OrdenTrabajoPK(idOrden, idOrdenDetalle, estadoTrabajo);
+
+      OrdenTrabajo trabajo = ordenTrabajoRepository.findById(trabajoPK)
+              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                      "No hay trabajo asignado para este estado: " + trabajoPK));
+
+      OrdenCostoPK ordenCostoPK = new OrdenCostoPK(idOrden, idOrdenDetalle, estadoTrabajo);
+      OrdenCosto ordenCostoExistente = ordenCostoRepository.findById(ordenCostoPK)
+              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                      "No se encontró el costo para esta orden, detalle y tipo de trabajo: " + ordenCostoPK));
+
+      ordenCostoExistente.setCantidadTrabajada(trabajo.getCantidadTrabajada());
+
+      return ordenCostoRepository.save(ordenCostoExistente);  
     }
 
     @Transactional
