@@ -34,7 +34,6 @@ export class HomeComponent implements OnInit {
   }
 
   getPagoCostosRoute(): any[] {
-    const usuarioActual = localStorage.getItem('usuario') || 'admin';
-    return ['/ordenes-costo/pagar', 'Reparacion', usuarioActual];
+    return ['/ordenes-costo/pagar'];
   }
 }

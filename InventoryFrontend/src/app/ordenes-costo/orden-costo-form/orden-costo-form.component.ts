@@ -52,10 +52,15 @@ export class OrdenCostoFormComponent implements OnInit {
     };
   }
 
-  private getListRoute(): any[] {
+  private navigateToList(): void {
     const tipoCosto = this.filters.tipoCosto || 'Reparacion';
     const trabajador = this.filters.trabajador || localStorage.getItem('usuario') || 'admin';
-    return ['/ordenes-costo/pagar', tipoCosto, trabajador];
+    this.router.navigate(['/ordenes-costo/pagar'], {
+      queryParams: {
+        tipoCosto,
+        trabajador
+      }
+    });
   }
 
   confirmarPago(): void {
@@ -74,7 +79,7 @@ export class OrdenCostoFormComponent implements OnInit {
       ).subscribe({
         next: () => {
           alert('✅ Costos pagados correctamente');
-          this.router.navigate(this.getListRoute());
+          this.navigateToList();
         },
         error: (err) => {
           console.error(err);
@@ -85,6 +90,6 @@ export class OrdenCostoFormComponent implements OnInit {
   }
 
   cancelar(): void {
-    this.router.navigate(this.getListRoute());
+    this.navigateToList();
   }
 }

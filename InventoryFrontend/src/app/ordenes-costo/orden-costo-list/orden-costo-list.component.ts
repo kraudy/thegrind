@@ -43,11 +43,17 @@ export class OrdenCostoListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const tipoCostoParam = this.route.snapshot.paramMap.get('tipoCosto');
-    const trabajadorParam = this.route.snapshot.paramMap.get('trabajador');
+    const tipoCostoParam = this.route.snapshot.queryParamMap.get('tipoCosto');
+    const trabajadorParam = this.route.snapshot.queryParamMap.get('trabajador');
 
     if (!tipoCostoParam || !trabajadorParam) {
-      this.router.navigate(['/ordenes-costo/pagar', 'Reparacion', this.usuarioActual || 'admin'], { replaceUrl: true });
+      this.router.navigate(['/ordenes-costo/pagar'], {
+        queryParams: {
+          tipoCosto: 'Reparacion',
+          trabajador: this.usuarioActual || 'admin'
+        },
+        replaceUrl: true
+      });
       return;
     }
 
@@ -91,7 +97,11 @@ export class OrdenCostoListComponent implements OnInit {
             this.filters.trabajador = this.trabajadoresDisponibles[0] || '';
 
             if (this.filters.trabajador) {
-              this.router.navigate(['/ordenes-costo/pagar', this.filters.tipoCosto, this.filters.trabajador], {
+              this.router.navigate(['/ordenes-costo/pagar'], {
+                queryParams: {
+                  tipoCosto: this.filters.tipoCosto,
+                  trabajador: this.filters.trabajador
+                },
                 replaceUrl: true
               });
             }
@@ -196,13 +206,22 @@ export class OrdenCostoListComponent implements OnInit {
   }
 
   onTrabajadorChange(): void {
+    if (this.filters.tipoCosto && this.filters.trabajador) {
+      this.router.navigate(['/ordenes-costo/pagar'], {
+        queryParams: {
+          tipoCosto: this.filters.tipoCosto,
+          trabajador: this.filters.trabajador
+        },
+        replaceUrl: true
+      });
+    }
     this.loadOrdenes();
   }
 
   clearFilters(): void {
     this.filters = {
-      tipoCosto: this.route.snapshot.paramMap.get('tipoCosto') || '',
-      trabajador: this.route.snapshot.paramMap.get('trabajador') || '',
+      tipoCosto: this.route.snapshot.queryParamMap.get('tipoCosto') || '',
+      trabajador: this.route.snapshot.queryParamMap.get('trabajador') || '',
       fechaInicio: '',
       fechaFin: '',
       idOrden: undefined,
