@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.List;
 
@@ -77,17 +78,6 @@ public class CostoPdfService {
                     font-weight: bold; 
                     color: #1e3a8a;
                 }
-                .total { 
-                    text-align: right; 
-                    font-size: 1.8em; 
-                    font-weight: bold; 
-                    color: #1e3a8a; 
-                    padding: 15px;
-                    border: 3px solid #1e3a8a;
-                    border-radius: 12px;
-                    display: block;
-                    width: fit-content;
-                }
                 .signature {
                     text-align: center;
                     page-break-inside: avoid;
@@ -103,13 +93,6 @@ public class CostoPdfService {
                     font-size: 0.9em; 
                     color: #666; 
                 }
-                .bottom-section {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: flex-end;
-                    margin-top: 50px;
-                    gap: 40px;
-                }
             </style>
         </head>
         <body>
@@ -120,7 +103,7 @@ public class CostoPdfService {
                 <p><strong>Trabajador:</strong> ${trabajador}</p>
                 <p><strong>Tipo de Costo:</strong> ${tipoCosto}</p>
                 <p><strong>Fecha de generación:</strong> ${fechaGeneracion}</p>
-                <p><strong>Cantidad de trabajada:</strong> ${cantidadTrabajada}</p>
+                <p><strong>Cantidad trabajada:</strong> ${cantidadTrabajada}</p>
             </div>
 
             <table>
@@ -129,6 +112,7 @@ public class CostoPdfService {
                         <th>Fecha Trabajo</th>
                         <th>Día</th>
                         <th>Cantidad Trabajada</th>
+                        <th>Costo (C$)</th>
                         <th>Sub Total (C$)</th>
                     </tr>
                 </thead>
@@ -137,19 +121,10 @@ public class CostoPdfService {
                 </tbody>
             </table>
 
-            <!-- Bottom section: firma izquierda + total derecha -->
-            <div class="bottom-section">
-                <div class="signature">
-                    <div class="signature-line"></div>
-                    <p style="margin: 0;"><strong>Firma del Trabajador</strong></p>
-                    <p style="margin: 4px 0 0 0;">${trabajador}</p>
-                    <p style="margin-top: 30px; font-size: 14px;">_______________________________</p>
-                    <p style="margin: 4px 0 0 0;">Fecha y Hora de Firma</p>
-                </div>
-
-                <div class="total">
-                    TOTAL A PAGAR: C$${totalMonto}
-                </div>
+            <div class="signature" style="margin-top: 50px;">
+                <div class="signature-line"></div>
+                <p style="margin: 0;"><strong>Firma del Trabajador</strong></p>
+                <p style="margin: 4px 0 0 0;">${trabajador}</p>
             </div>
 
             <div class="footer">
@@ -185,6 +160,8 @@ public class CostoPdfService {
         Map<LocalDate, BigDecimal> dailyTotals = new TreeMap<>();
         Map<LocalDate, Integer> dailyCounts = new TreeMap<>();
 
+        Integer totalCantidad = 0;
+
         for (OrdenCostoDTO costo : costos) {
             LocalDate fecha = costo.fechaTrabajo();
             if (fecha != null) {
@@ -195,39 +172,67 @@ public class CostoPdfService {
                 } else if ("Pegado".equalsIgnoreCase(costo.tipoCosto())) {
                   cantidad = costo.cantidadAsignada();
                 } 
+                totalCantidad += cantidad; // Acumulamos total cantidad para el resumen general
                 dailyTotals.merge(fecha, subTotal, BigDecimal::add);
                 dailyCounts.merge(fecha, cantidad, Integer::sum);
             }
         }
 
-        // Construir filas del resumen
+        LocalDate baseDate = costos.stream()
+                .map(OrdenCostoDTO::fechaTrabajo)
+                .filter(Objects::nonNull)
+                .min(LocalDate::compareTo)
+                .orElse(LocalDate.now());
+        LocalDate monday = baseDate.minusDays(baseDate.getDayOfWeek().getValue() - 1L);
+
+        BigDecimal costoUnitario = costos.stream()
+            .map(OrdenCostoDTO::costo)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(BigDecimal.ZERO);
+
+        // Construir filas del resumen (Lunes a Sabado, con ceros si no hay datos)
         StringBuilder rows = new StringBuilder();
-        for (Map.Entry<LocalDate, BigDecimal> entry : dailyTotals.entrySet()) {
-            LocalDate date = entry.getKey();
+        for (int i = 0; i < 6; i++) {
+            LocalDate date = monday.plusDays(i);
             String diaNombre = date.format(DIA_NOMBRE_FORMAT);
-            int count = dailyCounts.get(date);
-            BigDecimal dailyTotal = entry.getValue();
+            int count = dailyCounts.getOrDefault(date, 0);
+            BigDecimal dailyTotal = dailyTotals.getOrDefault(date, BigDecimal.ZERO);
 
             rows.append(String.format("""
                 <tr>
                     <td style="text-align:center;">%s</td>
                     <td>%s</td>
                     <td style="text-align:center;">%d</td>
+                    <td style="text-align:right; font-weight:bold;">%s</td>
                     <td style="text-align:right; font-weight:bold;">%.2f</td>
                 </tr>
                 """,
                 date.format(DATE_ONLY_FORMAT),
                 diaNombre,
                 count,
+                costoUnitario.setScale(2, RoundingMode.HALF_UP).toPlainString(),
                 dailyTotal
             ));
         }
+
+        rows.append(String.format("""
+            <tr>
+                <td colspan="2" style="text-align:right; font-weight:bold;">TOTAL</td>
+                <td style="text-align:center; font-weight:bold;">%d</td>
+                <td style="text-align:center; font-weight:bold;">-</td>
+                <td style="text-align:right; font-weight:bold;">%s</td>
+            </tr>
+            """,
+            totalCantidad,
+            total != null ? total.setScale(2, RoundingMode.HALF_UP).toPlainString() : "0.00"
+        ));
 
         return PDF_TEMPLATE
                 .replace("${tipoCosto}", tipoCosto)
                 .replace("${trabajador}", trabajador)
                 .replace("${fechaGeneracion}", LocalDateTime.now().format(DATE_FORMAT))
-                .replace("${cantidadTrabajada}", String.valueOf(costos.size()))
+                .replace("${cantidadTrabajada}", String.valueOf(totalCantidad))
                 .replace("${resumenDias}", rows.toString())
                 .replace("${totalMonto}", total != null ? total.setScale(2, RoundingMode.HALF_UP).toPlainString() : "0.00");
     }
