@@ -7,8 +7,12 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.List;
 
 @Service
@@ -16,6 +20,7 @@ public class CostoPdfService {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final DateTimeFormatter DATE_ONLY_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DIA_NOMBRE_FORMAT = DateTimeFormatter.ofPattern("EEEE", new Locale("es", "NI")); // Lunes, Martes...
 
     private static final String PDF_TEMPLATE = """
         <!DOCTYPE html>
@@ -24,7 +29,7 @@ public class CostoPdfService {
             <style>
                 @page { 
                     margin: 2cm; 
-                    size: legal landscape;   /* ← Legal + Horizontal (landscape) */
+                    size: letter;   /* ← Portrait + Carta (Letter) */
                 }
                 body { 
                     font-family: Arial, sans-serif; 
@@ -98,7 +103,6 @@ public class CostoPdfService {
                     font-size: 0.9em; 
                     color: #666; 
                 }
-                /* New flex container for signature + total */
                 .bottom-section {
                     display: flex;
                     justify-content: space-between;
@@ -116,31 +120,25 @@ public class CostoPdfService {
                 <p><strong>Trabajador:</strong> ${trabajador}</p>
                 <p><strong>Tipo de Costo:</strong> ${tipoCosto}</p>
                 <p><strong>Fecha de generación:</strong> ${fechaGeneracion}</p>
-                <p><strong>Cantidad de registros:</strong> ${cantidadRegistros}</p>
+                <p><strong>Cantidad de trabajada:</strong> ${cantidadTrabajada}</p>
             </div>
 
             <table>
                 <thead>
                     <tr>
-                        <th>ID Orden</th>
-                        <th>ID Detalle</th>
-                        <th>Cliente</th>
-                        <th>Cant. Asignada</th>
-                        <th>Cant. Trabajada</th>
-                        <th>Costo Unit.</th>
-                        <th>Subtotal</th>
                         <th>Fecha Trabajo</th>
-                        <th>Comentario</th>
+                        <th>Día</th>
+                        <th>Cantidad Trabajada</th>
+                        <th>Sub Total (C$)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${detalles}
+                    ${resumenDias}
                 </tbody>
             </table>
 
-            <!-- Bottom section: signature left + total right -->
+            <!-- Bottom section: firma izquierda + total derecha -->
             <div class="bottom-section">
-                <!-- Firma -->
                 <div class="signature">
                     <div class="signature-line"></div>
                     <p style="margin: 0;"><strong>Firma del Trabajador</strong></p>
@@ -183,35 +181,45 @@ public class CostoPdfService {
     private String buildHtmlFromTemplate(List<OrdenCostoDTO> costos, String tipoCosto,
                                          String trabajador, BigDecimal total) {
 
-        StringBuilder rows = new StringBuilder();
+        // ==================== AGRUPACIÓN POR DÍA ====================
+        Map<LocalDate, BigDecimal> dailyTotals = new TreeMap<>();
+        Map<LocalDate, Integer> dailyCounts = new TreeMap<>();
 
-        for (OrdenCostoDTO c : costos) {
-            String fechaTrabajo = c.fechaTrabajo() != null 
-                    ? c.fechaTrabajo().format(DATE_ONLY_FORMAT) 
-                    : "—";
+        for (OrdenCostoDTO costo : costos) {
+            LocalDate fecha = costo.fechaTrabajo();
+            if (fecha != null) {
+                BigDecimal subTotal = costo.subTotal() != null ? costo.subTotal() : BigDecimal.ZERO;
+                Integer cantidad = 0 ;
+                if ("Reparacion".equalsIgnoreCase(costo.tipoCosto())) {
+                  cantidad = costo.cantidadTrabajada();
+                } else if ("Pegado".equalsIgnoreCase(costo.tipoCosto())) {
+                  cantidad = costo.cantidadAsignada();
+                } 
+                dailyTotals.merge(fecha, subTotal, BigDecimal::add);
+                dailyCounts.merge(fecha, cantidad, Integer::sum);
+            }
+        }
+
+        // Construir filas del resumen
+        StringBuilder rows = new StringBuilder();
+        for (Map.Entry<LocalDate, BigDecimal> entry : dailyTotals.entrySet()) {
+            LocalDate date = entry.getKey();
+            String diaNombre = date.format(DIA_NOMBRE_FORMAT);
+            int count = dailyCounts.get(date);
+            BigDecimal dailyTotal = entry.getValue();
 
             rows.append(String.format("""
                 <tr>
-                    <td>%d</td>
-                    <td>%d</td>
+                    <td style="text-align:center;">%s</td>
                     <td>%s</td>
                     <td style="text-align:center;">%d</td>
-                    <td style="text-align:center;">%d</td>
-                    <td style="text-align:right;">%.2f</td>
                     <td style="text-align:right; font-weight:bold;">%.2f</td>
-                    <td>%s</td>
-                    <td style="max-width:220px;">%s</td>
                 </tr>
                 """,
-                c.idOrden(),
-                c.idOrdenDetalle(),
-                c.clienteNombre() != null ? c.clienteNombre() : "—",
-                c.cantidadAsignada(),
-                c.cantidadTrabajada(),
-                c.costo() != null ? c.costo() : BigDecimal.ZERO,
-                c.subTotal() != null ? c.subTotal() : BigDecimal.ZERO,
-                fechaTrabajo,
-                c.comentario() != null ? c.comentario().replace("\n", "<br>") : "—"
+                date.format(DATE_ONLY_FORMAT),
+                diaNombre,
+                count,
+                dailyTotal
             ));
         }
 
@@ -219,8 +227,8 @@ public class CostoPdfService {
                 .replace("${tipoCosto}", tipoCosto)
                 .replace("${trabajador}", trabajador)
                 .replace("${fechaGeneracion}", LocalDateTime.now().format(DATE_FORMAT))
-                .replace("${cantidadRegistros}", String.valueOf(costos.size()))
-                .replace("${detalles}", rows.toString())
+                .replace("${cantidadTrabajada}", String.valueOf(costos.size()))
+                .replace("${resumenDias}", rows.toString())
                 .replace("${totalMonto}", total != null ? total.setScale(2, RoundingMode.HALF_UP).toPlainString() : "0.00");
     }
 }
