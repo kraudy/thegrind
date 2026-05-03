@@ -1,11 +1,9 @@
 package com.github.kraudy.InventoryBackend.service;
 
-import com.github.kraudy.InventoryBackend.dto.UsuarioNombreDTO;
 import com.github.kraudy.InventoryBackend.model.*;
 import com.github.kraudy.InventoryBackend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,7 +20,6 @@ public class OrdenTrabajoService {
     private final OrdenDetalleRepository ordenDetalleRepository;
     private final OrdenCalendarioRepository ordenCalendarioRepository;
     private final UsuarioRepository usuarioRepository;
-    private final CurrentUserService currentUserService;
 
     /**
      * Registra progreso de trabajo (reparadores, normal, pegado, enmarcado, etc.)
@@ -182,7 +179,9 @@ public class OrdenTrabajoService {
 
     private void setCantidadDesdeEstadoAnterior(OrdenTrabajo trabajo, OrdenSeguimiento seg, boolean esEntrega) {
         int seqAnterior = esEntrega
-                ? (seg.getTipo().equals("Ampliaciones") ? seg.getSecuencia() - 2 : seg.getSecuencia() - 1)
+                ? ((seg.getTipo().equals("Ampliaciones") || seg.getTipo().equals("Carita"))
+                    ? seg.getSecuencia() - 2
+                    : seg.getSecuencia() - 1)
                 : seg.getSecuencia() - 1;   // Pegado/Enmarcado/etc. siempre toman del estado inmediatamente anterior
 
         ProductoTipoEstadoPK prevPK = new ProductoTipoEstadoPK(seg.getTipo(), seg.getSubTipo(), seqAnterior);

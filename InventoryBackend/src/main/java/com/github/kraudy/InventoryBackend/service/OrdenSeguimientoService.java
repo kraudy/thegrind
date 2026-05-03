@@ -336,7 +336,7 @@ public class OrdenSeguimientoService {
         }
         int seq = 0;
 
-        if (actual.getTipo().equals("Ampliaciones")) {
+        if (actual.getTipo().equals("Ampliaciones") || actual.getTipo().equals("Carita")) {
           seq = switch (EstadoSeguimientoEnum.fromString(actual.getEstado())) {
             case IMPRESION -> actual.getSecuencia() - 1;
             case LISTO -> actual.getSecuencia() - 2;

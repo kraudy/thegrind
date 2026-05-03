@@ -244,7 +244,7 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, On
             this.advancingDetailMap[det.idOrdenDetalle] = false;
           }
         });
-    } else if (det.tipoProducto === 'Ampliaciones') { //TODO: Aqui se avance y despues se asigna
+    } else if (det.tipoProducto === 'Ampliaciones' || det.tipoProducto === 'Carita') { //TODO: Aqui se avance y despues se asigna
       this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe({
         next: () => {
           this.toastService.showToast('success', 'Éxito', `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) - Estado avanzado correctamente`, 4000);
