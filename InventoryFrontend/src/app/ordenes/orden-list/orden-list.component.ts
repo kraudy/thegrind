@@ -70,10 +70,17 @@ export class OrdenListComponent implements OnInit {
     this.loadOrdenes();
   }
 
+  canModifyOrden(orden?: Orden): boolean {
+    return (orden?.estado || '').toLowerCase() === 'recibida';
+  }
 
-  deleteOrden(id?: number): void {
-    if (id && confirm('¿Seguro desea eliminar?')){
-      this.ordenService.delete(id).subscribe(() => this.loadOrdenes());
+  deleteOrden(orden?: Orden): void {
+    if (!orden?.id || !this.canModifyOrden(orden)) {
+      return;
+    }
+
+    if (confirm('¿Seguro desea eliminar?')){
+      this.ordenService.delete(orden.id).subscribe(() => this.loadOrdenes());
     }
   }
 

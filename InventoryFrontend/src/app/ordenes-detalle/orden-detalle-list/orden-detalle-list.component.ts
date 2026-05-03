@@ -244,7 +244,25 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
+  canModifyDetalles(): boolean {
+    return (this.orden?.estado || '').toLowerCase() === 'recibida';
+  }
+
+  goToNuevoDetalle(): void {
+    if (!this.orden?.id || !this.canModifyDetalles()) {
+      return;
+    }
+
+    this.router.navigate(['/ordenes-detalle', this.orden.id, 'new'], {
+      queryParams: { clienteNombre: this.orden.clienteNombre }
+    });
+  }
+
   deleteOrdenDetalle(idOrden: number, idOrdenDetalle: number): void {
+    if (!this.canModifyDetalles()) {
+      return;
+    }
+
     if (confirm('¿Seguro desea eliminar este detalle de orden?')) {
       this.ordenDetalleService.delete(idOrden, idOrdenDetalle).subscribe({
         next: () => {

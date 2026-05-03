@@ -11,14 +11,20 @@
     </button>
 
     <!-- Botón Agregar Detalle (derecha) -->
-    <a [routerLink]="['/ordenes-detalle', orden.id, 'new']"
-       [queryParams]="{clienteNombre: orden!.clienteNombre}"
-      class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition transform hover:scale-105">
+    <button (click)="goToNuevoDetalle()"
+      [disabled]="!canModifyDetalles()"
+      [class.bg-indigo-600]="canModifyDetalles()"
+      [class.hover:bg-indigo-700]="canModifyDetalles()"
+      [class.text-white]="canModifyDetalles()"
+      [class.bg-gray-300]="!canModifyDetalles()"
+      [class.text-gray-500]="!canModifyDetalles()"
+      [class.cursor-not-allowed]="!canModifyDetalles()"
+      class="inline-flex items-center px-6 py-3 font-medium rounded-lg shadow-md transition transform hover:scale-105 disabled:transform-none">
       <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
       </svg>
       Agregar Detalle
-    </a>
+    </button>
 
     <!-- Título centrado -->
     <h1 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-bold text-gray-900 pointer-events-none">
@@ -104,11 +110,20 @@
               {{ detalle.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-4">
-              <a [routerLink]="['/ordenes-detalle', detalle.idOrden, detalle.idOrdenDetalle, 'edit']"
+              <a *ngIf="canModifyDetalles(); else detalleEditDisabled"
+                 [routerLink]="['/ordenes-detalle', detalle.idOrden, detalle.idOrdenDetalle, 'edit']"
                  [queryParams]="{clienteNombre: orden!.clienteNombre}"
                  class="text-indigo-600 hover:text-indigo-900 font-medium">Editar</a>
+              <ng-template #detalleEditDisabled>
+                <span class="text-gray-400 cursor-not-allowed font-medium">Editar</span>
+              </ng-template>
               <button (click)="deleteOrdenDetalle(detalle.idOrden, detalle.idOrdenDetalle)"
-                      class="text-red-600 hover:text-red-900 font-medium">
+                      [disabled]="!canModifyDetalles()"
+                      [class.text-red-600]="canModifyDetalles()"
+                      [class.hover:text-red-900]="canModifyDetalles()"
+                      [class.text-gray-400]="!canModifyDetalles()"
+                      [class.cursor-not-allowed]="!canModifyDetalles()"
+                      class="font-medium disabled:pointer-events-none">
                 Eliminar
               </button>
             </td>
