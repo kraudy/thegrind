@@ -25,6 +25,7 @@ import { ProductoColor } from '../../productos-colores/producto-color.model';
 import { ProductoColorService } from '../../productos-colores/producto-color.service';
 
 import { ProductoConfigService } from '../../productos-config/producto-config.service';
+import { ToastService } from '../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-product-list',
@@ -60,7 +61,8 @@ export class ProductoListComponent implements OnInit {
     private productoTipoService: ProductoTipoService,
     private productoConfigService: ProductoConfigService,
     private router: Router,
-    private cd: ChangeDetectorRef 
+    private cd: ChangeDetectorRef,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -206,7 +208,6 @@ export class ProductoListComponent implements OnInit {
     this.refreshConfig();   // ← uses the new dynamic logic
   }
 
-
   viewDetails(id: number): void {
     this.router.navigate(['/productos-detalle', id]);
   }
@@ -217,7 +218,18 @@ export class ProductoListComponent implements OnInit {
 
   deleteProduct(id?: number): void {
     if (id && confirm('¿Seguro desea eliminar?')){
-      this.productoService.delete(id).subscribe(() => this.loadProducts());
+      this.productoService.delete(id).subscribe({
+        next: () => this.loadProducts(),
+        error: (err) => {
+          console.error('[ProductList] failed to delete product', err);
+          this.toastService.showToast(
+            'error',
+            'Error al eliminar',
+            err?.error?.message || 'No se pudo eliminar el producto.',
+            6000
+          );
+        }
+      });
     }
   }
 
