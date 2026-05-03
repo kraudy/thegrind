@@ -1,6 +1,8 @@
 package com.github.kraudy.InventoryBackend.service.pdf;
 
 import com.github.kraudy.InventoryBackend.dto.OrdenCostoDTO;
+import com.github.kraudy.InventoryBackend.model.OrdenSeguimientoPK;
+import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoRepository;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +21,15 @@ import java.util.List;
 @Service
 public class CostoPdfService {
 
+    private final OrdenSeguimientoRepository ordenSeguimientoRepository;
+
+    public CostoPdfService(OrdenSeguimientoRepository ordenSeguimientoRepository) {
+        this.ordenSeguimientoRepository = ordenSeguimientoRepository;
+    }
+
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final DateTimeFormatter DATE_ONLY_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final DateTimeFormatter DIA_NOMBRE_FORMAT = DateTimeFormatter.ofPattern("EEEE", new Locale("es", "NI")); // Lunes, Martes...
+    private static final DateTimeFormatter DIA_NOMBRE_FORMAT = DateTimeFormatter.ofPattern("EEEE", Locale.forLanguageTag("es-NI")); // Lunes, Martes...
 
     private static final String PDF_TEMPLATE = """
         <!DOCTYPE html>
@@ -159,8 +167,14 @@ public class CostoPdfService {
         // ==================== AGRUPACIÓN POR DÍA ====================
         Map<LocalDate, BigDecimal> dailyTotals = new TreeMap<>();
         Map<LocalDate, Integer> dailyCounts = new TreeMap<>();
+        Map<LocalDate, Integer> dailySpecialCounts = new TreeMap<>(); // Caritas (Reparacion) o Calados (Pegado)
+        Map<LocalDate, Integer> dailyOtherCounts = new TreeMap<>();
+
+        Map<String, Boolean> specialByDetalle = new TreeMap<>();
 
         Integer totalCantidad = 0;
+        Integer totalCantidadSpecial = 0;
+        Integer totalCantidadOther = 0;
 
         for (OrdenCostoDTO costo : costos) {
             LocalDate fecha = costo.fechaTrabajo();
@@ -172,7 +186,18 @@ public class CostoPdfService {
                 } else if ("Pegado".equalsIgnoreCase(costo.tipoCosto())) {
                   cantidad = costo.cantidadAsignada();
                 } 
+
+                boolean isSpecial = isSpecialDetalle(costo, tipoCosto, specialByDetalle);
                 totalCantidad += cantidad; // Acumulamos total cantidad para el resumen general
+
+                if (isSpecial) {
+                    totalCantidadSpecial += cantidad;
+                    dailySpecialCounts.merge(fecha, cantidad, Integer::sum);
+                } else {
+                    totalCantidadOther += cantidad;
+                    dailyOtherCounts.merge(fecha, cantidad, Integer::sum);
+                }
+
                 dailyTotals.merge(fecha, subTotal, BigDecimal::add);
                 dailyCounts.merge(fecha, cantidad, Integer::sum);
             }
@@ -186,10 +211,27 @@ public class CostoPdfService {
         LocalDate monday = baseDate.minusDays(baseDate.getDayOfWeek().getValue() - 1L);
 
         BigDecimal costoUnitario = costos.stream()
-            .map(OrdenCostoDTO::costo)
-            .filter(Objects::nonNull)
-            .findFirst()
-            .orElse(BigDecimal.ZERO);
+                .map(OrdenCostoDTO::costo)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(BigDecimal.ZERO);
+
+        BigDecimal costoSpecial = costos.stream()
+                .filter(c -> isSpecialDetalle(c, tipoCosto, specialByDetalle))
+                .map(OrdenCostoDTO::costo)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(BigDecimal.ZERO);
+
+        BigDecimal costoOther = costos.stream()
+                .filter(c -> !isSpecialDetalle(c, tipoCosto, specialByDetalle))
+                .map(OrdenCostoDTO::costo)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(BigDecimal.ZERO);
+
+        final boolean splitByProductType = "Reparacion".equalsIgnoreCase(tipoCosto) || "Pegado".equalsIgnoreCase(tipoCosto);
+        final String specialLabel = "Reparacion".equalsIgnoreCase(tipoCosto) ? "Caritas" : "Calados";
 
         // Construir filas del resumen (Lunes a Sabado, con ceros si no hay datos)
         StringBuilder rows = new StringBuilder();
@@ -197,34 +239,53 @@ public class CostoPdfService {
             LocalDate date = monday.plusDays(i);
             String diaNombre = date.format(DIA_NOMBRE_FORMAT);
             int count = dailyCounts.getOrDefault(date, 0);
+            int specialCount = dailySpecialCounts.getOrDefault(date, 0);
+            int otherCount = dailyOtherCounts.getOrDefault(date, 0);
             BigDecimal dailyTotal = dailyTotals.getOrDefault(date, BigDecimal.ZERO);
+
+            String cantidadCell = splitByProductType
+                    ? String.format("%d<br/><span style=\"font-size:12px; color:#475569;\">%s: %d | Otros: %d</span>",
+                        count, specialLabel, specialCount, otherCount)
+                    : String.valueOf(count);
+
+            String costoCell = splitByProductType
+                    ? String.format("<div style=\"font-weight:normal; font-size:12px; color:#475569;\">%s: %s</div><div style=\"font-weight:normal; font-size:12px; color:#475569;\">Otros: %s</div>",
+                        specialLabel,
+                        costoSpecial.setScale(2, RoundingMode.HALF_UP).toPlainString(),
+                        costoOther.setScale(2, RoundingMode.HALF_UP).toPlainString())
+                    : costoUnitario.setScale(2, RoundingMode.HALF_UP).toPlainString();
 
             rows.append(String.format("""
                 <tr>
                     <td style="text-align:center;">%s</td>
                     <td>%s</td>
-                    <td style="text-align:center;">%d</td>
+                    <td style="text-align:center;">%s</td>
                     <td style="text-align:right; font-weight:bold;">%s</td>
                     <td style="text-align:right; font-weight:bold;">%.2f</td>
                 </tr>
                 """,
                 date.format(DATE_ONLY_FORMAT),
                 diaNombre,
-                count,
-                costoUnitario.setScale(2, RoundingMode.HALF_UP).toPlainString(),
+                cantidadCell,
+                costoCell,
                 dailyTotal
             ));
         }
 
+        String totalCantidadCell = splitByProductType
+                ? String.format("%d<br/><span style=\"font-size:12px; color:#475569;\">%s: %d | Otros: %d</span>",
+                    totalCantidad, specialLabel, totalCantidadSpecial, totalCantidadOther)
+                : String.valueOf(totalCantidad);
+
         rows.append(String.format("""
             <tr>
                 <td colspan="2" style="text-align:right; font-weight:bold;">TOTAL</td>
-                <td style="text-align:center; font-weight:bold;">%d</td>
+                <td style="text-align:center; font-weight:bold;">%s</td>
                 <td style="text-align:center; font-weight:bold;">-</td>
                 <td style="text-align:right; font-weight:bold;">%s</td>
             </tr>
             """,
-            totalCantidad,
+            totalCantidadCell,
             total != null ? total.setScale(2, RoundingMode.HALF_UP).toPlainString() : "0.00"
         ));
 
@@ -235,5 +296,30 @@ public class CostoPdfService {
                 .replace("${cantidadTrabajada}", String.valueOf(totalCantidad))
                 .replace("${resumenDias}", rows.toString())
                 .replace("${totalMonto}", total != null ? total.setScale(2, RoundingMode.HALF_UP).toPlainString() : "0.00");
+    }
+
+    private boolean isSpecialDetalle(OrdenCostoDTO costo, String tipoCosto, Map<String, Boolean> cache) {
+        if (costo == null || costo.idOrden() == null || costo.idOrdenDetalle() == null) {
+            return false;
+        }
+
+        if (!"Reparacion".equalsIgnoreCase(tipoCosto) && !"Pegado".equalsIgnoreCase(tipoCosto)) {
+            return false;
+        }
+
+        String cacheKey = costo.idOrden() + "-" + costo.idOrdenDetalle() + "-" + tipoCosto;
+        if (cache.containsKey(cacheKey)) {
+            return cache.get(cacheKey);
+        }
+
+        String specialType = "Reparacion".equalsIgnoreCase(tipoCosto) ? "Carita" : "Calado";
+
+        boolean isSpecial = ordenSeguimientoRepository
+                .findById(new OrdenSeguimientoPK(costo.idOrden(), costo.idOrdenDetalle()))
+                .map(seg -> seg.getTipo() != null && specialType.equalsIgnoreCase(seg.getTipo()))
+                .orElse(false);
+
+        cache.put(cacheKey, isSpecial);
+        return isSpecial;
     }
 }
