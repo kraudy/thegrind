@@ -137,7 +137,7 @@ public class OrdenTrabajoService {
         } else if (List.of("Pegado", "Enmarcado", "Armado", "Calado", "Sublimacion")
                 .contains(siguienteEstado.getEstado())) {
 
-            if (seguimientoActual.getTipo().equals("Retablos")) {
+            if (seguimientoActual.getTipo().equals("Retablos") || seguimientoActual.getTipo().equals("Calado")) {
                 if (!usuarioRepository.usuarioEsPegador(trabajador))
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario no es pegador");
                 trabajo.setRol("pega");

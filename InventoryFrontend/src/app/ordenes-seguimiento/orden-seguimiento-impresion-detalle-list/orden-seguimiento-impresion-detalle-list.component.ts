@@ -181,38 +181,39 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, On
 
 
     // Impresion logic
-    if (det.tipoProducto === 'Retablos') {
+    if (det.tipoProducto === 'Retablos' || det.tipoProducto === 'Calado') {
       this.usuarioService.getPegadoresNombres().subscribe({
         next: (pegadores) => {
-          if (pegadores && pegadores.length > 0) {
-            const pegador = pegadores[0]; // Take first pegador
-            this.ordenSeguimientoService.assignTrabajo(det.idOrden, det.idOrdenDetalle, pegador.usuario).subscribe({
-              next: () => {
-                this.toastService.showToast('success', 'Éxito', 'Pegador asignado correctamente', 4000);
-                // Assignment successful, now advance
-                this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe({
-                  next: () => {
-                    this.toastService.showToast('success', 'Éxito', `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) - Estado avanzado correctamente`, 4000);
-                    this.load();
-                    this.advancingDetailMap[det.idOrdenDetalle] = false;
-                  },
-                  error: (err) => {
-                    console.error('Error al avanzar estado:', err);
-                    this.toastService.showToast('error', 'Error al avanzar', 'No se pudo avanzar el estado del detalle', 7000);
-                    this.advancingDetailMap[det.idOrdenDetalle] = false;
-                  }
-                });
-              },
-              error: (err) => {
-                console.error('Error assigning pegador:', err);
-                this.toastService.showToast('error', 'Error al asignar pegador', 'No se pudo asignar el pegador', 6000);
-                this.advancingDetailMap[det.idOrdenDetalle] = false;
-              }
-            });
-          } else {
+          if (!!pegadores && pegadores.length <= 0) {
             this.toastService.showToast('error', 'Sin pegadores', 'No hay pegadores disponibles', 6000);
             this.advancingDetailMap[det.idOrdenDetalle] = false;
+            return;
           }
+          const pegador = pegadores[0]; // Take first pegador
+
+          this.ordenSeguimientoService.assignTrabajo(det.idOrden, det.idOrdenDetalle, pegador.usuario).subscribe({
+            next: () => {
+              this.toastService.showToast('success', 'Éxito', 'Pegador asignado correctamente', 4000);
+              // Assignment successful, now advance
+              this.ordenSeguimientoService.advance(det.idOrden, det.idOrdenDetalle).subscribe({
+                next: () => {
+                  this.toastService.showToast('success', 'Éxito', `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) - Estado avanzado correctamente`, 4000);
+                  this.load();
+                  this.advancingDetailMap[det.idOrdenDetalle] = false;
+                },
+                error: (err) => {
+                  console.error('Error al avanzar estado:', err);
+                  this.toastService.showToast('error', 'Error al avanzar', 'No se pudo avanzar el estado del detalle', 7000);
+                  this.advancingDetailMap[det.idOrdenDetalle] = false;
+                }
+              });
+            },
+            error: (err) => {
+              console.error('Error assigning pegador:', err);
+              this.toastService.showToast('error', 'Error al asignar pegador', 'No se pudo asignar el pegador', 6000);
+              this.advancingDetailMap[det.idOrdenDetalle] = false;
+            }
+          });
         },
         error: (err) => {
           console.error('Error getting pegadores:', err);
@@ -268,7 +269,7 @@ export class OrdenSeguimientoImpresionDetalleListComponent implements OnInit, On
           this.advancingDetailMap[det.idOrdenDetalle] = false;
         }
       });
-    } else if (det.tipoProducto === 'Baner' || det.tipoProducto === 'Calado' || 
+    } else if (det.tipoProducto === 'Baner' ||
         det.tipoProducto === 'Camisa' || det.tipoProducto === 'Taza' || det.tipoProducto === 'Llavero') {
 
       this.ordenSeguimientoService.assignTrabajo(det.idOrden, det.idOrdenDetalle, "alistador").subscribe({

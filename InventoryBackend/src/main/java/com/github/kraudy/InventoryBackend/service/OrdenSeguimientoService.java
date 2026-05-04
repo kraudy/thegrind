@@ -180,11 +180,11 @@ public class OrdenSeguimientoService {
         notificationService.notifyOrdenesCostoChanged();
       }
 
-      if (EstadoSeguimientoEnum.PEGADO.equals(estado) && "Retablos".equals(tipo)) {
+      if (EstadoSeguimientoEnum.PEGADO.equals(estado) && ("Retablos".equals(tipo) || "Calado".equals(tipo))) {
         notificationService.notifyOrdenesCostoChanged();
       }
 
-      if (EstadoSeguimientoEnum.LISTO.equals(estado) && "Retablos".equals(tipo)) {
+      if (EstadoSeguimientoEnum.LISTO.equals(estado) && ("Retablos".equals(tipo) || "Calado".equals(tipo))) {
         notificationService.notifyOrdenesCostoChanged();
       }
 

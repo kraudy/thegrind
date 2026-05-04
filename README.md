@@ -288,6 +288,9 @@ docker compose up -d --build
 
 sudo lsof -i :5432
 sudo lsof -i :8080
+
+lsof -i -P -n | grep LISTEN
+
 sudo kill xxxx
 
 # ========================
@@ -301,7 +304,8 @@ docker compose logs backend --tail 100
 # reset and rebuild
 
 # Clean everything (volumes + network + orphans)
-docker compose down -v --remove-orphans #REMOVES DATABASE
+# WARNING !!!! REMOVES DATABASE AND ALL THE DATA !!!!!!!!!!!!!!!!
+docker compose down -v --remove-orphans 
 
 # Rebuild and start fresh
 # docker compose up -d --build
