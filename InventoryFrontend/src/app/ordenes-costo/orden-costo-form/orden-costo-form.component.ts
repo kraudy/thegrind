@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { OrdenCostoService } from '../orden-costo.service';
+import { ToastService } from '../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-orden-costo-form',
@@ -20,7 +21,8 @@ export class OrdenCostoFormComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private ordenCostoService: OrdenCostoService
+    private ordenCostoService: OrdenCostoService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -67,23 +69,44 @@ export class OrdenCostoFormComponent implements OnInit {
     if (this.totalMonto <= 0) return;
 
     if (!this.hasRequiredPathParams()) {
-      alert('❌ Debe seleccionar tipo de costo y trabajador para pagar.');
+      this.toastService.showToast(
+        'error',
+        'Datos incompletos',
+        'Debe seleccionar tipo de costo y trabajador para pagar.',
+        6000
+      );
       return;
     }
 
-    if (confirm(`¿Está seguro de pagar ${this.totalMonto} unidades trabajadas al trabajador ${this.filters.trabajador || 'seleccionado'}?`)) {
+    if (confirm(`¿Está seguro de pagar ${this.totalMonto} al trabajador ${this.filters.trabajador || 'seleccionado'}?`)) {
       this.ordenCostoService.pagar(
         this.filters.tipoCosto,
         this.filters.trabajador,
         this.getQueryFilters()
       ).subscribe({
         next: () => {
-          alert('✅ Costos pagados correctamente');
+          const trabajador = this.filters.trabajador || 'trabajador seleccionado';
+          const monto = new Intl.NumberFormat('es-NI', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          }).format(this.totalMonto);
+
+          this.toastService.showToast(
+            'success',
+            'Pago confirmado',
+            `Se pagaron ${monto} a ${trabajador}.`,
+            4000
+          );
           this.navigateToList();
         },
         error: (err) => {
           console.error(err);
-          alert('❌ Error al procesar el pago');
+          this.toastService.showToast(
+            'error',
+            'Error al procesar pago',
+            err?.error?.message || 'No se pudo procesar el pago.',
+            7000
+          );
         }
       });
     }

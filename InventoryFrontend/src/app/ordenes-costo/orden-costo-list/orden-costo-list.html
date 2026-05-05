@@ -83,6 +83,7 @@
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">ID Orden</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">ID Detalle</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Cliente</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Producto</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Cant. Orden</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Cant. Asignada</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600">Cant. Trabajada</th>
@@ -98,6 +99,7 @@
             <td class="px-6 py-4 font-semibold">{{ c.idOrden }}</td>
             <td class="px-6 py-4">{{ c.idOrdenDetalle }}</td>
             <td class="px-6 py-4">{{ c.clienteNombre }}</td>
+            <td class="px-6 py-4">{{ c.productoNombre }}</td>
             <td class="px-6 py-4 text-center">{{ c.cantidadOrden }}</td>
             <td class="px-6 py-4 text-center">{{ c.cantidadAsignada }}</td>
             <td
@@ -122,7 +124,15 @@
 
     <!-- Confirm button -->
     <div class="p-6 bg-gray-50 border-t flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div class="flex flex-col sm:flex-row gap-3">
+      <div class="flex flex-col sm:flex-row gap-3 sm:items-end">
+        <button
+          (click)="generarReciboPDF()"
+          [disabled]="generatingPdf || !filters.tipoCosto || !filters.trabajador"
+          class="px-6 py-3 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition"
+        >
+          {{ generatingPdf ? 'Generando PDF...' : 'Generar PDF Recibo' }}
+        </button>
+
         <div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 min-w-45">
           <p class="text-xs font-medium text-emerald-800 uppercase tracking-wide">Total a pagar</p>
           <p class="text-xl font-bold text-emerald-700 leading-tight">{{ totalMonto | number:'1.2-2' }}</p>
@@ -134,7 +144,12 @@
         </div>
       </div>
 
-      <button (click)="confirmarPago()" [disabled]="ordenesCosto.length === 0" class="px-12 py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-semibold rounded-2xl text-lg flex items-center gap-3 transition">
+      <button
+        (click)="confirmarPago()"
+        [disabled]="ordenesCosto.length === 0 || filters.pagado !== false"
+        [ngClass]="filters.pagado === false ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-gray-400 cursor-not-allowed'"
+        class="px-12 py-4 text-white font-semibold rounded-2xl text-lg flex items-center gap-3 transition"
+      >
         <span>Confirmar Pago ({{ ordenesCosto.length }} costos)</span>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7-7 7M5 12h14" />

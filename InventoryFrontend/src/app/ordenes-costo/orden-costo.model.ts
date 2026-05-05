@@ -7,6 +7,7 @@ export interface OrdenCosto {
   idClinete: number;
   clienteNombre: string;
   idProducto: number;
+  productoNombre: string;
   cantidadOrden: number;
   cantidadAsignada: number;
   cantidadTrabajada: number;

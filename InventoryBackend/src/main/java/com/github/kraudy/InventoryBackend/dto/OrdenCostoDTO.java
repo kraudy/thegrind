@@ -13,6 +13,7 @@ public record OrdenCostoDTO(
   Long idCliente,
   String clienteNombre,
   Long idProducto,
+  String productoNombre,
   int cantidadOrden,
   int cantidadAsignada,
   int cantidadTrabajada,

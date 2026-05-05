@@ -24,6 +24,7 @@ public interface OrdenCostoRepository extends JpaRepository<OrdenCosto, OrdenCos
       cte.id As idCliente,
       CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
       oc.idProducto,
+      p.nombre AS productoNombre,
       oc.cantidadOrden,
       oc.cantidadAsignada,
       oc.cantidadTrabajada,
@@ -48,6 +49,8 @@ public interface OrdenCostoRepository extends JpaRepository<OrdenCosto, OrdenCos
       ON (oc.idOrden = ord.id)
     INNER JOIN Cliente cte
       ON (ord.idCliente = cte.id)
+    INNER JOIN Producto p
+      ON (oc.idProducto = p.id)
 
     WHERE  oc.trabajador = :trabajador
       AND  oc.tipoCosto = :tipoCosto

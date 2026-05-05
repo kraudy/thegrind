@@ -60,16 +60,6 @@ public class CostoPdfService {
                     font-size: 20px;
                     margin-bottom: 30px;
                 }
-                .header { 
-                    margin-bottom: 35px; 
-                    font-size: 16px; 
-                    background-color: #f8fafc;
-                    padding: 15px;
-                    border-radius: 8px;
-                }
-                .header p { 
-                    margin: 6px 0; 
-                }
                 table { 
                     width: 100%; 
                     border-collapse: collapse; 
@@ -106,13 +96,6 @@ public class CostoPdfService {
         <body>
             <h1>RECIBO DE PAGO</h1>
             <div class="subtitle">Tipo: <strong>${tipoCosto}</strong> • Trabajador: <strong>${trabajador}</strong></div>
-
-            <div class="header">
-                <p><strong>Trabajador:</strong> ${trabajador}</p>
-                <p><strong>Tipo de Costo:</strong> ${tipoCosto}</p>
-                <p><strong>Fecha de generación:</strong> ${fechaGeneracion}</p>
-                <p><strong>Cantidad trabajada:</strong> ${cantidadTrabajada}</p>
-            </div>
 
             <table>
                 <thead>
@@ -293,9 +276,7 @@ public class CostoPdfService {
                 .replace("${tipoCosto}", tipoCosto)
                 .replace("${trabajador}", trabajador)
                 .replace("${fechaGeneracion}", LocalDateTime.now().format(DATE_FORMAT))
-                .replace("${cantidadTrabajada}", String.valueOf(totalCantidad))
-                .replace("${resumenDias}", rows.toString())
-                .replace("${totalMonto}", total != null ? total.setScale(2, RoundingMode.HALF_UP).toPlainString() : "0.00");
+            .replace("${resumenDias}", rows.toString());
     }
 
     private boolean isSpecialDetalle(OrdenCostoDTO costo, String tipoCosto, Map<String, Boolean> cache) {

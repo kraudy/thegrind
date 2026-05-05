@@ -28,6 +28,7 @@ export class OrdenCostoListComponent implements OnInit {
   totalMonto: number = 0;
   loading = false;
   loadingTrabajadores = false;
+  generatingPdf = false;
   errorMessage = '';
   trabajadoresDisponibles: string[] = [];
   usuarioActual = localStorage.getItem('usuario') || '';
@@ -165,6 +166,15 @@ export class OrdenCostoListComponent implements OnInit {
     };
   }
 
+  private getPdfFilters() {
+    return {
+      fechaInicio: this.filters.fechaInicio || undefined,
+      fechaFin: this.filters.fechaFin || undefined,
+      idOrden: this.filters.idOrden,
+      idOrdenDetalle: this.filters.idOrdenDetalle
+    };
+  }
+
   loadOrdenes(): void {
     if (!this.hasRequiredPathParams()) {
       this.ordenesCosto = [];
@@ -259,5 +269,38 @@ export class OrdenCostoListComponent implements OnInit {
         totalMonto: this.totalMonto
       }
     });
+  }
+
+  generarReciboPDF(): void {
+    if (!this.hasRequiredPathParams()) {
+      this.errorMessage = 'Selecciona tipo de costo y trabajador para generar el PDF.';
+      this.cd.detectChanges();
+      return;
+    }
+
+    this.generatingPdf = true;
+    this.errorMessage = '';
+
+    this.ordenCostoService
+      .generarReciboPDF(this.filters.tipoCosto, this.filters.trabajador, this.getPdfFilters())
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Recibo-${this.filters.trabajador}-${new Date().toISOString().slice(0, 10)}.pdf`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+
+          this.generatingPdf = false;
+          this.cd.detectChanges();
+        },
+        error: (err: any) => {
+          console.error(err);
+          this.generatingPdf = false;
+          this.errorMessage = 'No se pudo generar el recibo PDF.';
+          this.cd.detectChanges();
+        }
+      });
   }
 }
