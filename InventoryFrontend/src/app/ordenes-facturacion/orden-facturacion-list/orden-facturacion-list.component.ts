@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -13,7 +14,7 @@ import { OrdenFacturacion } from '../orden-facturacion.model';
 @Component({
   selector: 'app-orden-facturacion-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './orden-facturacion-list.html',
   styleUrls: ['./orden-facturacion-list.css'],
 })
@@ -24,6 +25,10 @@ export class OrdenFacturacionListComponent implements OnInit, OnDestroy {
   ordenes: OrdenFacturacion[] = [];
   loading = false;
   errorMessage = '';
+
+  filterId?: number | null;
+  filterCliente = '';
+  filterTrabajador = '';
 
   constructor(
     private ordenSeguimientoService: OrdenSeguimientoService,
@@ -57,7 +62,11 @@ export class OrdenFacturacionListComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.errorMessage = '';
 
-    this.ordenSeguimientoService.getOrdenesParaFacturacion().subscribe({
+    this.ordenSeguimientoService.getOrdenesParaFacturacion({
+      id: this.filterId ?? undefined,
+      cliente: this.filterCliente,
+      trabajador: this.filterTrabajador
+    }).subscribe({
       next: (ordenes) => {
         this.ordenes = ordenes || [];
         this.loading = false;
@@ -71,6 +80,21 @@ export class OrdenFacturacionListComponent implements OnInit, OnDestroy {
         this.cd.detectChanges();
       }
     });
+  }
+
+  onFilterChange(): void {
+    if (this.filterId === null || Number.isNaN(this.filterId)) {
+      this.filterId = undefined;
+    }
+
+    this.loadOrdenesParaFacturacion();
+  }
+
+  clearFilters(): void {
+    this.filterId = undefined;
+    this.filterCliente = '';
+    this.filterTrabajador = '';
+    this.loadOrdenesParaFacturacion();
   }
 
   viewDetails(orden: OrdenFacturacion): void {

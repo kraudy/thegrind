@@ -77,8 +77,22 @@ export class OrdenSeguimientoService {
   }
 
   /* Seguimiento para facturacion */
-  getOrdenesParaFacturacion(): Observable<OrdenFacturacion[]> {
-    return this.http.get<OrdenFacturacion[]>(`${this.apiUrl}/para-facturacion`);
+  getOrdenesParaFacturacion(filters: { id?: number; cliente?: string; trabajador?: string } = {}): Observable<OrdenFacturacion[]> {
+    let params = new HttpParams();
+
+    if (filters.id != null && !Number.isNaN(filters.id)) {
+      params = params.set('id', filters.id.toString());
+    }
+
+    if (filters.cliente?.trim()) {
+      params = params.set('cliente', filters.cliente.trim());
+    }
+
+    if (filters.trabajador?.trim()) {
+      params = params.set('trabajador', filters.trabajador.trim());
+    }
+
+    return this.http.get<OrdenFacturacion[]>(`${this.apiUrl}/para-facturacion`, { params });
   }
 
   getOrdenDetalleParaFacturacion(idOrden: number): Observable<OrdenFacturacionDetalle[]> {

@@ -508,9 +508,13 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
     LEFT JOIN pagos_totals pagos ON pagos.id_orden = ord.id
 
     WHERE ord.estado = 'Entregado'
+        AND (:id IS NULL OR ord.id = :id)
+        AND (:cliente IS NULL OR LOWER(CONCAT(cte.nombre, ' ', cte.apellido)) LIKE LOWER(CONCAT('%', :cliente, '%')))
+        AND (:trabajador IS NULL OR LOWER(ord.creada_por) LIKE LOWER(CONCAT('%', :trabajador, '%')))
+        
     ORDER BY ord.id_cliente, ord.fecha_vencimiento ASC
   """, nativeQuery = true)
-  List<OrdenSeguimientoFacturacionDTO> getOrdenesParaFacturacion();
+  List<OrdenSeguimientoFacturacionDTO> getOrdenesParaFacturacion(@Param("id") Long id, @Param("cliente") String cliente, @Param("trabajador") String trabajador);
 
   /* Aqui no se especifica current date porque el id ya deberia estar filtrado */
   @Query(value = """

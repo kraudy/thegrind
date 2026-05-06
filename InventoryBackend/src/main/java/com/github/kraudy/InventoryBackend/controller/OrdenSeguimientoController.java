@@ -147,8 +147,12 @@ public class OrdenSeguimientoController {
 
   /* Retorna lista de ordenes para facturacion */
   @GetMapping("/para-facturacion")
-  public List<OrdenSeguimientoFacturacionDTO> getOrdenesParaFacturacion() {
-    return ordenSeguimientoRepository.getOrdenesParaFacturacion();
+  public List<OrdenSeguimientoFacturacionDTO> getOrdenesParaFacturacion(
+    @RequestParam(required = false) Long id,
+    @RequestParam(required = false) String cliente,
+    @RequestParam(required = false) String trabajador
+  ) {
+    return ordenSeguimientoRepository.getOrdenesParaFacturacion(id, cliente, trabajador);
   }
 
   @GetMapping("/para-facturacion/{idOrden}")

@@ -17,44 +17,11 @@
 
   <!-- Resumen -->
   <div class="bg-white shadow-xl rounded-xl p-8 mb-12" *ngIf="detalles.length > 0">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="bg-gray-50 rounded-lg p-4">
-        <p class="text-sm font-medium text-gray-600">Cliente</p>
-        <p class="text-2xl font-bold text-gray-900">{{ clienteNombre }}</p>
-      </div>
-      <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
-        <p class="text-sm font-medium text-blue-700">Total Prod. Orden</p>
-        <p class="text-2xl font-bold text-blue-600">{{ totalProductosOrden }}</p>
-      </div>
-      <div class="bg-green-50 rounded-lg p-4 border border-green-200">
-        <p class="text-sm font-medium text-green-700">Total Prod. Factura</p>
-        <p class="text-2xl font-bold text-green-600">{{ totalProductosFactura }}</p>
-      </div>
-      <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-        <p class="text-sm font-medium text-emerald-700">Monto Factura</p>
-        <p class="text-3xl font-bold text-emerald-600">
-          C$ {{ totalMontoFactura | number:'1.2-2' }}
-        </p>
-      </div>
+    <div class="bg-gray-50 rounded-lg p-4">
+      <p class="text-sm font-medium text-gray-600">Cliente</p>
+      <p class="text-2xl font-bold text-gray-900">{{ clienteNombre }}</p>
     </div>
-    
-    <!-- Additional totals row -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-      <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
-        <p class="text-sm font-medium text-purple-700">Total Monto Orden</p>
-        <p class="text-2xl font-bold text-purple-600">C$ {{ totalMontoOrden | number:'1.2-2' }}</p>
-      </div>
-      <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-        <p class="text-sm font-medium text-emerald-700">Monto Factura</p>
-        <p class="text-2xl font-bold text-emerald-600">C$ {{ totalMontoFactura | number:'1.2-2' }}</p>
-      </div>
-      <div class="bg-red-50 rounded-lg p-4 border border-red-200">
-        <p class="text-sm font-medium text-red-700">Saldo Pendiente</p>
-        <p class="text-3xl font-bold text-red-600">
-          C$ {{ saldoPendiente | number:'1.2-2' }}
-        </p>
-      </div>
-    </div>
+  </div>
 
   <!-- Tabla de detalles listos para facturar -->
   <div class="bg-white shadow-xl rounded-xl overflow-hidden">
@@ -82,6 +49,31 @@
             <td class="px-6 py-4 text-sm text-gray-600">{{ d.trabajadorEntrega || '-' }}</td>
           </tr>
         </tbody>
+        <tfoot class="bg-slate-100 border-t-4 border-slate-300">
+          <tr>
+            <td class="px-6 py-5 text-sm font-extrabold uppercase tracking-wide text-slate-700 bg-slate-200">Totales</td>
+            <td class="px-6 py-5 text-sm bg-blue-50 border-l border-slate-200">
+              <div class="text-xs font-semibold uppercase tracking-wide text-blue-700">Total Prod. Orden</div>
+              <div class="mt-1 text-lg font-extrabold text-blue-800">{{ totalProductosOrden }}</div>
+            </td>
+            <td class="px-6 py-5 text-sm bg-emerald-50 border-l border-slate-200">
+              <div class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Total Prod. Factura</div>
+              <div class="mt-1 text-lg font-extrabold text-emerald-800">{{ totalProductosFactura }}</div>
+            </td>
+            <td class="px-6 py-5 bg-slate-100 border-l border-slate-200"></td>
+            <td class="px-6 py-5 text-sm bg-purple-50 border-l border-slate-200">
+              <div class="text-xs font-semibold uppercase tracking-wide text-purple-700">Total Monto Orden</div>
+              <div class="mt-1 text-lg font-extrabold text-purple-800">C$ {{ totalMontoOrden | number:'1.2-2' }}</div>
+            </td>
+            <td class="px-6 py-5 text-sm bg-gradient-to-b from-emerald-50 to-red-50 border-l border-slate-200">
+              <div class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Monto Factura</div>
+              <div class="mt-1 text-lg font-extrabold text-emerald-800">C$ {{ totalMontoFactura | number:'1.2-2' }}</div>
+              <div class="mt-4 text-xs font-semibold uppercase tracking-wide text-red-700">Saldo Pendiente</div>
+              <div class="mt-1 text-lg font-extrabold text-red-800">C$ {{ saldoPendiente | number:'1.2-2' }}</div>
+            </td>
+            <td class="px-6 py-5 bg-slate-100 border-l border-slate-200"></td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   </div>
