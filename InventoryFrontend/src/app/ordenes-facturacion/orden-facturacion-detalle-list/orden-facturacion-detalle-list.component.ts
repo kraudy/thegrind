@@ -15,6 +15,7 @@ import { OrdenFacturacionDetalle } from '../orden-facturacion-detalle.model';
 
 import { OrdenPagoService } from '../../ordenes-pago/orden-pago.service';
 import { OrdenPago } from '../../ordenes-pago/orden-pago.model';
+import { FacturaService } from '../../facturas/factura.service';
 
 @Component({
   selector: 'app-orden-facturacion-detalle-list',
@@ -44,6 +45,7 @@ export class OrdenFacturacionDetalleListComponent implements OnInit, OnDestroy {
 
   // ==================== Modal Saldo ====================
   showRegistrarSaldoModal = false;
+  creatingFactura = false;
 
   nuevoPago = {
     monto: 0,
@@ -61,7 +63,8 @@ export class OrdenFacturacionDetalleListComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService, 
     private toastService: ToastService, 
     private cd: ChangeDetectorRef,
-    private ordenPagoService: OrdenPagoService
+    private ordenPagoService: OrdenPagoService,
+    private facturaService: FacturaService
   ) {}
 
   ngOnInit() {
@@ -183,10 +186,38 @@ export class OrdenFacturacionDetalleListComponent implements OnInit, OnDestroy {
   }
 
   generarFactura(): void {
-    if (confirm('¿Desea generar la factura con las cantidades entregadas?')) {
-      alert('✅ Factura generada (backend pendiente). Los datos ya están listos.');
-      this.loadAll();
+    if (this.creatingFactura || !this.idOrden) {
+      return;
     }
+
+    if (!confirm('¿Desea generar la factura con las cantidades entregadas?')) {
+      return;
+    }
+
+    this.creatingFactura = true;
+    this.facturaService.createFromOrden(this.idOrden).subscribe({
+      next: (factura) => {
+        this.creatingFactura = false;
+        this.toastService.showToast(
+          'success',
+          'Factura creada',
+          `Se creó la factura #${factura.id} para la orden #${this.idOrden}.`,
+          5000
+        );
+        this.loadAll();
+      },
+      error: (err) => {
+        console.error('Error creando factura', err);
+        this.creatingFactura = false;
+        this.toastService.showToast(
+          'error',
+          'Error al crear factura',
+          err?.error?.message || 'No se pudo crear la factura para esta orden.',
+          7000
+        );
+        this.cd.detectChanges();
+      }
+    });
   }
 
   goBack(): void {

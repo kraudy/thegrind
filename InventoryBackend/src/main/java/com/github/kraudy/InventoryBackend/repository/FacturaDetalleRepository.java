@@ -10,10 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.github.kraudy.InventoryBackend.dto.FacturaDTO;
 import com.github.kraudy.InventoryBackend.dto.FacturaDetalleDTO;
-import com.github.kraudy.InventoryBackend.dto.OrdenDTO;
-import com.github.kraudy.InventoryBackend.dto.OrdenDetalleDTO;
 import com.github.kraudy.InventoryBackend.model.FacturaDetalle;
 import com.github.kraudy.InventoryBackend.model.FacturaDetallePK;
 
@@ -53,17 +50,25 @@ public interface FacturaDetalleRepository extends JpaRepository<FacturaDetalle, 
         id_factura, id_detalle, 
         id_orden_detalle, id_producto, precio, cantidad, subtotal, usuario_creacion, fecha_creacion 
     ) VALUES (
-        :facturaDetalle.idFactura, (SELECT COALESCE(MAX(id_detalle),0) + 1 FROM factura_detalle WHERE id_factura = :facturaDetalle.idFactura),
-        :facturaDetalle.idOrdenDetalle, :facturaDetalle.idProducto,
-        :facturaDetalle.precio, :facturaDetalle.cantidad, :facturaDetalle.subtotal,
-        :facturaDetalle.usuarioCreacion, CURRENT_TIMESTAMP
+        :idFactura, (SELECT COALESCE(MAX(id_detalle),0) + 1 FROM factura_detalle WHERE id_factura = :idFactura),
+        :idOrdenDetalle, :idProducto,
+        :precio, :cantidad, :subtotal,
+        :usuarioCreacion, CURRENT_TIMESTAMP
     )
   """, nativeQuery = true)
-  void insertDetalle(@Param("facturaDetalle") FacturaDetalle facturaDetalle);
+  void insertDetalle(
+    @Param("idFactura") Long idFactura,
+    @Param("idOrdenDetalle") Long idOrdenDetalle,
+    @Param("idProducto") Long idProducto,
+    @Param("precio") BigDecimal precio,
+    @Param("cantidad") int cantidad,
+    @Param("subtotal") BigDecimal subtotal,
+    @Param("usuarioCreacion") String usuarioCreacion
+  );
 
 
   @Query(value = """
-    factura_total AS (
+    WITH factura_total AS (
         SELECT 
             det.id_orden,
             SUM(det.precio_unitario * COALESCE(trabajoEntregado.cantidad_trabajada, 0)) AS totalFactura

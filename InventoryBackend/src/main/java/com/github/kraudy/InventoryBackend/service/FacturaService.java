@@ -1,11 +1,11 @@
 package com.github.kraudy.InventoryBackend.service;
 
-import com.github.kraudy.InventoryBackend.dto.OrdenDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.TrabajoEntregadoDTO;
 import com.github.kraudy.InventoryBackend.model.*;
 import com.github.kraudy.InventoryBackend.repository.*;
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,24 +13,18 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
-public class FacturaDetalleService {
-  private final OrdenCalendarioRepository ordenCalendarioRepository;
-
+public class FacturaService {
   private final FacturaDetalleRepository facturaDetalleRepository;
   private final CurrentUserService currentUserService;
   private final FacturaRepository facturaRepository;
 
   private final OrdenTrabajoRepository ordenTrabajoRepository;
   private final OrdenRepository ordenRepository;
-  private final OrdenDetalleRepository ordenDetalleRepository;
-  private final ProductoRepository productoRepository;
-  private final ProductoTipoEstadoRepository productoTipoEstadoRepository;
-  private final OrdenSeguimientoRepository ordenSeguimientoRepository;
 
   private final NotificationService notificationService;
 
   @Transactional
-  public Factura crearDesdeOrden(Long idOrden) {
+  public Factura crearFactura(Long idOrden) {
     if (idOrden == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El ID del orden es obligatorio");
     }
@@ -39,6 +33,7 @@ public class FacturaDetalleService {
     Orden orden = ordenRepository.findById(idOrden)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Orden con id " + idOrden + " no encontrada"));
+
 
     //factura.setSoloFecha(factura.getFechaTrabajo().toLocalDate());
 
@@ -57,30 +52,30 @@ public class FacturaDetalleService {
     factura.setEstado(estadoFactura);
     // fechaCreacion se genera automaticamente
 
+    Factura facturaCreada = facturaRepository.save(factura);
+
     for (TrabajoEntregadoDTO trabajoEntregado : ordenTrabajoRepository.getTrabajoEntregado(orden.getId())) {
-
-
-      FacturaDetalle facturaDetalle = new FacturaDetalle();
-
-      facturaDetalle.setIdOrdenDetalle(trabajoEntregado.idOrdenDetalle());
-      facturaDetalle.setIdProducto(trabajoEntregado.idProducto());
-      facturaDetalle.setPrecio(trabajoEntregado.precio());
-
-      facturaDetalle.setCantidad(trabajoEntregado.cantidadEntregada());
-      facturaDetalle.setSubtotal(trabajoEntregado.subtotal());
-      facturaDetalle.setPrecio(trabajoEntregado.precio());
-      facturaDetalle.setUsuarioCreacion(currentUser);
-
-      // idDetalle se genera automáticamente en el SQL como el maximo + 1 para la factura dada, así que no lo seteamos aquí
-      facturaDetalleRepository.insertDetalle(facturaDetalle);
-      // fechaCreacion se obtiene automaticamente
+      // idDetalle se genera automáticamente en SQL para cada factura.
+      facturaDetalleRepository.insertDetalle(
+        facturaCreada.getId(),
+        trabajoEntregado.idOrdenDetalle(),
+        trabajoEntregado.idProducto(),
+        trabajoEntregado.precio(),
+        trabajoEntregado.cantidadEntregada(),
+        trabajoEntregado.subtotal(),
+        currentUser
+      );
 
     }
+
+    // Actualizamos estado de orden a "Facturado"
+    orden.setEstado("Facturado");
+    ordenRepository.save(orden);
 
     // Actualiza vista de facturaciones en frontend
     notificationService.notifyFacturasChanged();
 
-    return facturaRepository.save(factura);
+    return facturaCreada;
 
   }
 }

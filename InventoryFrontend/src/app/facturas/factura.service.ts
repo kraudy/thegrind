@@ -11,6 +11,10 @@ export class FacturaService {
 
   constructor(private http: HttpClient) {}
 
+  createFromOrden(idOrden: number): Observable<Factura> {
+    return this.http.post<Factura>(`${this.apiUrl}/${idOrden}`, {});
+  }
+
   getAllFiltered(searchTerm: string = '', estadoFilter: string = ''): Observable<Factura[]> {
     let params = new HttpParams();
 

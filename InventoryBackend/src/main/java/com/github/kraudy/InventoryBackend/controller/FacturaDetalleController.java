@@ -20,7 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import org.springframework.http.*;
 
-import com.github.kraudy.InventoryBackend.service.FacturaDetalleService;
+import com.github.kraudy.InventoryBackend.service.FacturaService;
 import com.github.kraudy.InventoryBackend.service.OrdenPdfService;
 
 import java.util.List;
@@ -40,7 +40,7 @@ public class FacturaDetalleController {
   private ProductoPrecioRepository productoPrecioRepository;
 
   @Autowired
-  private FacturaDetalleService facturaDetalleService;
+  private FacturaService facturaDetalleService;
 
   // Obtener todos los detalles de una factura específica
   @GetMapping("/{idFactura}")
@@ -75,19 +75,6 @@ public class FacturaDetalleController {
 
     FacturaDetallePK pk = new FacturaDetallePK(idFactura, idDetalle);
     return facturaDetalleRepository.findById(pk).orElse(null);
-  }
-  
-  // Crear factura desde orden
-  @PostMapping("/{idOrden}")
-  public void crearDesdeOrden(@PathVariable Long idOrden) {
-    
-    if (idOrden == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El ID del orden es obligatorio");
-    }
-
-    facturaDetalleService.crearDesdeOrden(idOrden);    
-
-    return;
   }
 
   // Eliminar un detalle

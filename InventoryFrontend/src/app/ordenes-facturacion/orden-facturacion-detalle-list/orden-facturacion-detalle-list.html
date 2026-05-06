@@ -10,16 +10,13 @@
       Volver
     </button>
 
-    <h1 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-bold text-gray-900 pointer-events-none">
-      Facturación Orden #{{ idOrden }}
-    </h1>
-  </div>
-
-  <!-- Resumen -->
-  <div class="bg-white shadow-xl rounded-xl p-8 mb-12" *ngIf="detalles.length > 0">
-    <div class="bg-gray-50 rounded-lg p-4">
-      <p class="text-sm font-medium text-gray-600">Cliente</p>
-      <p class="text-2xl font-bold text-gray-900">{{ clienteNombre }}</p>
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+      <h1 class="text-4xl font-bold text-gray-900">
+        Facturación Orden #{{ idOrden }}
+      </h1>
+      <p class="mt-2 text-2xl md:text-3xl font-semibold text-gray-600">
+        {{ clienteNombre }}
+      </p>
     </div>
   </div>
 
@@ -65,7 +62,7 @@
               <div class="text-xs font-semibold uppercase tracking-wide text-purple-700">Total Monto Orden</div>
               <div class="mt-1 text-lg font-extrabold text-purple-800">C$ {{ totalMontoOrden | number:'1.2-2' }}</div>
             </td>
-            <td class="px-6 py-5 text-sm bg-gradient-to-b from-emerald-50 to-red-50 border-l border-slate-200">
+            <td class="px-6 py-5 text-sm bg-linear-to-b from-emerald-50 to-red-50 border-l border-slate-200">
               <div class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Monto Factura</div>
               <div class="mt-1 text-lg font-extrabold text-emerald-800">C$ {{ totalMontoFactura | number:'1.2-2' }}</div>
               <div class="mt-4 text-xs font-semibold uppercase tracking-wide text-red-700">Saldo Pendiente</div>
@@ -147,11 +144,12 @@
   <!-- Botón Generar Factura -->
   <div class="flex justify-end mt-8">
     <button (click)="generarFactura()"
-            class="inline-flex items-center px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-semibold rounded-2xl shadow-xl transition transform hover:scale-105">
+            [disabled]="creatingFactura"
+            class="inline-flex items-center px-8 py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-lg font-semibold rounded-2xl shadow-xl transition transform hover:scale-105 disabled:hover:scale-100">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H3a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />
       </svg>
-      Generar Factura
+      {{ creatingFactura ? 'Generando Factura...' : 'Generar Factura' }}
     </button>
   </div>
 

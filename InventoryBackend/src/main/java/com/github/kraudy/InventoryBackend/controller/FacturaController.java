@@ -5,7 +5,13 @@ import com.github.kraudy.InventoryBackend.dto.FacturaDTO;
 import com.github.kraudy.InventoryBackend.model.Factura;
 
 import com.github.kraudy.InventoryBackend.repository.FacturaRepository;
+import com.github.kraudy.InventoryBackend.repository.OrdenSeguimientoRepository;
+import com.github.kraudy.InventoryBackend.service.FacturaService;
+import com.github.kraudy.InventoryBackend.service.OrdenSeguimientoService;
 
+import lombok.RequiredArgsConstructor;
+
+import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleFacturacionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,10 +23,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/facturas")
 @CrossOrigin(origins = "http://localhost:4200")  // Prevents Cors error. Allow Angular dev server
+@RequiredArgsConstructor
 public class FacturaController {
 
   @Autowired
   private FacturaRepository facturaRepository;
+
+  @Autowired
+  private OrdenSeguimientoRepository ordenSeguimientoRepository;
+
+  private final FacturaService facturaService;
 
 
   @GetMapping
@@ -33,12 +45,9 @@ public class FacturaController {
     return facturaRepository.obtenerFacturas(id, cliente, facturador, estado);
   }
 
-  @PostMapping
-  public Factura create(@RequestBody Factura factura) {
-    String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
-    factura.setUsuarioCreacion(currentUser);
-    
-    return facturaRepository.save(factura);
+  @PostMapping("/{idOrden}")
+  public Factura create(@PathVariable Long idOrden) {
+    return facturaService.crearFactura(idOrden);
   }
 
   @PutMapping("/{id}")
