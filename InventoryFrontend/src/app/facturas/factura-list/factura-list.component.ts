@@ -96,7 +96,11 @@ export class FacturaListComponent implements OnInit, OnDestroy {
   viewDetails(factura: Factura): void {
     this.router.navigate(['/facturas-detalle', factura.id, factura.clienteNombre], {
       queryParams: {
-        totalMontoOrden: factura.total
+        totalMontoFactura: factura.total,
+        idOrden: factura.idOrden,
+        estado: factura.estado,
+        usuarioCreacion: factura.usuarioCreacion,
+        fechaCreacion: factura.fechaCreacion
       }
     });
   }

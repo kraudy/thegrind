@@ -11,12 +11,12 @@ export class FacturaDetalleService {
 
   constructor(private http: HttpClient) {}
 
-  getById(id: number, detalle: number): Observable<FacturaDetalle[]> {
-    return this.http.get<FacturaDetalle[]>(`${this.apiUrl}/${id}/${detalle}`);
+  getByFactura(idFactura: number): Observable<FacturaDetalle[]> {
+    return this.http.get<FacturaDetalle[]>(`${this.apiUrl}/${idFactura}`);
   }
 
-  crearDesdeOrden(idOrden: number): Observable<FacturaDetalle> {
-    return this.http.post<FacturaDetalle>(`${this.apiUrl}/${idOrden}`, null, { responseType: 'json' });
+  getById(idFactura: number, idDetalle: number): Observable<FacturaDetalle> {
+    return this.http.get<FacturaDetalle>(`${this.apiUrl}/${idFactura}/${idDetalle}`);
   }
 
 }

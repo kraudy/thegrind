@@ -50,6 +50,7 @@ import { OrdenCostoListComponent } from './ordenes-costo/orden-costo-list/orden-
 import { OrdenCostoFormComponent } from './ordenes-costo/orden-costo-form/orden-costo-form.component';
 
 import { FacturaListComponent } from './facturas/factura-list/factura-list.component';
+import { FacturaDetalleListComponent } from './facturas/factura-detalle-list/factura-detalle-list.component';
 
 import { UsuarioListComponent } from './usuarios/usuario-list/usuario-list.component';
 import { UsuarioFormComponent } from './usuarios/usuario-form/usuario-form.component';
@@ -129,6 +130,8 @@ export const routes: Routes = [
 
   // Facturas
   { path: 'facturas', component: FacturaListComponent, canActivate: [authGuard] },
+  { path: 'facturas-detalle/:idFactura/:clienteNombre', component: FacturaDetalleListComponent, canActivate: [authGuard] },
+  { path: 'facturas-detalle/:idFactura', component: FacturaDetalleListComponent, canActivate: [authGuard] },
 
   // Usuarios
   { path: 'usuarios', component: UsuarioListComponent, canActivate: [authGuard] },

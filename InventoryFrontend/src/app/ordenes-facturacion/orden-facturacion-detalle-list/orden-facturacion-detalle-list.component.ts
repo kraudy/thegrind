@@ -204,7 +204,7 @@ export class OrdenFacturacionDetalleListComponent implements OnInit, OnDestroy {
           `Se creó la factura #${factura.id} para la orden #${this.idOrden}.`,
           5000
         );
-        this.loadAll();
+        this.router.navigate(['/ordenes-facturacion']);
       },
       error: (err) => {
         console.error('Error creando factura', err);
