@@ -8,12 +8,23 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface OrdenPagoRepository extends JpaRepository<OrdenPago, Long> {
 
     // All payments for a specific order
     List<OrdenPago> findByIdOrden(Long idOrden);
+
+    // All pending payments (for the approval screen)
+    @Query(value = """
+        SELECT 
+            SUM(COALESCE(op.monto, 0))
+
+        FROM orden_pago op
+        WHERE op.id_orden = :idOrden
+        """, nativeQuery = true)
+    BigDecimal getTotalPagado(@Param("idOrden") Long idOrden);
 
     // All pending payments (for the approval screen)
     @Query(value = """

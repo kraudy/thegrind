@@ -4,6 +4,7 @@ import com.github.kraudy.InventoryBackend.dto.OrdenPagoDTO;
 import com.github.kraudy.InventoryBackend.model.OrdenPago;
 import com.github.kraudy.InventoryBackend.repository.OrdenPagoRepository;
 import com.github.kraudy.InventoryBackend.service.NotificationService;
+import com.github.kraudy.InventoryBackend.service.OrdenPagoService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,17 +25,15 @@ public class OrdenPagoController {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private OrdenPagoService ordenPagoService;
+
     // Register a new advance payment on an order
     @PostMapping("/{idOrden}")
     public OrdenPago registrarPago(@PathVariable Long idOrden, @RequestBody OrdenPago pago) {
-        pago.setIdOrden(idOrden);
-        pago.setEstado("Pendiente");   //TODO: Set this as DEFAULT
 
-        OrdenPago saved = ordenPagoRepository.save(pago);
-
-        notificationService.notifyOrdenesPagoChanged();   // Notifica
-
-        return saved;
+      return ordenPagoService.registrarPago(idOrden, pago);
+      
     }
 
     // Get all payments for a specific order

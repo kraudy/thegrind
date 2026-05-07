@@ -52,8 +52,7 @@ export class OrdenFacturacionDetalleListComponent implements OnInit, OnDestroy {
     metodoPago: 'Efectivo',
     codigoReferencia: '',
     banco: '',
-    notas: '',
-    tipoPago: 'Saldo' as const
+    notas: ''
   };
 
   constructor(
@@ -133,8 +132,7 @@ export class OrdenFacturacionDetalleListComponent implements OnInit, OnDestroy {
       metodoPago: 'Efectivo',
       codigoReferencia: '',
       banco: '',
-      notas: '',
-      tipoPago: 'Saldo'
+      notas: ''
     };
     this.showRegistrarSaldoModal = true;
   }
@@ -148,17 +146,32 @@ export class OrdenFacturacionDetalleListComponent implements OnInit, OnDestroy {
 
   registrarSaldo() {
     if (!this.idOrden || this.nuevoPago.monto <= 0) {
-      alert('❌ El monto debe ser mayor a 0');
+      this.toastService.showToast(
+        'warning',
+        'Monto invalido',
+        'El monto debe ser mayor a 0.',
+        5000
+      );
       return;
     }
 
     if (this.nuevoPago.metodoPago === 'Transferencia') {
       if (!this.nuevoPago.codigoReferencia?.trim()) {
-        alert('❌ El código de referencia es obligatorio cuando el método es Transferencia.');
+        this.toastService.showToast(
+          'warning',
+          'Referencia requerida',
+          'El codigo de referencia es obligatorio cuando el metodo es Transferencia.',
+          5000
+        );
         return;
       }
       if (!this.nuevoPago.banco || this.nuevoPago.banco === '') {
-        alert('❌ Debe seleccionar un banco cuando el método es Transferencia.');
+        this.toastService.showToast(
+          'warning',
+          'Banco requerido',
+          'Debe seleccionar un banco cuando el metodo es Transferencia.',
+          5000
+        );
         return;
       }
     }
@@ -174,13 +187,20 @@ export class OrdenFacturacionDetalleListComponent implements OnInit, OnDestroy {
           `Se registró un pago de saldo por C$ ${this.nuevoPago.monto.toFixed(2)}`,
           5000
         );
-        //alert('✅ Pago de Saldo registrado correctamente.\nEl administrador debe aprobarlo.');
 
         this.loadAll();
       },
       error: (err) => {
         console.error('Error registrando saldo', err);
-        alert('No se pudo registrar el pago de saldo. Revisa la consola.');
+
+        const backendMessage = err?.error?.message || err?.message || 'No se pudo registrar el pago de saldo.';
+        this.toastService.showToast(
+          'error',
+          'Error al registrar pago',
+          backendMessage,
+          7000
+        );
+        this.cd.detectChanges();
       }
     });
   }
