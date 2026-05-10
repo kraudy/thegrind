@@ -56,6 +56,10 @@ public class OrdenPagoService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El pago a orden facturada debe hacerse a través de la factura, no de la orden");
     }
 
+    if (pago.getMetodoPago().equals("Transferencia")) {
+      validarReferenciaPago(pago.getCodigoReferencia());
+    }
+
     BigDecimal total = new BigDecimal(0.00);
 
     /* Determina el total segun el estado de la orden */
@@ -84,6 +88,12 @@ public class OrdenPagoService {
     notificationService.notifyOrdenesPagoChanged();   // Notifica
 
     return saved;
+  }
+
+  private void validarReferenciaPago(String codigoReferencia) {
+    if (ordenPagoRepository.validarReferenciaTransferencia(codigoReferencia)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La referencia del pago ya ha sido utilizada");
+    }
   }
 
 }

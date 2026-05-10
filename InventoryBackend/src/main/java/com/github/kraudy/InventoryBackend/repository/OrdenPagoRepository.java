@@ -16,6 +16,16 @@ public interface OrdenPagoRepository extends JpaRepository<OrdenPago, Long> {
     // All payments for a specific order
     List<OrdenPago> findByIdOrden(Long idOrden);
 
+    @Query(value = """
+        SELECT 
+            CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+
+        FROM orden_pago op
+        WHERE op.metodo_pago = 'Transferencia' AND op.codigo_referencia = :codigoReferencia
+        LIMIT 1
+        """, nativeQuery = true)
+    Boolean validarReferenciaTransferencia(@Param("codigoReferencia") String codigoReferencia);
+
     // All pending payments (for the approval screen)
     @Query(value = """
         SELECT 

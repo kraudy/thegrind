@@ -41,8 +41,7 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges, OnDestroy {
     metodoPago: 'Efectivo',
     codigoReferencia: '',
     banco: '',
-    notas: '',
-    tipoPago: 'Adelanto'  // default to Adelanto, but could be selectable in the future
+    notas: ''
   };
 
   // Real-time WebSocket support
@@ -177,7 +176,7 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   openRegistrarAdelantoModal() {
-    this.nuevoPago = { monto: 0, metodoPago: 'Efectivo', codigoReferencia: '', banco: '', notas: '', tipoPago: 'Adelanto' };
+    this.nuevoPago = { monto: 0, metodoPago: 'Efectivo', codigoReferencia: '', banco: '', notas: '' };
     this.showRegistrarAdelantoModal = true;
   }
 
@@ -216,13 +215,34 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges, OnDestroy {
       },
       error: (err) => {
         console.error('Error registrando adelanto', err);
+        const backendMessage = this.extractBackendErrorMessage(err);
         this.toastService.showToast(
           'error',
           'Error al registrar pago',
-          `No se pudo registrar el pago de C$ ${this.nuevoPago.monto.toFixed(2)}`
+          backendMessage
+            ? `No se pudo registrar el pago de C$ ${this.nuevoPago.monto.toFixed(2)}. ${backendMessage}`
+            : `No se pudo registrar el pago de C$ ${this.nuevoPago.monto.toFixed(2)}`
         );
       }
     });
+  }
+
+  private extractBackendErrorMessage(err: any): string {
+    const errorBody = err?.error;
+
+    if (typeof errorBody === 'string' && errorBody.trim()) {
+      return errorBody.trim();
+    }
+
+    if (typeof errorBody?.message === 'string' && errorBody.message.trim()) {
+      return errorBody.message.trim();
+    }
+
+    if (typeof err?.message === 'string' && err.message.trim()) {
+      return err.message.trim();
+    }
+
+    return '';
   }
 
   downloadPdf(): void {

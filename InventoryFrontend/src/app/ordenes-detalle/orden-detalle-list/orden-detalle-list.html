@@ -234,14 +234,6 @@
             </select>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium mb-1">Tipo de Pago</label>
-            <select [(ngModel)]="nuevoPago.tipoPago" class="w-full px-4 py-3 border rounded-xl">
-              <option value="Adelanto">Adelanto</option>
-              <option value="Saldo">Saldo</option>
-            </select>
-          </div>
-
           <!-- Código de referencia -->
           <div *ngIf="nuevoPago.metodoPago === 'Transferencia'">
             <label class="block text-sm font-medium mb-1">
