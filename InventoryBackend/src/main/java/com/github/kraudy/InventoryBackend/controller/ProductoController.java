@@ -1,5 +1,7 @@
 package com.github.kraudy.InventoryBackend.controller;
 
+import com.github.kraudy.InventoryBackend.dto.ProductoBulkPricingRequest;
+import com.github.kraudy.InventoryBackend.dto.ProductoBulkPricingResponse;
 import com.github.kraudy.InventoryBackend.dto.ProductoBulkRequest;
 import com.github.kraudy.InventoryBackend.dto.ProductoBulkResponse;
 import com.github.kraudy.InventoryBackend.dto.ProductoConfigDTO;
@@ -73,6 +75,11 @@ public class ProductoController {
     @PostMapping(value = "/bulk", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ProductoBulkResponse createBulk(@RequestBody ProductoBulkRequest request) {
         return productoService.createBulk(request);
+    }
+
+    @PostMapping(value = "/bulk-pricing", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ProductoBulkPricingResponse applyBulkPricing(@RequestBody ProductoBulkPricingRequest request) {
+        return productoService.applyBulkPricing(request);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

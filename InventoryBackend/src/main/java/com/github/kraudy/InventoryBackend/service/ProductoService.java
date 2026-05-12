@@ -1,11 +1,15 @@
 package com.github.kraudy.InventoryBackend.service;
 
+import com.github.kraudy.InventoryBackend.dto.ProductoBulkPricingRequest;
+import com.github.kraudy.InventoryBackend.dto.ProductoBulkPricingResponse;
 import com.github.kraudy.InventoryBackend.dto.ProductoBulkRequest;
 import com.github.kraudy.InventoryBackend.dto.ProductoBulkResponse;
 import com.github.kraudy.InventoryBackend.dto.ProductoConfigDTO;
 import com.github.kraudy.InventoryBackend.model.Producto;
 import com.github.kraudy.InventoryBackend.model.ProductoCosto;
+import com.github.kraudy.InventoryBackend.model.ProductoCostoPK;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecio;
+import com.github.kraudy.InventoryBackend.model.ProductoPrecioPK;
 import com.github.kraudy.InventoryBackend.repository.ProductoCostoRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoPrecioRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoRepository;
@@ -301,5 +305,144 @@ public class ProductoService {
         }
 
         return new ProductoBulkResponse(created, skipped, totalRequested, created.size());
+    }
+
+    /**
+     * Apply a list of precio/costo operations to every producto in the given set.
+     *
+     * Each (producto, operation) outcome is tracked independently — invalid /
+     * not-found / duplicate operations are reported in the response without
+     * rolling back the rest of the batch.
+     */
+    @Transactional
+    public ProductoBulkPricingResponse applyBulkPricing(ProductoBulkPricingRequest request) {
+        if (request == null
+                || request.getProductoIds() == null || request.getProductoIds().isEmpty()
+                || request.getOperations() == null || request.getOperations().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Debe seleccionar al menos un producto y una operación");
+        }
+
+        String currentUser = currentUserService.getCurrentUser();
+        List<ProductoBulkPricingResponse.Skipped> skipped = new ArrayList<>();
+        int applied = 0;
+
+        for (Long productoId : request.getProductoIds()) {
+            if (productoId == null) continue;
+            if (!productoRepository.existsById(productoId)) {
+                for (ProductoBulkPricingRequest.Operation op : request.getOperations()) {
+                    skipped.add(new ProductoBulkPricingResponse.Skipped(
+                            productoId, op.getType().name(), "-", "producto_not_found"));
+                }
+                continue;
+            }
+
+            for (ProductoBulkPricingRequest.Operation op : request.getOperations()) {
+                try {
+                    switch (op.getType()) {
+                        case ADD_PRECIO -> {
+                            if (op.getPrecio() == null) {
+                                skipped.add(new ProductoBulkPricingResponse.Skipped(
+                                        productoId, op.getType().name(), "-", "invalid"));
+                                continue;
+                            }
+                            ProductoPrecioPK pk = new ProductoPrecioPK(productoId, op.getPrecio());
+                            if (productoPrecioRepository.existsById(pk)) {
+                                skipped.add(new ProductoBulkPricingResponse.Skipped(
+                                        productoId, op.getType().name(),
+                                        op.getPrecio().toPlainString(), "already_exists"));
+                                continue;
+                            }
+                            ProductoPrecio pp = new ProductoPrecio();
+                            pp.setProductoId(productoId);
+                            pp.setPrecio(op.getPrecio());
+                            pp.setDescripcion(op.getDescripcion() == null ? "" : op.getDescripcion());
+                            pp.setCantidadRequerida(op.getCantidadRequerida() == null ? 0 : op.getCantidadRequerida());
+                            pp.setActivo(true);
+                            pp.setUsuarioCreacion(currentUser);
+                            pp.setUsuarioModificacion(currentUser);
+                            productoPrecioRepository.save(pp);
+                            applied++;
+                        }
+                        case REMOVE_PRECIO -> {
+                            if (op.getPrecio() == null) {
+                                skipped.add(new ProductoBulkPricingResponse.Skipped(
+                                        productoId, op.getType().name(), "-", "invalid"));
+                                continue;
+                            }
+                            ProductoPrecioPK pk = new ProductoPrecioPK(productoId, op.getPrecio());
+                            if (!productoPrecioRepository.existsById(pk)) {
+                                skipped.add(new ProductoBulkPricingResponse.Skipped(
+                                        productoId, op.getType().name(),
+                                        op.getPrecio().toPlainString(), "not_found"));
+                                continue;
+                            }
+                            productoPrecioRepository.deleteById(pk);
+                            applied++;
+                        }
+                        case UPSERT_COSTO -> {
+                            if (op.getTipoCosto() == null || op.getTipoCosto().isBlank()
+                                    || op.getCosto() == null) {
+                                skipped.add(new ProductoBulkPricingResponse.Skipped(
+                                        productoId, op.getType().name(),
+                                        op.getTipoCosto(), "invalid"));
+                                continue;
+                            }
+                            ProductoCostoPK pk = new ProductoCostoPK(productoId, op.getTipoCosto());
+                            ProductoCosto pc = productoCostoRepository.findById(pk).orElse(null);
+                            if (pc == null) {
+                                pc = new ProductoCosto();
+                                pc.setProductoId(productoId);
+                                pc.setTipoCosto(op.getTipoCosto());
+                                pc.setUsuarioCreacion(currentUser);
+                            }
+                            pc.setCosto(op.getCosto());
+                            if (op.getDescripcion() != null) {
+                                pc.setDescripcion(op.getDescripcion());
+                            } else if (pc.getDescripcion() == null) {
+                                pc.setDescripcion("");
+                            }
+                            if (op.getCantidadRequerida() != null) {
+                                pc.setCantidadRequerida(op.getCantidadRequerida());
+                            }
+                            pc.setActivo(true);
+                            pc.setUsuarioModificacion(currentUser);
+                            productoCostoRepository.save(pc);
+                            applied++;
+                        }
+                        case REMOVE_COSTO -> {
+                            if (op.getTipoCosto() == null || op.getTipoCosto().isBlank()) {
+                                skipped.add(new ProductoBulkPricingResponse.Skipped(
+                                        productoId, op.getType().name(), "-", "invalid"));
+                                continue;
+                            }
+                            ProductoCostoPK pk = new ProductoCostoPK(productoId, op.getTipoCosto());
+                            if (!productoCostoRepository.existsById(pk)) {
+                                skipped.add(new ProductoBulkPricingResponse.Skipped(
+                                        productoId, op.getType().name(),
+                                        op.getTipoCosto(), "not_found"));
+                                continue;
+                            }
+                            productoCostoRepository.deleteById(pk);
+                            applied++;
+                        }
+                    }
+                } catch (Exception e) {
+                    skipped.add(new ProductoBulkPricingResponse.Skipped(
+                            productoId, op.getType().name(),
+                            op.getPrecio() != null ? op.getPrecio().toPlainString() : op.getTipoCosto(),
+                            "error"));
+                }
+            }
+        }
+
+        int totalOps = request.getProductoIds().size() * request.getOperations().size();
+        return new ProductoBulkPricingResponse(
+                request.getProductoIds().size(),
+                request.getOperations().size(),
+                applied,
+                totalOps - applied,
+                skipped
+        );
     }
 }

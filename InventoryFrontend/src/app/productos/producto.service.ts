@@ -42,6 +42,41 @@ export interface ProductoBulkResponse {
   totalCreated: number;
 }
 
+export type ProductoBulkPricingOpType =
+  | 'ADD_PRECIO'
+  | 'REMOVE_PRECIO'
+  | 'UPSERT_COSTO'
+  | 'REMOVE_COSTO';
+
+export interface ProductoBulkPricingOperation {
+  type: ProductoBulkPricingOpType;
+  precio?: number;
+  tipoCosto?: string;
+  costo?: number;
+  descripcion?: string;
+  cantidadRequerida?: number;
+}
+
+export interface ProductoBulkPricingRequest {
+  productoIds: number[];
+  operations: ProductoBulkPricingOperation[];
+}
+
+export interface ProductoBulkPricingSkipped {
+  productoId: number;
+  opType: string;
+  detalle: string;
+  reason: string;
+}
+
+export interface ProductoBulkPricingResponse {
+  totalProductos: number;
+  totalOperaciones: number;
+  aplicadas: number;
+  omitidas: number;
+  skipped: ProductoBulkPricingSkipped[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -62,6 +97,10 @@ export class ProductoService {
 
   createBulk(payload: ProductoBulkRequest): Observable<ProductoBulkResponse> {
     return this.http.post<ProductoBulkResponse>(`${this.apiUrl}/bulk`, payload);
+  }
+
+  applyBulkPricing(payload: ProductoBulkPricingRequest): Observable<ProductoBulkPricingResponse> {
+    return this.http.post<ProductoBulkPricingResponse>(`${this.apiUrl}/bulk-pricing`, payload);
   }
 
   // ✅ NEW: accepts FormData for image upload
