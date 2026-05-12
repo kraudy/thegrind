@@ -1,5 +1,7 @@
 package com.github.kraudy.InventoryBackend.controller;
 
+import com.github.kraudy.InventoryBackend.dto.ProductoBulkRequest;
+import com.github.kraudy.InventoryBackend.dto.ProductoBulkResponse;
 import com.github.kraudy.InventoryBackend.dto.ProductoConfigDTO;
 import com.github.kraudy.InventoryBackend.model.Producto;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecio;
@@ -66,6 +68,11 @@ public class ProductoController {
             @RequestPart("producto") Producto product,
             @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
         return productoService.create(product, imagen);
+    }
+
+    @PostMapping(value = "/bulk", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ProductoBulkResponse createBulk(@RequestBody ProductoBulkRequest request) {
+        return productoService.createBulk(request);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

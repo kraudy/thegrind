@@ -5,6 +5,7 @@ import { HomeComponent } from './home/home/home.component';
 
 import { ProductoListComponent } from './productos/producto-list/producto-list.component';
 import { ProductoFormComponent } from './productos/producto-form/producto-form.component';
+import { ProductoBulkFormComponent } from './productos/producto-bulk-form/producto-bulk-form.component';
 
 import { OrdenListComponent } from './ordenes/orden-list/orden-list.component';
 import { OrdenFormComponent } from './ordenes/orden-form/orden-form.component';
@@ -66,6 +67,7 @@ export const routes: Routes = [
 
   { path: 'productos', component: ProductoListComponent, canActivate: [authGuard] },
   { path: 'productos/new', component: ProductoFormComponent, canActivate: [authGuard] },
+  { path: 'productos/bulk', component: ProductoBulkFormComponent, canActivate: [authGuard] },
   { path: 'productos/:id/edit', component: ProductoFormComponent, canActivate: [authGuard] },
 
   { path: 'productos-detalle/:id', component: ProductoDetalleComponent, canActivate: [authGuard] },

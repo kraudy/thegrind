@@ -3,6 +3,45 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Producto } from './producto.model';
 
+export interface ProductoBulkPrecioItem {
+  precio: number;
+  descripcion?: string;
+  cantidadRequerida?: number;
+}
+
+export interface ProductoBulkCostoItem {
+  tipoCosto: string;
+  costo: number;
+  descripcion?: string;
+  cantidadRequerida?: number;
+}
+
+export interface ProductoBulkRequest {
+  tipoProducto: string;
+  subTipoProducto: string;
+  modeloProducto: string;
+  medidas: string[];
+  colores: string[];
+  nombre: string;
+  descripcion?: string;
+  activo?: boolean;
+  precios: ProductoBulkPrecioItem[];
+  costos: ProductoBulkCostoItem[];
+}
+
+export interface ProductoBulkSkipped {
+  medida: string;
+  color: string;
+  reason: 'invalid_combination' | 'already_exists' | string;
+}
+
+export interface ProductoBulkResponse {
+  created: Producto[];
+  skipped: ProductoBulkSkipped[];
+  totalRequested: number;
+  totalCreated: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -19,6 +58,10 @@ export class ProductoService {
 
   create(formData: FormData): Observable<Producto> {
     return this.http.post<Producto>(this.apiUrl, formData);
+  }
+
+  createBulk(payload: ProductoBulkRequest): Observable<ProductoBulkResponse> {
+    return this.http.post<ProductoBulkResponse>(`${this.apiUrl}/bulk`, payload);
   }
 
   // ✅ NEW: accepts FormData for image upload

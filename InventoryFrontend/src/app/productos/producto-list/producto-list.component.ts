@@ -66,8 +66,44 @@ export class ProductoListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.restoreFilters();
     this.loadTipos();
     this.refreshConfig(); // ← initial load of ALL valid attribute combinations
+  }
+
+  private readonly FILTERS_KEY = 'productoList.filters';
+
+  private restoreFilters(): void {
+    try {
+      const raw = sessionStorage.getItem(this.FILTERS_KEY);
+      if (!raw) return;
+      const f = JSON.parse(raw);
+      this.searchTerm = f.searchTerm ?? '';
+      this.selectedTipo = f.selectedTipo ?? '';
+      this.selectedSubTipo = f.selectedSubTipo ?? '';
+      this.selectedMedida = f.selectedMedida ?? '';
+      this.selectedModelo = f.selectedModelo ?? '';
+      this.selectedColor = f.selectedColor ?? '';
+      this.sinPrecio = !!f.sinPrecio;
+    } catch {
+      /* ignore corrupted state */
+    }
+  }
+
+  private persistFilters(): void {
+    try {
+      sessionStorage.setItem(this.FILTERS_KEY, JSON.stringify({
+        searchTerm: this.searchTerm,
+        selectedTipo: this.selectedTipo,
+        selectedSubTipo: this.selectedSubTipo,
+        selectedMedida: this.selectedMedida,
+        selectedModelo: this.selectedModelo,
+        selectedColor: this.selectedColor,
+        sinPrecio: this.sinPrecio,
+      }));
+    } catch {
+      /* ignore quota errors */
+    }
   }
  
   // Load list (unchanged – now triggered by refreshConfig)
@@ -102,6 +138,7 @@ export class ProductoListComponent implements OnInit {
       next: (data) => {
         this.productos = data || [];
         this.loading = false;
+        this.persistFilters();
         this.cd.detectChanges();
       },
       error: (err) => {
@@ -205,6 +242,7 @@ export class ProductoListComponent implements OnInit {
     this.selectedModelo = '';
     this.selectedColor = '';   
     this.sinPrecio = false;
+    try { sessionStorage.removeItem(this.FILTERS_KEY); } catch { /* ignore */ }
     this.refreshConfig();   // ← uses the new dynamic logic
   }
 
