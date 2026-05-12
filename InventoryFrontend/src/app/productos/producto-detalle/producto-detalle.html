@@ -61,15 +61,23 @@
       </div>
     </div>
 
-    <div class="mt-8 pt-6 border-t flex justify-between items-center">
-      <a [routerLink]="['/productos', producto?.id, 'edit']"
-         class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg">
-        ✏️ Editar Producto
-      </a>
-      <span class="px-4 py-2 rounded-full text-sm font-medium"
-            [ngClass]="producto?.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
-        {{ producto?.activo ? 'Activo' : 'Inactivo' }}
-      </span>
+    <div class="mt-8 pt-6 border-t">
+      <div class="flex justify-between items-center mb-4">
+        <a [routerLink]="['/productos', producto?.id, 'edit']"
+           class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg">
+          ✏️ Editar Producto
+        </a>
+        <button (click)="deleteProducto()"
+                class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg">
+          🗑️ Eliminar Producto
+        </button>
+      </div>
+      <div class="flex justify-center">
+        <span class="px-4 py-2 rounded-full text-sm font-medium"
+              [ngClass]="producto?.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+          {{ producto?.activo ? 'Activo' : 'Inactivo' }}
+        </span>
+      </div>
     </div>
   </div>
 

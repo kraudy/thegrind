@@ -5,8 +5,11 @@ import com.github.kraudy.InventoryBackend.dto.ProductoBulkPricingResponse;
 import com.github.kraudy.InventoryBackend.dto.ProductoBulkRequest;
 import com.github.kraudy.InventoryBackend.dto.ProductoBulkResponse;
 import com.github.kraudy.InventoryBackend.dto.ProductoConfigDTO;
+import com.github.kraudy.InventoryBackend.dto.ProductoListDTO;
 import com.github.kraudy.InventoryBackend.model.Producto;
+import com.github.kraudy.InventoryBackend.model.ProductoCosto;
 import com.github.kraudy.InventoryBackend.model.ProductoPrecio;
+import com.github.kraudy.InventoryBackend.repository.ProductoCostoRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoPrecioRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoRepository;
 import com.github.kraudy.InventoryBackend.service.ProductoService;
@@ -17,7 +20,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.http.MediaType;
 
 @RestController
@@ -33,10 +39,13 @@ public class ProductoController {
     private ProductoPrecioRepository productoPrecioRepository;
 
     @Autowired
+    private ProductoCostoRepository productoCostoRepository;
+
+    @Autowired
     private ProductoService productoService; 
 
     @GetMapping
-    public List<Producto> getAll(
+    public List<ProductoListDTO> getAll(
       @RequestParam(required = false) Long id,
       @RequestParam(required = false) String nombre,
       @RequestParam(required = false) String tipo,
@@ -46,7 +55,34 @@ public class ProductoController {
       @RequestParam(required = false) String color,
       @RequestParam(required = false) Boolean sinPrecio
     ) {
-        return productoRepository.obtenerProductos(id, nombre, tipo, subTipo, medida, modelo, color, sinPrecio);
+        List<Producto> productos = productoRepository.obtenerProductos(id, nombre, tipo, subTipo, medida, modelo, color, sinPrecio);
+        if (productos.isEmpty()) return List.of();
+
+        List<Long> ids = productos.stream().map(Producto::getId).toList();
+
+        // Bulk-fetch precios & costos in one query each — avoids N+1.
+        Map<Long, List<ProductoListDTO.PrecioMini>> preciosByProducto = productoPrecioRepository
+            .findActiveByProductoIdIn(ids).stream()
+            .collect(Collectors.groupingBy(
+                ProductoPrecio::getProductoId,
+                Collectors.mapping(
+                    pp -> new ProductoListDTO.PrecioMini(pp.getPrecio(), pp.getDescripcion(), pp.getCantidadRequerida()),
+                    Collectors.toList())));
+
+        Map<Long, List<ProductoListDTO.CostoMini>> costosByProducto = productoCostoRepository
+            .findActiveByProductoIdIn(ids).stream()
+            .collect(Collectors.groupingBy(
+                ProductoCosto::getProductoId,
+                Collectors.mapping(
+                    pc -> new ProductoListDTO.CostoMini(pc.getTipoCosto(), pc.getCosto()),
+                    Collectors.toList())));
+
+        return productos.stream()
+            .map(p -> new ProductoListDTO(
+                p,
+                preciosByProducto.getOrDefault(p.getId(), Collections.emptyList()),
+                costosByProducto.getOrDefault(p.getId(), Collections.emptyList())))
+            .toList();
     }
 
     @GetMapping("/config")

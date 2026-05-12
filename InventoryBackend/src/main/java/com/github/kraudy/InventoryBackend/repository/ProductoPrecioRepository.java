@@ -36,4 +36,15 @@ public interface ProductoPrecioRepository extends JpaRepository<ProductoPrecio, 
       WHERE pp.producto_id = :idProducto
       """, nativeQuery = true)
     List<ProductoPrecio> obtenerPreciosProducto(@Param("idProducto") Long idProducto);
+
+    /**
+     * Bulk fetch of all active precios for the given product ids; used by the
+     * catalog list endpoint to embed pricing per row without N+1 queries.
+     */
+    @Query("""
+      SELECT p FROM ProductoPrecio p
+      WHERE p.activo = true AND p.productoId IN :productoIds
+      ORDER BY p.productoId, p.precio DESC
+      """)
+    List<ProductoPrecio> findActiveByProductoIdIn(@Param("productoIds") List<Long> productoIds);
 }

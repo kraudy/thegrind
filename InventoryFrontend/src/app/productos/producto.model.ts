@@ -1,3 +1,14 @@
+export interface ProductoPrecioMini {
+  precio: number;
+  descripcion: string;
+  cantidadRequerida: number;
+}
+
+export interface ProductoCostoMini {
+  tipoCosto: string;
+  costo: number;
+}
+
 export interface Producto {
   id: number;
   tipoProducto: string;
@@ -13,4 +24,7 @@ export interface Producto {
   usuarioModificacion: string;
   imagen: string;
   activo: boolean;
+  // Embedded by GET /api/productos for the catalog list view.
+  precios?: ProductoPrecioMini[];
+  costos?: ProductoCostoMini[];
 }

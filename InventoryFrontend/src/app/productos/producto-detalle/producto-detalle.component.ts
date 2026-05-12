@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { ProductoService } from '../producto.service';
 import { Producto } from '../producto.model';
@@ -27,6 +27,7 @@ export class ProductoDetalleComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private productoService: ProductoService,
     private precioService: ProductoPrecioService,
     private costoService: ProductoCostoService,
@@ -100,6 +101,29 @@ export class ProductoDetalleComponent implements OnInit {
         },
       });
     }
+  }
+
+  // Producto
+  deleteProducto(): void {
+    if (!this.producto?.id) return;
+    if (!confirm(`¿Seguro que deseas eliminar el producto "${this.producto.nombre}"? Esto también eliminará todos sus precios y costos.`)) return;
+
+    const id = this.producto.id;
+    this.productoService.delete(id).subscribe({
+      next: () => {
+        this.toastService.showToast('warning', 'Producto eliminado', 'El producto ha sido eliminado correctamente.', 4000);
+        this.router.navigate(['/productos']);
+      },
+      error: (err) => {
+        console.error('Error eliminando producto', err);
+        this.toastService.showToast(
+          'error',
+          'Error al eliminar',
+          err?.error?.message || 'No se pudo eliminar el producto.',
+          6000
+        );
+      },
+    });
   }
 
 }
