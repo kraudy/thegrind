@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnChanges, OnInit, ChangeDetectorRef } from '@angular/core';
 
 import { CommonModule, Location  } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ClienteService } from '../cliente.service';
@@ -94,13 +94,24 @@ export class ClienteFormComponent implements OnChanges, OnInit{
     };
   }
 
-  onSubmit(): void {
+  onSubmit(form?: NgForm): void {
+    const nombre = (this.formCliente.nombre ?? '').trim();
+    const apellido = (this.formCliente.apellido ?? '').trim();
+
+    if (!nombre || !apellido) {
+      if (form) {
+        Object.values(form.controls).forEach(c => c.markAsTouched());
+      }
+      alert('Nombre y apellido son obligatorios');
+      return;
+    }
+
     const payload: Partial<Cliente> = {
-      nombre: this.formCliente.nombre ?? '',
-      apellido: this.formCliente.apellido ?? '',
-      telefono: this.formCliente.telefono ?? '',
-      correo: this.formCliente.correo ?? '',
-      direccion: this.formCliente.direccion ?? '',
+      nombre: nombre,
+      apellido: apellido,
+      telefono: (this.formCliente.telefono ?? '').trim(),
+      correo: (this.formCliente.correo ?? '').trim(),
+      direccion: (this.formCliente.direccion ?? '').trim(),
     };
 
     if (this.isEdit && this.formCliente.id) {

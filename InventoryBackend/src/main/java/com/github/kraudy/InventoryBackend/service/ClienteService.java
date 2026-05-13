@@ -20,6 +20,8 @@ public class ClienteService {
 
     @Transactional
     public Cliente create(Cliente cliente) {
+        validateRequiredFields(cliente);
+
         // Normalize names to Title Case
         cliente.setNombre(toTitleCase(cliente.getNombre()));
         cliente.setApellido(toTitleCase(cliente.getApellido()));
@@ -34,6 +36,8 @@ public class ClienteService {
 
     @Transactional
     public Cliente update(Cliente cliente) {
+        validateRequiredFields(cliente);
+
         // Normalize names to Title Case
         cliente.setNombre(toTitleCase(cliente.getNombre()));
         cliente.setApellido(toTitleCase(cliente.getApellido()));
@@ -54,6 +58,15 @@ public class ClienteService {
         existente.setDireccion(cliente.getDireccion());
 
         return clienteRepository.save(existente);
+    }
+
+    private void validateRequiredFields(Cliente cliente) {
+        if (cliente.getNombre() == null || cliente.getNombre().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre es requerido");
+        }
+        if (cliente.getApellido() == null || cliente.getApellido().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El apellido es requerido");
+        }
     }
 
     private String toTitleCase(String input) {

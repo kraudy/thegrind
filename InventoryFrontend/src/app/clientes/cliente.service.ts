@@ -18,6 +18,28 @@ export class ClienteService {
     return this.http.get<Cliente[]>(this.apiUrl);
   }
 
+  getAllWithFilters(filters: {
+    id?: number;
+    nombre?: string;
+    telefono?: string;
+    correo?: string;
+  } = {}): Observable<Cliente[]> {
+    let params = new HttpParams();
+    if (filters.id !== undefined) {
+      params = params.set('id', filters.id.toString());
+    }
+    if (filters.nombre) {
+      params = params.set('nombre', filters.nombre);
+    }
+    if (filters.telefono) {
+      params = params.set('telefono', filters.telefono);
+    }
+    if (filters.correo) {
+      params = params.set('correo', filters.correo);
+    }
+    return this.http.get<Cliente[]>(this.apiUrl, { params });
+  }
+
   getById(id: number): Observable<Cliente> {
     return this.http.get<Cliente>(`${this.apiUrl}/${id}`);
   }

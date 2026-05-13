@@ -18,6 +18,22 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
       """)
   List<Cliente> searchByTerm(@Param("term") String term);
 
+  @Query(value = """
+      SELECT id, nombre, apellido, telefono, correo, direccion, fecha_creacion, fecha_modificacion
+      FROM cliente
+      WHERE (:id IS NULL OR id = :id)
+        AND (:nombre IS NULL
+             OR LOWER(nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))
+             OR LOWER(apellido) LIKE LOWER(CONCAT('%', :nombre, '%')))
+        AND (:telefono IS NULL OR telefono LIKE CONCAT('%', :telefono, '%'))
+        AND (:correo IS NULL OR LOWER(correo) LIKE LOWER(CONCAT('%', :correo, '%')))
+      ORDER BY id
+      """, nativeQuery = true)
+  List<Cliente> obtenerClientes(@Param("id") Long id,
+                                @Param("nombre") String nombre,
+                                @Param("telefono") String telefono,
+                                @Param("correo") String correo);
+
   @Query("""
       SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Cliente c
       WHERE LOWER(c.nombre) = LOWER(:nombre) AND LOWER(c.apellido) = LOWER(:apellido)

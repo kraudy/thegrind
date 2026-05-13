@@ -19,7 +19,7 @@
       </p>
     </div>
 
-    <form (ngSubmit)="onSubmit()" class="space-y-12">
+    <form #clienteForm="ngForm" (ngSubmit)="onSubmit(clienteForm)" class="space-y-12" novalidate>
       <!-- Información Personal -->
       <div class="bg-gray-50 rounded-xl p-6">
         <h3 class="text-xl font-semibold text-gray-800 mb-6">Información Personal</h3>
@@ -29,18 +29,24 @@
             <input type="text"
                    [(ngModel)]="formCliente.nombre"
                    name="nombre"
+                   #nombreCtrl="ngModel"
                    required
                    placeholder="Ej: Juan"
-                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm">
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm"
+                   [class.border-red-500]="nombreCtrl.invalid && nombreCtrl.touched">
+            <p *ngIf="nombreCtrl.invalid && nombreCtrl.touched" class="text-red-600 text-xs mt-1">El nombre es obligatorio.</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Apellido *</label>
             <input type="text"
                    [(ngModel)]="formCliente.apellido"
                    name="apellido"
+                   #apellidoCtrl="ngModel"
                    required
                    placeholder="Ej: Pérez"
-                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm">
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm"
+                   [class.border-red-500]="apellidoCtrl.invalid && apellidoCtrl.touched">
+            <p *ngIf="apellidoCtrl.invalid && apellidoCtrl.touched" class="text-red-600 text-xs mt-1">El apellido es obligatorio.</p>
           </div>
         </div>
       </div>
@@ -54,7 +60,6 @@
             <input type="tel"
                    [(ngModel)]="formCliente.telefono"
                    name="telefono"
-                   required
                    placeholder="Ej: +505 8888 8888"
                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm">
           </div>
@@ -63,7 +68,6 @@
             <input type="email"
                    [(ngModel)]="formCliente.correo"
                    name="correo"
-                   required
                    placeholder="Ej: juan.perez@example.com"
                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm">
           </div>
@@ -87,7 +91,8 @@
 
       <div class="flex justify-center space-x-6 pt-8">
         <button type="submit"
-                class="px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
+                [disabled]="clienteForm.invalid"
+                class="px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
           {{ isEdit ? 'Actualizar' : 'Crear' }}
         </button>
         <button type="button"

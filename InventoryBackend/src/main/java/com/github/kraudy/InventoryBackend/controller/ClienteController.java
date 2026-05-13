@@ -24,8 +24,16 @@ public class ClienteController {
   private ClienteService clienteService;
 
   @GetMapping
-  public List<Cliente> getAll() {
-    return clienteRepository.findAll();
+  public List<Cliente> getAll(
+      @RequestParam(required = false) Long id,
+      @RequestParam(required = false) String nombre,
+      @RequestParam(required = false) String telefono,
+      @RequestParam(required = false) String correo
+  ) {
+    String nombreParam = (nombre != null && !nombre.trim().isEmpty()) ? nombre.trim() : null;
+    String telefonoParam = (telefono != null && !telefono.trim().isEmpty()) ? telefono.trim() : null;
+    String correoParam = (correo != null && !correo.trim().isEmpty()) ? correo.trim() : null;
+    return clienteRepository.obtenerClientes(id, nombreParam, telefonoParam, correoParam);
   }
 
   @GetMapping("/{id}")

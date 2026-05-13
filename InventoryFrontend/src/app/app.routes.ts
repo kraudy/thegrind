@@ -32,6 +32,7 @@ import { OrdenSeguimientoRepartirDetalleListComponent } from './ordenes-seguimie
 
 import { ClienteListComponent } from './clientes/cliente-list/cliente-list.component';
 import { ClienteFormComponent } from './clientes/cliente-form/cliente-form.component';
+import { ClienteDetalleComponent } from './clientes/cliente-detalle/cliente-detalle.component';
 
 import { ProductoTipoListComponent } from './productos-tipos/producto-tipo-list/producto-tipo-list.component';
 import { ProductoTipoFormComponent } from './productos-tipos/producto-tipo-form/producto-tipo-form.component';
@@ -129,6 +130,7 @@ export const routes: Routes = [
   { path: 'clientes', component: ClienteListComponent, canActivate: [authGuard] },
   { path: 'clientes/new', component: ClienteFormComponent, canActivate: [authGuard] },
   { path: 'clientes/:id/edit', component: ClienteFormComponent, canActivate: [authGuard] },
+  { path: 'clientes-detalle/:id', component: ClienteDetalleComponent, canActivate: [authGuard] },
 
   { path: 'ordenes-seguimiento/general', component: OrdenSeguimientoGeneralListComponent, canActivate: [authGuard] },
 

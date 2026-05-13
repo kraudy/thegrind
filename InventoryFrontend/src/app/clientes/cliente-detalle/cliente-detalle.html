@@ -1,0 +1,61 @@
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <!-- Back button -->
+  <a routerLink="/clientes"
+     class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-md transition">
+    ← Volver a Clientes
+  </a>
+
+  <h1 class="text-4xl font-bold text-gray-900 mt-8 mb-2">Detalle del Cliente</h1>
+  <p class="text-gray-500">ID: {{ cliente?.id }}</p>
+
+  <!-- Cliente Info -->
+  <div class="bg-white shadow-xl rounded-2xl p-8 mt-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <span class="text-sm text-gray-500">Nombre</span>
+        <p class="text-2xl font-semibold">{{ cliente?.nombre }}</p>
+      </div>
+      <div>
+        <span class="text-sm text-gray-500">Apellido</span>
+        <p class="text-2xl font-semibold">{{ cliente?.apellido }}</p>
+      </div>
+      <div>
+        <span class="text-sm text-gray-500">Teléfono</span>
+        <p class="text-gray-800">{{ cliente?.telefono || '—' }}</p>
+      </div>
+      <div>
+        <span class="text-sm text-gray-500">Correo</span>
+        <p class="text-gray-800">
+          <a *ngIf="cliente?.correo" [href]="'mailto:' + cliente?.correo"
+             class="text-indigo-600 hover:text-indigo-900">{{ cliente?.correo }}</a>
+          <span *ngIf="!cliente?.correo">—</span>
+        </p>
+      </div>
+      <div class="md:col-span-2">
+        <span class="text-sm text-gray-500">Dirección</span>
+        <p class="text-gray-800">{{ cliente?.direccion || '—' }}</p>
+      </div>
+      <div>
+        <span class="text-sm text-gray-500">Fecha de Creación</span>
+        <p class="text-gray-700">{{ cliente?.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+      <div>
+        <span class="text-sm text-gray-500">Fecha de Modificación</span>
+        <p class="text-gray-700">{{ cliente?.fechaModificacion | date:'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t">
+      <div class="flex justify-between items-center">
+        <a [routerLink]="['/clientes', cliente?.id, 'edit']"
+           class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg">
+          ✏️ Editar Cliente
+        </a>
+        <button (click)="deleteCliente()"
+                class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg">
+          🗑️ Eliminar Cliente
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
