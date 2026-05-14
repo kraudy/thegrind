@@ -25,5 +25,6 @@ public record OrdenSeguimientoFacturacionDTO(
     LocalDateTime fechaModificacion,
     String estado,
     String tiempoRestante,
-    String duracionTrabajo           // renamed to match query alias
+    String duracionTrabajo,          // renamed to match query alias
+    String canal
 ) {}

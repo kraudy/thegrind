@@ -15,5 +15,6 @@ public record OrdenDTO(
   LocalDateTime fechaPreparada,
   LocalDateTime fechaDespachada,
   LocalDateTime fechaModificacion,
-  String estado
+  String estado,
+  String canal
 ) {}

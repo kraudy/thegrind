@@ -30,9 +30,10 @@ public class OrdenController {
     @RequestParam(required = false) Long id,
     @RequestParam(required = false) String cliente,
     @RequestParam(required = false) String recepcionista,
-    @RequestParam(required = false) String estado
+    @RequestParam(required = false) String estado,
+    @RequestParam(required = false) String canal
   ) {
-    return ordenRepository.obtenerOrdenes(id, cliente, recepcionista, estado);
+    return ordenRepository.obtenerOrdenes(id, cliente, recepcionista, estado, canal);
   }
 
   @GetMapping("/{id}")

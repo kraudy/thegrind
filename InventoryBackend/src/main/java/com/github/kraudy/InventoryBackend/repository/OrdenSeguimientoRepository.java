@@ -67,7 +67,8 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
       CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
       ord.creada_por AS creadaPor,
       ord.fecha_vencimiento AS fechaVencimiento,
-      (fecha_vencimiento - current_timestamp)::text AS tiempoRestante
+      (fecha_vencimiento - current_timestamp)::text AS tiempoRestante,
+      ord.canal AS canal
 
     FROM orden ord
     JOIN cliente cte ON cte.id = ord.id_cliente
@@ -125,7 +126,8 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
         CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
         ord.creada_por,
         ord.fecha_vencimiento,
-        (fecha_vencimiento - current_timestamp)::text AS tiempoRestante
+        (fecha_vencimiento - current_timestamp)::text AS tiempoRestante,
+        ord.canal
 
       FROM orden_calendario cal
 
@@ -150,7 +152,8 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
       cal.clienteNombre,
       cal.creada_por AS creadaPor,
       cal.fecha_vencimiento AS fechaVencimiento,
-      cal.tiempoRestante
+      cal.tiempoRestante,
+      cal.canal AS canal
 
     FROM cal
     JOIN seg ON seg.id_orden = cal.id
@@ -197,7 +200,8 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
         CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
         ord.creada_por,
         ord.fecha_vencimiento,
-        (fecha_vencimiento - current_timestamp)::text AS tiempoRestante
+        (fecha_vencimiento - current_timestamp)::text AS tiempoRestante,
+        ord.canal
 
       FROM orden_calendario cal
 
@@ -222,7 +226,8 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
       cal.clienteNombre,
       cal.creada_por AS creadaPor,
       cal.fecha_vencimiento AS fechaVencimiento,
-      cal.tiempoRestante
+      cal.tiempoRestante,
+      cal.canal AS canal
 
     FROM cal
     JOIN seg ON seg.id_orden = cal.id
@@ -289,7 +294,8 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
       CONCAT(cte.nombre, ' ', cte.apellido) AS clienteNombre,
       ord.creada_por  AS creadaPor,
       ord.fecha_vencimiento AS fechaVencimiento,
-      (fecha_vencimiento - current_timestamp)::text AS tiempoRestante
+      (fecha_vencimiento - current_timestamp)::text AS tiempoRestante,
+      ord.canal AS canal
 
     FROM orden_calendario cal
 
@@ -373,7 +379,8 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
         ord.estado as estadoOrden,
         ord.creada_por,
         ord.fecha_vencimiento,
-        (ord.fecha_vencimiento - CURRENT_TIMESTAMP)::text AS tiempoRestante
+        (ord.fecha_vencimiento - CURRENT_TIMESTAMP)::text AS tiempoRestante,
+        ord.canal
       FROM orden ord
       JOIN cliente cte ON cte.id = ord.id_cliente
       LEFT JOIN orden_calendario cal ON ord.id = cal.id_orden
@@ -387,6 +394,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
       cal.creada_por AS creadaPor,
       cal.fecha_vencimiento AS fechaVencimiento,
       cal.tiempoRestante,
+      cal.canal AS canal,
 
       -- Boolean flags (for quick UI badges)
       CASE WHEN repartidas.id_orden IS NOT NULL THEN true ELSE false END AS tieneRepartidas,
@@ -498,7 +506,8 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
       ord.estado AS estado,
 
       (ord.fecha_vencimiento - current_timestamp)::text AS tiempoRestante,
-      (ord.fecha_creacion - ord.fecha_despachada)::text AS duracionTrabajo
+      (ord.fecha_creacion - ord.fecha_despachada)::text AS duracionTrabajo,
+      ord.canal AS canal
 
     FROM orden_calendario cal
     JOIN orden ord ON ord.id = cal.id_orden

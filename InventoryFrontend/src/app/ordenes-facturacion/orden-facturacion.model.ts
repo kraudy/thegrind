@@ -20,4 +20,5 @@ export interface OrdenFacturacion {
   estado: string;
   tiempoRestante: string;
   duracionTrabajo: string;
+  canal?: string; // 'General' | 'Whatsapp'
 }

@@ -63,6 +63,7 @@
           <tr>
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Canal</th>
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Creada Por</th>
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Total Prod. Orden</th>
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Total Prod. Factura</th>
@@ -79,6 +80,15 @@
               (click)="viewDetails(orden)">
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ orden.id }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ orden.clienteNombre }}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                    [ngClass]="{
+                      'bg-emerald-100 text-emerald-700': orden.canal === 'Whatsapp',
+                      'bg-indigo-100 text-indigo-700': orden.canal !== 'Whatsapp'
+                    }">
+                {{ orden.canal || 'General' }}
+              </span>
+            </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ orden.creadaPor }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ orden.totalProductosOrden }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ orden.totalProductosFactura }}</td>

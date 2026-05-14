@@ -10,6 +10,7 @@ public record OrdenSeguimientoEstadosGeneralDTO(
     String creadaPor,
     LocalDateTime fechaVencimiento,
     String tiempoRestante,
+    String canal,
 
     boolean tieneRepartidas,
     boolean tieneNormales,

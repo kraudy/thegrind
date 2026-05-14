@@ -1,12 +1,16 @@
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+     [ngClass]="{ 'bg-emerald-50/40 rounded-3xl': isWhatsappContext }">
   <div class="text-center mb-8">
-    <h1 class="text-4xl font-bold text-gray-900">
+    <h1 class="text-4xl font-bold"
+        [ngClass]="isWhatsappContext ? 'text-emerald-700' : 'text-gray-900'">
       {{ isEdit ? 'Editar Detalle de Orden' : 'Agregar Detalle a Orden #' + formOrdenDetalle.idOrden }}
+      <span *ngIf="isWhatsappContext" class="ml-3 text-base align-middle px-3 py-1 rounded-full bg-emerald-100 text-emerald-700">Whatsapp</span>
     </h1>
     <h2 class="text-2xl font-semibold text-gray-700 mt-2">{{ clienteNombre }}</h2>
   </div>
 
-  <div class="bg-white shadow-xl rounded-xl overflow-hidden">
+  <div class="shadow-xl rounded-xl overflow-hidden"
+       [ngClass]="isWhatsappContext ? 'bg-emerald-50 ring-2 ring-emerald-400' : 'bg-white'">
     <div class="p-8">
       <form (ngSubmit)="onSubmit()" #detalleForm="ngForm" class="space-y-8">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">

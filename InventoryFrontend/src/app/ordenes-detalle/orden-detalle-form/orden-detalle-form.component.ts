@@ -41,6 +41,11 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
 
   isEdit = false;
   clienteNombre: string = '';
+  canal: 'General' | 'Whatsapp' = 'General';
+
+  get isWhatsappContext(): boolean {
+    return this.canal === 'Whatsapp';
+  }
 
   // Dynamic filter dropdowns (valid combinations only)
   tipos: ProductoTipo[] = [];
@@ -90,6 +95,9 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
     const queryParams = this.route.snapshot.queryParams;
 
     this.clienteNombre = queryParams['clienteNombre'] || '';
+    if (queryParams['canal'] === 'Whatsapp') {
+      this.canal = 'Whatsapp';
+    }
 
     const ordenIdStr = params.get('ordenId');
     if (!ordenIdStr) {

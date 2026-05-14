@@ -268,13 +268,20 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges, OnDestroy {
     return (this.orden?.estado || '').toLowerCase() === 'recibida';
   }
 
+  get isWhatsappContext(): boolean {
+    return this.orden?.canal === 'Whatsapp';
+  }
+
   goToNuevoDetalle(): void {
     if (!this.orden?.id || !this.canModifyDetalles()) {
       return;
     }
 
     this.router.navigate(['/ordenes-detalle', this.orden.id, 'new'], {
-      queryParams: { clienteNombre: this.orden.clienteNombre }
+      queryParams: {
+        clienteNombre: this.orden.clienteNombre,
+        ...(this.isWhatsappContext ? { canal: 'Whatsapp' } : {})
+      }
     });
   }
 

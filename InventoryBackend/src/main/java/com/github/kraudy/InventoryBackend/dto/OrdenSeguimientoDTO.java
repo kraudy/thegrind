@@ -9,5 +9,6 @@ public record OrdenSeguimientoDTO(
     String clienteNombre,
     String creadaPor,
     LocalDateTime fechaVencimiento,
-    String tiempoRestante
+    String tiempoRestante,
+    String canal
 ) {}

@@ -33,4 +33,6 @@ export interface OrdenSeguimientoDetalleGeneral {
   countPegado: number;
   countListo: number;
   countEntregado: number;
+
+  canal?: string; // 'General' | 'Whatsapp'
 }

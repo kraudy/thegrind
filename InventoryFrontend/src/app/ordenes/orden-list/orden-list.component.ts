@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { OrdenService } from '../orden.service';
@@ -24,19 +24,38 @@ export class OrdenListComponent implements OnInit {
   // === Filtros ===
   searchTerm = '';
   selectedEstadoFilter = '';   // '' = Todos
+  selectedCanalFilter = '';    // '' = Todos | 'General' | 'Whatsapp'
+
+  // Canal "lock" cuando el listado fue abierto desde una tarjeta específica (ej. Whatsapp).
+  // Si lockedCanal != '' el filtro de canal queda fijo y la UI cambia de tema.
+  lockedCanal: '' | 'General' | 'Whatsapp' = '';
 
   constructor(
       private ordenService: OrdenService,
       private router: Router,
+      private route: ActivatedRoute,
       private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.loadOrdenes();
+    this.route.queryParamMap.subscribe(params => {
+      const canal = params.get('canal');
+      if (canal === 'Whatsapp' || canal === 'General') {
+        this.lockedCanal = canal;
+        this.selectedCanalFilter = canal;
+      } else {
+        this.lockedCanal = '';
+      }
+      this.loadOrdenes();
+    });
+  }
+
+  get isWhatsappContext(): boolean {
+    return this.lockedCanal === 'Whatsapp';
   }
 
   loadOrdenes(): void {
-    this.ordenService.getAllFiltered(this.searchTerm, this.selectedEstadoFilter)
+    this.ordenService.getAllFiltered(this.searchTerm, this.selectedEstadoFilter, this.selectedCanalFilter)
       .subscribe({
         next: (data) => {
           this.ordenes = data || [];
@@ -67,6 +86,9 @@ export class OrdenListComponent implements OnInit {
   clearFilters(): void {
     this.searchTerm = '';
     this.selectedEstadoFilter = '';
+    if (!this.lockedCanal) {
+      this.selectedCanalFilter = '';
+    }
     this.loadOrdenes();
   }
 
@@ -84,7 +106,14 @@ export class OrdenListComponent implements OnInit {
     }
   }
 
+  // Query params para conservar el canal al navegar
+  get canalQueryParams(): any {
+    return this.lockedCanal ? { canal: this.lockedCanal } : {};
+  }
+
   viewDetails(ordenId: number): void {
-    this.router.navigate(['/ordenes-detalle', ordenId], { queryParams: { from: 'list' } });
+    this.router.navigate(['/ordenes-detalle', ordenId], {
+      queryParams: { from: 'list', ...this.canalQueryParams }
+    });
   }
 }

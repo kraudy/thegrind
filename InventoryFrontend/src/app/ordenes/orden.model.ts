@@ -11,4 +11,5 @@ export interface Orden {
   fechaDespachada: Date | null; // Fecha en que la orden fue despachada
   fechaModificacion: Date; // Fecha en que la orden fue modificada
   estado: string;
+  canal?: string; // 'General' | 'Whatsapp'
 }

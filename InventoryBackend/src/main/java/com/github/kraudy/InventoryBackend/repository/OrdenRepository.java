@@ -28,7 +28,8 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
       ord.fecha_preparada AS fechaPreparada,
       ord.fecha_despachada AS fechaDespachada,
       ord.fecha_modificacion AS fechaModificacion,
-      ord.estado AS estado
+      ord.estado AS estado,
+      ord.canal AS canal
     FROM orden ord
     JOIN cliente cte ON cte.id = ord.id_cliente
     ORDER BY ord.id ASC
@@ -49,7 +50,8 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
       ord.fecha_preparada AS fechaPreparada,
       ord.fecha_despachada AS fechaDespachada,
       ord.fecha_modificacion AS fechaModificacion,
-      ord.estado AS estado
+      ord.estado AS estado,
+      ord.canal AS canal
     FROM orden ord
     JOIN cliente cte ON cte.id = ord.id_cliente
     WHERE ord.id = :id
@@ -130,7 +132,8 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
       ord.fecha_preparada AS fechaPreparada,
       ord.fecha_despachada AS fechaDespachada,
       ord.fecha_modificacion AS fechaModificacion,
-      ord.estado AS estado
+      ord.estado AS estado,
+      ord.canal AS canal
     FROM orden ord
     JOIN cliente cte ON cte.id = ord.id_cliente
     WHERE ord.estado = 'Recibida'
@@ -151,7 +154,8 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
       ord.fecha_preparada AS fechaPreparada,
       ord.fecha_despachada AS fechaDespachada,
       ord.fecha_modificacion AS fechaModificacion,
-      ord.estado AS estado
+      ord.estado AS estado,
+      ord.canal AS canal
 
     FROM orden ord
     JOIN cliente cte ON cte.id = ord.id_cliente
@@ -159,8 +163,9 @@ public interface OrdenRepository extends JpaRepository<Orden, Long> {
       AND (:cliente IS NULL OR LOWER(CONCAT(cte.nombre, ' ', cte.apellido)) LIKE LOWER(CONCAT('%', :cliente, '%')))
       AND (:recepcionista IS NULL OR LOWER(ord.creada_por) LIKE LOWER(CONCAT('%', :recepcionista, '%')))
       AND (:estado IS NULL OR ord.estado = :estado)
+      AND (:canal IS NULL OR ord.canal = :canal)
     ORDER BY ord.id
     """, nativeQuery = true)
-  List<OrdenDTO> obtenerOrdenes(@Param("id") Long id, @Param("cliente") String cliente, @Param("recepcionista") String recepcionista, @Param("estado") String estado);
+  List<OrdenDTO> obtenerOrdenes(@Param("id") Long id, @Param("cliente") String cliente, @Param("recepcionista") String recepcionista, @Param("estado") String estado, @Param("canal") String canal);
 
 }

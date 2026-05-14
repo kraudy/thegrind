@@ -17,12 +17,17 @@ export class OrdenService {
     return this.http.get<Orden[]>(this.apiUrl);
   }
 
-  getAllFiltered(searchTerm: string = '', estadoFilter: string = ''): Observable<Orden[]> {
+  getAllFiltered(searchTerm: string = '', estadoFilter: string = '', canal: string = ''): Observable<Orden[]> {
     let params = new HttpParams();
 
     // Filtro de estado
     if (estadoFilter) {
       params = params.set('estado', estadoFilter);
+    }
+
+    // Filtro por canal (General | Whatsapp)
+    if (canal) {
+      params = params.set('canal', canal);
     }
 
     // Filtro inteligente: si es solo números → busca por ID exacto, sino por cliente (LIKE)

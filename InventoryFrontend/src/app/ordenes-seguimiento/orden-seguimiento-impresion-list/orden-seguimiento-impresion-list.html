@@ -39,6 +39,7 @@
           <tr>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Orden</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Cliente</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Canal</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Creada Por</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Vence</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tiempo Restante</th>
@@ -54,6 +55,15 @@
           >
             <td class="px-6 py-4 font-semibold text-indigo-700">#{{ orden.id }}</td>
             <td class="px-6 py-4 text-gray-800">{{ orden.clienteNombre }}</td>
+            <td class="px-6 py-4">
+              <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                    [ngClass]="{
+                      'bg-emerald-100 text-emerald-700': orden.canal === 'Whatsapp',
+                      'bg-indigo-100 text-indigo-700': orden.canal !== 'Whatsapp'
+                    }">
+                {{ orden.canal || 'General' }}
+              </span>
+            </td>
             <td class="px-6 py-4 text-gray-700">{{ orden.creadaPor }}</td>
             <td class="px-6 py-4 text-gray-700">{{ orden.fechaVencimiento | date:'dd/MM/yyyy HH:mm' }}</td>
             <td class="px-6 py-4 font-semibold" [ngClass]="getTiempoRestanteClass(orden.tiempoRestante)">

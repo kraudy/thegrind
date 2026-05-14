@@ -1,7 +1,9 @@
 <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-  <div class="bg-white shadow-2xl rounded-2xl p-8 md:p-12">
-    <h2 class="text-3xl font-bold text-gray-900 mb-10 text-center">
-      {{ isEdit ? 'Editar Orden' : 'Crear Nueva Orden' }}
+  <div class="shadow-2xl rounded-2xl p-8 md:p-12"
+       [ngClass]="isWhatsappContext ? 'bg-emerald-50 ring-2 ring-emerald-400' : 'bg-white'">
+    <h2 class="text-3xl font-bold mb-10 text-center"
+        [ngClass]="isWhatsappContext ? 'text-emerald-800' : 'text-gray-900'">
+      {{ isEdit ? (isWhatsappContext ? 'Editar Orden Whatsapp' : 'Editar Orden') : (isWhatsappContext ? 'Crear Orden Whatsapp' : 'Crear Nueva Orden') }}
     </h2>
 
     <!-- Mostrar fecha de creación si es edición -->
@@ -13,9 +15,22 @@
 
     <form (ngSubmit)="onSubmit()" class="space-y-12">
       <!-- Información básica -->
-      <div class="bg-gray-50 rounded-xl p-6">
-        <h3 class="text-xl font-semibold text-gray-800 mb-6">Información Básica</h3>
+      <div class="rounded-xl p-6"
+           [ngClass]="isWhatsappContext ? 'bg-emerald-100/60' : 'bg-gray-50'">
+        <h3 class="text-xl font-semibold mb-6"
+            [ngClass]="isWhatsappContext ? 'text-emerald-900' : 'text-gray-800'">Información Básica</h3>
         <div class="space-y-6">
+          <!-- Canal (siempre visible, no editable) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Canal</label>
+            <input type="text"
+                   [value]="canal"
+                   disabled
+                   class="w-full px-4 py-3 border rounded-lg cursor-not-allowed font-semibold"
+                   [ngClass]="isWhatsappContext
+                     ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
+                     : 'border-gray-300 bg-gray-100 text-gray-700'">
+          </div>
           <!-- Cliente selection / display -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Cliente *</label>
@@ -101,7 +116,8 @@
       <div class="flex justify-center space-x-6 pt-8">
         <button type="submit"
                 [disabled]="(formOrden.idCliente ?? 0) <= 0 || !fechaVencimientoDate || !fechaVencimientoTime"
-                class="px-10 py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
+                class="px-10 py-4 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105"
+                [ngClass]="isWhatsappContext ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-indigo-600 hover:bg-indigo-700'">
           {{ isEdit ? 'Actualizar' : 'Crear' }}
         </button>
         <button type="button"

@@ -30,6 +30,17 @@ export class OrdenFormComponent implements OnChanges, OnInit{
   isEdit = false;
   ordenId: number | null = null;
 
+  // Canal context: derived from query param when creating, or from loaded orden when editing
+  canal: 'General' | 'Whatsapp' = 'General';
+
+  get isWhatsappContext(): boolean {
+    return this.canal === 'Whatsapp';
+  }
+
+  get canalQueryParams(): any {
+    return this.canal === 'Whatsapp' ? { canal: 'Whatsapp' } : {};
+  }
+
   //Autocomplete properties
   filteredClientes: Cliente[] = [];
   selectedCliente: Cliente | null = null;
@@ -165,6 +176,12 @@ export class OrdenFormComponent implements OnChanges, OnInit{
   ngOnInit(): void {
     this.timeSlots = this.buildTimeSlots();
 
+    // Canal viene en el queryParam (?canal=Whatsapp) cuando se crea desde la tarjeta Whatsapp
+    const canalParam = this.route.snapshot.queryParamMap.get('canal');
+    if (canalParam === 'Whatsapp') {
+      this.canal = 'Whatsapp';
+    }
+
     if (!this.orden) {
       this.resetForm();
       this.isEdit = false;
@@ -207,6 +224,12 @@ export class OrdenFormComponent implements OnChanges, OnInit{
       next: (data) => {
         this.loadForm(data);
         this.isEdit = true;
+        // En edición, el canal viene de la orden ya creada
+        if (data.canal === 'Whatsapp') {
+          this.canal = 'Whatsapp';
+        } else {
+          this.canal = 'General';
+        }
 
         this.loadClienteForDisplay();
         this.hydrateFechaVencimientoParts();
@@ -308,7 +331,8 @@ export class OrdenFormComponent implements OnChanges, OnInit{
   onSubmit(): void {
     const payload: Partial<Orden> = {
       idCliente: this.formOrden.idCliente,
-      fechaVencimiento: this.formOrden.fechaVencimiento
+      fechaVencimiento: this.formOrden.fechaVencimiento,
+      canal: this.canal
     };
 
     if (this.isEdit && this.formOrden.id) {
@@ -337,7 +361,9 @@ export class OrdenFormComponent implements OnChanges, OnInit{
           this.ordenSaved.emit();
           this.resetForm();
           // Navigate to orden-detalle to add details
-          this.router.navigate(['/ordenes-detalle', createdOrden.id]);
+          this.router.navigate(['/ordenes-detalle', createdOrden.id], {
+            queryParams: this.canalQueryParams
+          });
         },
         complete: () => {
           console.log('Orden payload send sucessfully for create:', payload);

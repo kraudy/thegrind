@@ -401,13 +401,20 @@ public class OrdenSeguimientoService {
       //TODO: Aqui, una vez la orden esta entregada, agregar nuevo registro para facturacion, puede generarse aqui y caer en lista como ordenes para facturar
       // o incluso un nuevo estado en orden trabajo. Luego, una vez se factura la orden, se genera la factura en su propia tabla y se le relaciona la orden correspondiente  
       //TODO: Mover esto a un trigger
+      EstadoSeguimientoEnum estadoAlcanzado = EstadoSeguimientoEnum.fromString(avanzado.getEstado());
       if (!List.of(EstadoSeguimientoEnum.LISTO,
-                  EstadoSeguimientoEnum.ENTREGADO).contains(EstadoSeguimientoEnum.fromString(avanzado.getEstado()))) {
+                  EstadoSeguimientoEnum.ENTREGADO).contains(estadoAlcanzado)) {
         return;
       }
 
-      if (!ordenSeguimientoRepository.estanTodosLosDetallesListos(avanzado.getIdOrden())) return;
+      boolean todosEnEstado;
+      if (estadoAlcanzado == EstadoSeguimientoEnum.ENTREGADO) {
+        todosEnEstado = ordenSeguimientoRepository.estanTodosLosDetallesEntregados(avanzado.getIdOrden());
+      } else {
+        todosEnEstado = ordenSeguimientoRepository.estanTodosLosDetallesListos(avanzado.getIdOrden());
+      }
+      if (!todosEnEstado) return;
 
-      ordenRepository.updateEstadoOrdenYFecha(avanzado.getIdOrden(), siguiente.getEstado());
+      ordenRepository.updateEstadoOrdenYFecha(avanzado.getIdOrden(), avanzado.getEstado());
     }
 }

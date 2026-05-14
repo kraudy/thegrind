@@ -1,4 +1,5 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+     [ngClass]="{ 'bg-emerald-50/40 rounded-3xl': isWhatsappContext }">
   <!-- Header -->
   <div class="relative flex justify-between items-center mb-8" *ngIf="orden">
     <!-- Botón Volver (izquierda) -->
@@ -13,8 +14,10 @@
     <!-- Botón Agregar Detalle (derecha) -->
     <button (click)="goToNuevoDetalle()"
       [disabled]="!canModifyDetalles()"
-      [class.bg-indigo-600]="canModifyDetalles()"
-      [class.hover:bg-indigo-700]="canModifyDetalles()"
+      [class.bg-indigo-600]="canModifyDetalles() && !isWhatsappContext"
+      [class.hover:bg-indigo-700]="canModifyDetalles() && !isWhatsappContext"
+      [class.bg-emerald-600]="canModifyDetalles() && isWhatsappContext"
+      [class.hover:bg-emerald-700]="canModifyDetalles() && isWhatsappContext"
       [class.text-white]="canModifyDetalles()"
       [class.bg-gray-300]="!canModifyDetalles()"
       [class.text-gray-500]="!canModifyDetalles()"
@@ -27,8 +30,10 @@
     </button>
 
     <!-- Título centrado -->
-    <h1 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-bold text-gray-900 pointer-events-none">
+    <h1 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-bold pointer-events-none"
+        [ngClass]="isWhatsappContext ? 'text-emerald-700' : 'text-gray-900'">
       Detalles Orden #{{ orden.id }}
+      <span *ngIf="isWhatsappContext" class="ml-3 text-base align-middle px-3 py-1 rounded-full bg-emerald-100 text-emerald-700">Whatsapp</span>
     </h1>
   </div>
 

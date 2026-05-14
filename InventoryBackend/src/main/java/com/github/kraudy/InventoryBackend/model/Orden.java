@@ -63,6 +63,10 @@ public class Orden {
   @Column(nullable = false, columnDefinition = "VARCHAR(25)")
   private String estado = "Recibida"; // Valor por default al ser creada la orden
 
+  // Canal por el que se recibió la orden: General (presencial) o Whatsapp
+  @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+  private String canal = "General";
+
   // Relaciones
 
   @JsonIgnore
