@@ -24,10 +24,14 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
       WHERE (:id IS NULL OR id = :id)
         AND (:nombre IS NULL
              OR LOWER(nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))
-             OR LOWER(apellido) LIKE LOWER(CONCAT('%', :nombre, '%')))
+             OR LOWER(apellido) LIKE LOWER(CONCAT('%', :nombre, '%'))
+             OR LOWER(CONCAT(nombre, ' ', COALESCE(apellido, ''))) LIKE LOWER(CONCAT('%', :nombre, '%'))
+             OR LOWER(CONCAT(COALESCE(apellido, ''), ' ', nombre)) LIKE LOWER(CONCAT('%', :nombre, '%')))
         AND (:telefono IS NULL OR telefono LIKE CONCAT('%', :telefono, '%'))
         AND (:correo IS NULL OR LOWER(correo) LIKE LOWER(CONCAT('%', :correo, '%')))
       ORDER BY id
+
+      LIMIT 50
       """, nativeQuery = true)
   List<Cliente> obtenerClientes(@Param("id") Long id,
                                 @Param("nombre") String nombre,
