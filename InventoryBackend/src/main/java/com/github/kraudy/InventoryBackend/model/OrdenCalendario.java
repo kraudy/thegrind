@@ -31,6 +31,9 @@ public class OrdenCalendario {
   @Column(nullable = false, columnDefinition = "DATE")
   private LocalDate fecha;
 
+  @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'Normal'")
+  private String prioridad;
+
   @CreationTimestamp
   @Column(updatable = false, nullable = false)
   private LocalDateTime fechaCreacion;

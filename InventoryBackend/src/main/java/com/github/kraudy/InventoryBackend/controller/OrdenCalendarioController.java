@@ -18,6 +18,7 @@ import com.github.kraudy.InventoryBackend.repository.OrdenTrabajoRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoRepository;
 import com.github.kraudy.InventoryBackend.repository.ProductoTipoEstadoRepository;
 import com.github.kraudy.InventoryBackend.service.OrdenCalendarioService;
+import com.github.kraudy.InventoryBackend.service.NotificationService;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +46,9 @@ public class OrdenCalendarioController {
 
   @Autowired
   private OrdenCalendarioService ordenCalendarioService;
+
+  @Autowired
+  private NotificationService notificationService;
   
   
   @GetMapping
@@ -82,6 +86,26 @@ public class OrdenCalendarioController {
   public OrdenCalendario update(@PathVariable Long id, @RequestBody OrdenCalendario ordenCalendario) {
     ordenCalendario.setIdOrden(id);
     return ordenCalendarioRepository.save(ordenCalendario);
+  }
+
+  @PutMapping("/{id}/prioridad")
+  public OrdenCalendario updatePrioridad(@PathVariable Long id, @RequestBody Map<String, String> body) {
+    String prioridad = body.get("prioridad");
+    if (prioridad == null || !List.of("Normal", "Alta", "Urgente").contains(prioridad)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+        "Prioridad inválida. Debe ser 'Normal', 'Alta' o 'Urgente'.");
+    }
+    OrdenCalendario cal = ordenCalendarioRepository.findById(id)
+      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+        "Orden calendario con id " + id + " no encontrada"));
+    cal.setPrioridad(prioridad);
+    OrdenCalendario saved = ordenCalendarioRepository.save(cal);
+
+    // Notificar a todas las vistas que listan ordenes para que actualicen el color/badge de prioridad
+    notificationService.notifyOrdenesSeguimientoChanged();
+    notificationService.notifyCalendarioChanged();
+
+    return saved;
   }
 
   @DeleteMapping("/{id}")

@@ -45,6 +45,11 @@ export class OrdenCalendarioService {
     return this.http.delete<void>(`${this.apiUrl}/${idOrden}`);
   }
 
+  // Actualizar la prioridad de una orden en el calendario
+  updatePrioridad(idOrden: number, prioridad: 'Normal' | 'Alta' | 'Urgente'): Observable<OrdenCalendario> {
+    return this.http.put<OrdenCalendario>(`${this.apiUrl}/${idOrden}/prioridad`, { prioridad });
+  }
+
   getByDate(fecha: string): Observable<number> {
     return this.http.get<number>(`${this.apiUrl}/total-por-fecha/${fecha}`);
   }

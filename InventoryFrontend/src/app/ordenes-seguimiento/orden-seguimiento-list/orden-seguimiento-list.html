@@ -17,6 +17,32 @@
     <div class="text-lg text-gray-600 mt-2">{{ clienteNombre }}</div>
   </div>
 
+  <!-- Selector de Prioridad -->
+  <div class="mb-8 bg-white rounded-2xl shadow p-6 flex flex-wrap items-center justify-between gap-4"
+       [ngClass]="getPrioridadCardClass(prioridad)">
+    <div>
+      <h3 class="text-lg font-semibold text-gray-800">Prioridad de la orden</h3>
+      <p class="text-sm text-gray-500">Esta prioridad se reflejará en todas las vistas de seguimiento.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="px-3 py-1 text-xs font-medium rounded-2xl"
+            [ngClass]="getPrioridadBadgeClass(prioridad)">
+        Actual: {{ prioridad }}
+      </span>
+      <button *ngFor="let p of prioridadOptions"
+              (click)="setPrioridad(p)"
+              [ngClass]="{
+                'bg-gray-600 text-white': prioridad === p && p === 'Normal',
+                'bg-yellow-400 text-white': prioridad === p && p === 'Alta',
+                'bg-red-600 text-white': prioridad === p && p === 'Urgente',
+                'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50': prioridad !== p
+              }"
+              class="px-4 py-2 text-sm font-medium rounded-xl transition">
+        {{ p }}
+      </button>
+    </div>
+  </div>
+
   <div *ngFor="let det of detalles" class="mb-12 bg-white rounded-3xl shadow-xl overflow-hidden">
     
     <!-- Cabecera -->

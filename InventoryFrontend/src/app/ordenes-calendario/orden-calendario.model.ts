@@ -16,4 +16,6 @@ export interface OrdenCalendario {
 
   fechaModificacion: string;
   usuarioModificacion: string;
+
+  prioridad?: 'Normal' | 'Alta' | 'Urgente';
 }

@@ -102,7 +102,7 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-100">
-          <tr *ngFor="let orden of ordenes">
+          <tr *ngFor="let orden of ordenes" [ngClass]="getPrioridadRowClass(orden.prioridad)">
             <td class="px-6 py-4 font-semibold text-indigo-700">#{{ orden.id }}</td>
             <td class="px-6 py-4 text-gray-800">{{ orden.clienteNombre }}</td>
             

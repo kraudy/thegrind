@@ -13,7 +13,8 @@ import { ProductoTipoEstado } from '../../productos-tipo-estados/producto-tipo-e
 import { EstadosPorDetalleDTO } from '../estados-por-detalle.model';
 
 import { NotificationService } from '../../shared/notification.service';
-import { ToastService } from '../../shared/toast/toast.service';  
+import { ToastService } from '../../shared/toast/toast.service';
+import { getPrioridadBadgeClass, getPrioridadCardClass } from '../../shared/prioridad.util';
 
 @Component({
   selector: 'app-orden-seguimiento-list',
@@ -29,6 +30,8 @@ export class OrdenSeguimientoListComponent implements OnInit, OnDestroy {
   idOrden!: number;
   detalles: OrdenSeguimientoDetalle[] = [];
   clienteNombre = 'Cargando...';
+  prioridad: 'Normal' | 'Alta' | 'Urgente' = 'Normal';
+  readonly prioridadOptions: Array<'Normal' | 'Alta' | 'Urgente'> = ['Normal', 'Alta', 'Urgente'];
 
   possibleStatesMap = new Map<number, string[]>();
   currentStateMap = new Map<number, string>();
@@ -59,6 +62,7 @@ export class OrdenSeguimientoListComponent implements OnInit, OnDestroy {
     this.idOrden = Number(this.route.snapshot.paramMap.get('idOrden'));
     this.clienteNombre = String(this.route.snapshot.paramMap.get('clienteNombre'));
     this.load();
+    this.loadPrioridad();
   }
 
   ngOnDestroy() {
@@ -127,6 +131,36 @@ export class OrdenSeguimientoListComponent implements OnInit, OnDestroy {
   goBack() {
     this.router.navigate(['/ordenes-calendario']);
   }
+
+  private loadPrioridad() {
+    this.ordenCalendarioService.getById(this.idOrden).subscribe({
+      next: (cal) => {
+        this.prioridad = (cal?.prioridad as 'Normal' | 'Alta' | 'Urgente') || 'Normal';
+        this.cd.detectChanges();
+      },
+      error: (err) => console.error('❌ Error cargando prioridad', err)
+    });
+  }
+
+  setPrioridad(nueva: 'Normal' | 'Alta' | 'Urgente') {
+    if (this.prioridad === nueva) return;
+    const previa = this.prioridad;
+    this.prioridad = nueva; // actualizar UI optimistamente
+    this.ordenCalendarioService.updatePrioridad(this.idOrden, nueva).subscribe({
+      next: () => {
+        this.toastService.showToast('success', 'Prioridad actualizada', `Orden #${this.idOrden} marcada como ${nueva}`, 3500);
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        this.prioridad = previa;
+        this.toastService.showToast('error', 'Error', err.error?.message || 'No se pudo actualizar la prioridad', 6000);
+        this.cd.detectChanges();
+      }
+    });
+  }
+
+  getPrioridadBadgeClass = getPrioridadBadgeClass;
+  getPrioridadCardClass = getPrioridadCardClass;
 
   deleteOrderFromCalendar(): void {
     if (confirm(`¿Estás seguro de que quieres eliminar la orden #${this.idOrden} del calendario?`)) {

@@ -13,6 +13,7 @@ import { EstadisticasOrdenComponent } from '../../shared/estadisticas-orden/esta
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimientoDetalleGeneral } from '../orden-seguimiento-detalle-general.model';
 import { NotificationService } from '../../shared/notification.service';
+import { getPrioridadRowClass } from '../../shared/prioridad.util';
 
 @Component({
   selector: 'app-orden-seguimiento-general-list',
@@ -28,6 +29,8 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
   ordenes: OrdenSeguimientoDetalleGeneral[] = [];
   loading = false;
   errorMessage = '';
+
+  getPrioridadRowClass = getPrioridadRowClass;
 
   searchTerm = '';
   selectedStateFilter = ''; // '' = all, or 'Recibida' / 'Repartida' / 'Listo'

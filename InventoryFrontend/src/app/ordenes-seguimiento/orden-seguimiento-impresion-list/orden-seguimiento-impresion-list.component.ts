@@ -9,6 +9,7 @@ import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimiento } from '../orden-seguimiento.model';
 
 import { NotificationService } from '../../shared/notification.service';
+import { getPrioridadRowClass } from '../../shared/prioridad.util';
 
 @Component({
   selector: 'app-orden-seguimiento-impresion-list',
@@ -24,6 +25,8 @@ export class OrdenSeguimientoImpresionListComponent implements OnInit, OnDestroy
   ordenes: OrdenSeguimiento[] = [];
   loading = false;
   errorMessage = '';
+
+  getPrioridadRowClass = getPrioridadRowClass;
 
   constructor(
     private ordenSeguimientoService: OrdenSeguimientoService,

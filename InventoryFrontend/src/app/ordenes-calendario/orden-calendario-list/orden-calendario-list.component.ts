@@ -14,6 +14,7 @@ import { takeUntil } from 'rxjs/internal/operators/takeUntil';
 import { Subject } from 'rxjs/internal/Subject';
 
 import { EstadisticasOrdenComponent } from '../../shared/estadisticas-orden/estadisticas-orden.component';
+import { getPrioridadCardClass, getPrioridadBadgeClass } from '../../shared/prioridad.util';
 
 @Component({
   selector: 'app-orden-calendario-list',
@@ -28,6 +29,9 @@ export class OrdenCalendarioListComponent implements OnInit, OnDestroy {
   
   thisWeekDays: CalendarioDiaDTO[] = [];
   nextWeekDays: CalendarioDiaDTO[] = [];
+
+  getPrioridadCardClass = getPrioridadCardClass;
+  getPrioridadBadgeClass = getPrioridadBadgeClass;
 
   estadisticas: OrdenEstadisticas = {
     ordenesRecibidas: 0,

@@ -8,6 +8,7 @@ import { takeUntil } from 'rxjs/operators';
 import { OrdenSeguimientoService } from '../orden-seguimiento.service';
 import { OrdenSeguimiento } from '../orden-seguimiento.model';
 import { NotificationService } from '../../shared/notification.service';   // ← NEW
+import { getPrioridadRowClass } from '../../shared/prioridad.util';
 
 @Component({
   selector: 'app-orden-seguimiento-preparacion-list',
@@ -23,6 +24,8 @@ export class OrdenSeguimientoPreparacionListComponent implements OnInit, OnDestr
   ordenes: OrdenSeguimiento[] = [];
   loading = false;
   errorMessage = '';
+
+  getPrioridadRowClass = getPrioridadRowClass;
 
   constructor(
     private ordenSeguimientoService: OrdenSeguimientoService,

@@ -51,19 +51,23 @@
         <div class="p-4 min-h-70 space-y-3 overflow-auto">
           <div *ngFor="let ordenCalendario of day.orders"
                class="bg-white border border-gray-200 rounded-xl p-3 hover:shadow transition cursor-pointer relative group"
+               [ngClass]="getPrioridadCardClass(ordenCalendario.prioridad)"
                [routerLink]="['/ordenes-seguimiento', ordenCalendario.idOrden, ordenCalendario.clienteNombre]">
-            <div class="flex justify-between items-start">
-              <div class="flex-1">
+            <div class="flex justify-between items-center">
+              <div>
                 <div class="font-semibold text-indigo-700">#{{ ordenCalendario.idOrden }}</div>
                 <div class="text-xs text-gray-500 mt-1">
                   {{ formatTime(ordenCalendario.horaTrabajo, ordenCalendario.minutoTrabajo) }}
                 </div>
               </div>
-              <div class="flex items-center gap-2">
-                <div class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded">
-                  {{ ordenCalendario.clienteNombre }}
-                </div>
-              </div>
+              <span *ngIf="ordenCalendario.prioridad && ordenCalendario.prioridad !== 'Normal'"
+                    class="text-[10px] px-2 py-0.5 rounded font-semibold"
+                    [ngClass]="getPrioridadBadgeClass(ordenCalendario.prioridad)">
+                {{ ordenCalendario.prioridad }}
+              </span>
+            </div>
+            <div class="mt-2 text-center text-[11px] bg-gray-100 text-gray-600 px-2 py-1 rounded truncate">
+              {{ ordenCalendario.clienteNombre }}
             </div>
           </div>
 
@@ -112,19 +116,23 @@
         <div class="p-4 min-h-70 space-y-3 overflow-auto">
           <div *ngFor="let ordenCalendario of day.orders"
                class="bg-white border border-gray-200 rounded-xl p-3 hover:shadow transition cursor-pointer relative group"
+               [ngClass]="getPrioridadCardClass(ordenCalendario.prioridad)"
                [routerLink]="['/ordenes-seguimiento', ordenCalendario.idOrden, ordenCalendario.clienteNombre]">
-            <div class="flex justify-between items-start">
-              <div class="flex-1">
+            <div class="flex justify-between items-center">
+              <div>
                 <div class="font-semibold text-indigo-700">#{{ ordenCalendario.idOrden }}</div>
                 <div class="text-xs text-gray-500 mt-1">
                   {{ formatTime(ordenCalendario.horaTrabajo, ordenCalendario.minutoTrabajo) }}
                 </div>
               </div>
-              <div class="flex items-center gap-2">
-                <div class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded">
-                  {{ ordenCalendario.usuarioCreacion }}
-                </div>
-              </div>
+              <span *ngIf="ordenCalendario.prioridad && ordenCalendario.prioridad !== 'Normal'"
+                    class="text-[10px] px-2 py-0.5 rounded font-semibold"
+                    [ngClass]="getPrioridadBadgeClass(ordenCalendario.prioridad)">
+                {{ ordenCalendario.prioridad }}
+              </span>
+            </div>
+            <div class="mt-2 text-center text-[11px] bg-gray-100 text-gray-600 px-2 py-1 rounded truncate">
+              {{ ordenCalendario.usuarioCreacion }}
             </div>
           </div>
 

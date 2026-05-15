@@ -35,4 +35,5 @@ export interface OrdenSeguimientoDetalleGeneral {
   countEntregado: number;
 
   canal?: string; // 'General' | 'Whatsapp'
+  prioridad?: 'Normal' | 'Alta' | 'Urgente';
 }

@@ -45,7 +45,7 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr *ngFor="let orden of ordenes" class="cursor-pointer hover:bg-purple-50 transition" (click)="orden.id && viewDetails(orden)" title="Ver detalle de entrega">
+          <tr *ngFor="let orden of ordenes" class="cursor-pointer hover:bg-purple-50 transition" [ngClass]="getPrioridadRowClass(orden.prioridad)" (click)="orden.id && viewDetails(orden)" title="Ver detalle de entrega">
             <td class="px-6 py-4 font-semibold text-purple-700">#{{ orden.id }}</td>
             <td class="px-6 py-4 text-gray-800">{{ orden.clienteNombre }}</td>
             <td class="px-6 py-4">

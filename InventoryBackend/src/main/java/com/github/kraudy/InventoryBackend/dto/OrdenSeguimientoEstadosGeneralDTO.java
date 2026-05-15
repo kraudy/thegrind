@@ -11,6 +11,7 @@ public record OrdenSeguimientoEstadosGeneralDTO(
     LocalDateTime fechaVencimiento,
     String tiempoRestante,
     String canal,
+    String prioridad,
 
     boolean tieneRepartidas,
     boolean tieneNormales,

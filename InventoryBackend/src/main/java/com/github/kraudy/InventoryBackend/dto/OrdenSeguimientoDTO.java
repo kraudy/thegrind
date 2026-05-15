@@ -10,5 +10,6 @@ public record OrdenSeguimientoDTO(
     String creadaPor,
     LocalDateTime fechaVencimiento,
     String tiempoRestante,
-    String canal
+    String canal,
+    String prioridad
 ) {}
