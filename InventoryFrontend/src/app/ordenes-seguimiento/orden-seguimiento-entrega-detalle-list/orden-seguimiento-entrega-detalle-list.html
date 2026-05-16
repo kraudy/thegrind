@@ -1,13 +1,50 @@
 <div class="max-w-7xl mx-auto px-4 py-12">
+
+  <!-- Header -->
   <div class="flex justify-between items-center mb-6">
     <button (click)="goBack()"
             class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-xl">
-      ← Volver a Entrega
+      ← Volver a Entrega y Facturacion
     </button>
   </div>
   <div class="text-center mb-10">
-    <h1 class="text-4xl font-bold text-gray-900">Entrega Orden #{{ idOrden }}</h1>
+    <h1 class="text-4xl font-bold text-gray-900">
+      Entrega y Facturacion Orden #{{ idOrden }}
+    </h1>
     <div class="text-2xl font-bold text-gray-800 mt-2">{{ clienteNombre }}</div>
+    <div class="mt-3">
+      <span class="px-4 py-1 inline-flex text-sm font-semibold rounded-full"
+            [ngClass]="ordenEstado === 'Entregado' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'">
+        Estado: {{ ordenEstado || '—' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Resumen Totales -->
+  <div class="bg-white shadow-xl rounded-2xl p-6 mb-10" *ngIf="idOrden">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">Resumen</h2>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="bg-blue-50 rounded-xl p-4">
+        <div class="text-xs font-semibold uppercase text-blue-700">Prod. Orden</div>
+        <div class="mt-1 text-xl font-extrabold text-blue-800">{{ totalProductosOrden }}</div>
+      </div>
+      <div class="bg-emerald-50 rounded-xl p-4">
+        <div class="text-xs font-semibold uppercase text-emerald-700">Prod. Factura</div>
+        <div class="mt-1 text-xl font-extrabold text-emerald-800">{{ totalProductosFactura }}</div>
+      </div>
+      <div class="bg-purple-50 rounded-xl p-4">
+        <div class="text-xs font-semibold uppercase text-purple-700">Monto Orden</div>
+        <div class="mt-1 text-xl font-extrabold text-purple-800">C$ {{ totalMontoOrden | number:'1.2-2' }}</div>
+      </div>
+      <div class="bg-emerald-50 rounded-xl p-4">
+        <div class="text-xs font-semibold uppercase text-emerald-700">Monto Factura</div>
+        <div class="mt-1 text-xl font-extrabold text-emerald-800">C$ {{ totalMontoFactura | number:'1.2-2' }}</div>
+      </div>
+      <div class="bg-red-50 rounded-xl p-4">
+        <div class="text-xs font-semibold uppercase text-red-700">Saldo Pendiente</div>
+        <div class="mt-1 text-xl font-extrabold text-red-800">C$ {{ saldoPendiente | number:'1.2-2' }}</div>
+      </div>
+    </div>
   </div>
 
   <!-- Completion Message -->
@@ -15,12 +52,9 @@
     <div class="text-6xl mb-6">✅</div>
     <h2 class="text-4xl font-bold text-green-800 mb-4">¡Orden Completada!</h2>
     <p class="text-xl text-green-700 mb-6">Todos los productos han completado el proceso de entrega.</p>
-    <button (click)="goBack()"
-            class="inline-flex items-center px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md transition">
-      Volver a Lista de Entrega
-    </button>
   </div>
 
+  <!-- Detalles con stepper -->
   <div *ngFor="let det of detalles" class="mb-12 bg-white rounded-3xl shadow-xl overflow-hidden"
        [ngClass]="{'opacity-50': !det.permiteMover}">
 
@@ -38,49 +72,23 @@
     <!-- Estado Previo y Actual -->
     <div class="p-8 bg-white border-b">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Estado Previo -->
         <div class="bg-gray-50 rounded-xl p-6">
           <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">Estado Previo</h3>
           <div class="grid grid-cols-2 gap-4">
-            <div class="flex justify-between">
-              <span class="text-gray-600">Estado:</span>
-              <span class="font-medium">{{ det.estadoPrevio || 'N/A' }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">Trabajador:</span>
-              <span class="font-medium">{{ det.trabajadorPrevio || 'N/A' }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">Asignado:</span>
-              <span class="font-medium">{{ det.cantidadAsignadaPrevio || 0 }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">Trabajado:</span>
-              <span class="font-medium">{{ det.cantidadTrabajadaPrevio || 0 }}</span>
-            </div>
+            <div class="flex justify-between"><span class="text-gray-600">Estado:</span><span class="font-medium">{{ det.estadoPrevio || 'N/A' }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Trabajador:</span><span class="font-medium">{{ det.trabajadorPrevio || 'N/A' }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Asignado:</span><span class="font-medium">{{ det.cantidadAsignadaPrevio || 0 }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Trabajado:</span><span class="font-medium">{{ det.cantidadTrabajadaPrevio || 0 }}</span></div>
           </div>
         </div>
 
-        <!-- Estado Actual -->
         <div *ngIf="det.permiteMover" class="bg-purple-50 rounded-xl p-6">
           <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">Estado Actual</h3>
           <div class="grid grid-cols-2 gap-4">
-            <div class="flex justify-between">
-              <span class="text-gray-600">Estado:</span>
-              <span class="font-medium">{{ det.estadoActual || 'N/A' }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">Trabajador:</span>
-              <span class="font-medium">{{ det.trabajadorActual || 'N/A' }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">Asignado:</span>
-              <span class="font-medium">{{ det.cantidadAsignadaActual || 0 }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">Trabajado:</span>
-              <span class="font-medium">{{ det.cantidadTrabajadaActual || 0 }}</span>
-            </div>
+            <div class="flex justify-between"><span class="text-gray-600">Estado:</span><span class="font-medium">{{ det.estadoActual || 'N/A' }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Trabajador:</span><span class="font-medium">{{ det.trabajadorActual || 'N/A' }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Asignado:</span><span class="font-medium">{{ det.cantidadAsignadaActual || 0 }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Trabajado:</span><span class="font-medium">{{ det.cantidadTrabajadaActual || 0 }}</span></div>
           </div>
         </div>
       </div>
@@ -118,7 +126,6 @@
         </div>
       </div>
 
-      <!-- Botón Avanzar -->
       <div class="flex justify-end" *ngIf="det.permiteMover">
         <button (click)="advanceDetail(det)"
                 [disabled]="isLastState(det.idOrdenDetalle)"
@@ -131,4 +138,143 @@
       </div>
     </div>
   </div>
+
+  <!-- ==================== PAGOS REGISTRADOS ==================== -->
+  <div class="bg-white shadow-xl rounded-xl overflow-hidden mt-12" *ngIf="idOrden">
+    <div class="px-6 py-4 border-b bg-gray-50">
+      <h2 class="text-lg font-semibold text-gray-800">Pagos Registrados</h2>
+    </div>
+
+    <div class="p-6">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead>
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Fecha</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Monto</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Metodo</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Tipo</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Referencia</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Banco</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Estado</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Notas</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let pago of pagos">
+            <td class="px-4 py-3 text-sm">{{ pago.fechaPago | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td class="px-4 py-3 text-sm font-medium">C$ {{ pago.monto | number:'1.2-2' }}</td>
+            <td class="px-4 py-3 text-sm">{{ pago.metodoPago }}</td>
+            <td class="px-4 py-3 text-sm">
+              <span class="px-3 py-1 text-xs rounded-full"
+                    [ngClass]="{
+                      'bg-blue-100 text-blue-800': pago.tipoPago === 'Adelanto',
+                      'bg-green-100 text-green-800': pago.tipoPago === 'Saldo'
+                    }">
+                {{ pago.tipoPago }}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-sm">{{ pago.codigoReferencia || '-' }}</td>
+            <td class="px-4 py-3 text-sm">{{ pago.banco || '-' }}</td>
+            <td class="px-4 py-3 text-sm">
+              <span class="px-3 py-1 text-xs rounded-full"
+                    [ngClass]="{
+                      'bg-yellow-100 text-yellow-800': pago.estado === 'Pendiente',
+                      'bg-green-100 text-green-800': pago.estado === 'Aprobado'
+                    }">
+                {{ pago.estado }}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-sm text-gray-600">{{ pago.notas || '-' }}</td>
+          </tr>
+          <tr *ngIf="pagos.length === 0">
+            <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+              No hay pagos registrados para esta orden
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Botones de accion -->
+  <div class="flex flex-wrap justify-end gap-4 mt-8" *ngIf="idOrden">
+    <button (click)="openRegistrarSaldoModal()"
+            class="inline-flex items-center px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white text-lg font-semibold rounded-2xl shadow-xl transition transform hover:scale-105">
+      <span class="text-2xl mr-3">💰</span>
+      Registrar Pago
+    </button>
+
+    <button (click)="generarFactura()"
+            [disabled]="!canGenerarFactura()"
+            [title]="ordenEstado !== 'Entregado' ? 'Solo se puede facturar cuando la orden esta Entregada' : ''"
+            class="inline-flex items-center px-8 py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-lg font-semibold rounded-2xl shadow-xl transition transform hover:scale-105 disabled:hover:scale-100">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H3a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />
+      </svg>
+      {{ creatingFactura ? 'Generando Factura...' : 'Generar Factura' }}
+    </button>
+  </div>
+
+  <!-- Modal Registrar Pago -->
+  <div *ngIf="showRegistrarSaldoModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
+      <div class="p-6">
+        <h3 class="text-xl font-semibold mb-4">Registrar Pago</h3>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Monto (C$)</label>
+            <input type="number" [(ngModel)]="nuevoPago.monto"
+                  class="w-full px-4 py-3 border rounded-xl" placeholder="0.00">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Metodo de pago</label>
+            <select [(ngModel)]="nuevoPago.metodoPago" (ngModelChange)="onMetodoPagoChange()"
+                    class="w-full px-4 py-3 border rounded-xl">
+              <option value="Efectivo">Efectivo</option>
+              <option value="Transferencia">Transferencia</option>
+            </select>
+          </div>
+
+          <div *ngIf="nuevoPago.metodoPago === 'Transferencia'">
+            <label class="block text-sm font-medium mb-1">
+              Codigo de referencia <span class="text-red-500">*</span>
+            </label>
+            <input type="text" [(ngModel)]="nuevoPago.codigoReferencia"
+                  class="w-full px-4 py-3 border rounded-xl" placeholder="Numero de transferencia">
+          </div>
+
+          <div *ngIf="nuevoPago.metodoPago === 'Transferencia'">
+            <label class="block text-sm font-medium mb-1">
+              Banco <span class="text-red-500">*</span>
+            </label>
+            <select [(ngModel)]="nuevoPago.banco" class="w-full px-4 py-3 border rounded-xl">
+              <option value="">Seleccione banco...</option>
+              <option value="Bac">Bac</option>
+              <option value="Lafise">Lafise</option>
+              <option value="Banpro">Banpro</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Notas (opcional)</label>
+            <textarea [(ngModel)]="nuevoPago.notas" rows="3"
+                      class="w-full px-4 py-3 border rounded-xl"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex border-t">
+        <button (click)="showRegistrarSaldoModal = false"
+                class="flex-1 py-4 text-gray-600 font-medium">Cancelar</button>
+        <button (click)="registrarSaldo()"
+                class="flex-1 py-4 bg-purple-600 text-white font-medium rounded-br-2xl">
+          Registrar Pago
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>

@@ -29,7 +29,7 @@ public interface OrdenPagoRepository extends JpaRepository<OrdenPago, Long> {
     // All pending payments (for the approval screen)
     @Query(value = """
         SELECT 
-            SUM(COALESCE(op.monto, 0))
+            COALESCE(SUM(op.monto), 0)
 
         FROM orden_pago op
         WHERE op.id_orden = :idOrden

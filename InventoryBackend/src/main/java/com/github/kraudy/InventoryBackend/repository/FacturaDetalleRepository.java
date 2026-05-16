@@ -94,8 +94,8 @@ public interface FacturaDetalleRepository extends JpaRepository<FacturaDetalle, 
     )
     SELECT 
       CASE (factTot.totalFactura - COALESCE(ptot.totalPagos, 0))
-          WHEN 0 THEN 'Saldo'                                         -- Completamente Pagada
-          WHEN factTot.totalFactura THEN 'Pendiente'                  -- No se ha pagado nada 
+          WHEN 0 THEN 'Pagada'                                        -- Completamente Pagada
+          WHEN factTot.totalFactura THEN 'Parcial'                    -- No se ha pagado nada (sin abonos)
           ELSE 'Parcial'                                              -- Se ha pagado algo pero no todo
       END AS estadoPago
 

@@ -12,12 +12,11 @@ import com.github.kraudy.InventoryBackend.model.OrdenTrabajoPK;
 import com.github.kraudy.InventoryBackend.dto.EstadosPorDetalleDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleDTO;
-import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleFacturacionDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleEntregaDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleImpresionDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetallePreparacionDTO;
 import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoEstadosGeneralDTO;
-import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoFacturacionDTO;
+import com.github.kraudy.InventoryBackend.dto.OrdenEntregaFacturacionDTO;
 import com.github.kraudy.InventoryBackend.model.Orden;
 import com.github.kraudy.InventoryBackend.model.OrdenSeguimiento;
 import com.github.kraudy.InventoryBackend.model.OrdenTrabajo;
@@ -133,10 +132,14 @@ public class OrdenSeguimientoController {
   }
 
 
-  /* Retorna lista de ordenes con detalle en estados de espera de entrega */
+  /* Retorna lista de ordenes con detalle en estados de espera de entrega o facturacion */
   @GetMapping("/para-entrega")
-  public List<OrdenSeguimientoDTO> getOrdenesParaEntrega() {
-    return ordenSeguimientoRepository.getOrdenesParaEntrega();
+  public List<OrdenEntregaFacturacionDTO> getOrdenesParaEntrega(
+    @RequestParam(required = false) Long id,
+    @RequestParam(required = false) String cliente,
+    @RequestParam(required = false) String trabajador
+  ) {
+    return ordenSeguimientoRepository.getOrdenesParaEntrega(id, cliente, trabajador);
   }
 
   @GetMapping("/para-entrega/{idOrden}")
@@ -144,22 +147,6 @@ public class OrdenSeguimientoController {
     return ordenSeguimientoRepository.getSeguimientoDeOrdenParaEntrega(idOrden);
   }
 
-
-  /* Retorna lista de ordenes para facturacion */
-  @GetMapping("/para-facturacion")
-  public List<OrdenSeguimientoFacturacionDTO> getOrdenesParaFacturacion(
-    @RequestParam(required = false) Long id,
-    @RequestParam(required = false) String cliente,
-    @RequestParam(required = false) String trabajador
-  ) {
-    return ordenSeguimientoRepository.getOrdenesParaFacturacion(id, cliente, trabajador);
-  }
-
-  @GetMapping("/para-facturacion/{idOrden}")
-  public List<OrdenSeguimientoDetalleFacturacionDTO> getSeguimientoDeOrdenParaFacturacion(@PathVariable Long idOrden) {
-    return ordenSeguimientoRepository.getSeguimientoDeOrdenParaFacturacion(idOrden);
-  }
-  
 
   /* Muestra el seguimiento completo de los detalles de una orden */
   @GetMapping("/orden/{idOrden}")

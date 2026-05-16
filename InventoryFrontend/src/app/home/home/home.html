@@ -132,11 +132,11 @@
         <a routerLink="/ordenes-seguimiento-preparacion" class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition">Ver Lista</a>
       </div>
 
-      <!-- Órdenes para Entrega - ADMIN + ENTREGA -->
+      <!-- Entrega y Facturación - ADMIN + ENTREGA -->
       <div *ngIf="hasAccess('entrega')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
         <div class="text-5xl mb-4">🤝</div>
-        <h2 class="text-2xl font-bold text-gray-900 mb-3">Órdenes para Entrega</h2>
-        <p class="text-gray-600 mb-6">Revisa las órdenes listas para ser entregadas a los clientes.</p>
+        <h2 class="text-2xl font-bold text-gray-900 mb-3">Entrega y Facturación</h2>
+        <p class="text-gray-600 mb-6">Entrega de órdenes a los clientes, registro de pagos y generación de factura.</p>
         <a routerLink="/ordenes-seguimiento-entrega" class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg shadow-md transition">Ver Lista</a>
       </div>
 
@@ -171,17 +171,6 @@
         <a routerLink="/ordenes-pago/aprobar"
           class="inline-flex items-center px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl shadow-lg transition">
           Ver Pagos Pendientes
-        </a>
-      </div>
-
-      <!-- Facturación de Órdenes - ADMIN ONLY -->
-      <div *ngIf="hasAccess('admin')" class="bg-white shadow-2xl rounded-2xl p-10 text-center transform hover:scale-105 transition duration-300">
-        <div class="text-5xl mb-4">📄</div>
-        <h2 class="text-2xl font-bold text-gray-900 mb-3">Facturación de Órdenes</h2>
-        <p class="text-gray-600 mb-6">Gestiona la facturación de órdenes completadas</p>
-        <a routerLink="/ordenes-facturacion"
-          class="inline-flex items-center px-8 py-4 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-2xl shadow-lg transition">
-          Ver Órdenes para Facturar
         </a>
       </div>
 

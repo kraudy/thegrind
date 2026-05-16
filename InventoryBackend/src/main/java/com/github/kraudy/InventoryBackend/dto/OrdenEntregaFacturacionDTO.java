@@ -1,11 +1,14 @@
 package com.github.kraudy.InventoryBackend.dto;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.time.Duration;
 import java.time.LocalDateTime;
 
-public record OrdenSeguimientoFacturacionDTO(
+/**
+ * Listado combinado de ordenes en estados Listo y Entregado para la pantalla
+ * unificada de "Entrega y Facturacion". Incluye los totales de facturacion
+ * para que el FE pueda mostrar saldo pendiente sin un segundo round-trip.
+ */
+public record OrdenEntregaFacturacionDTO(
     Long id,
     Long idCliente,
     String clienteNombre,
@@ -25,6 +28,7 @@ public record OrdenSeguimientoFacturacionDTO(
     LocalDateTime fechaModificacion,
     String estado,
     String tiempoRestante,
-    String duracionTrabajo,          // renamed to match query alias
-    String canal
+    String duracionTrabajo,
+    String canal,
+    String prioridad
 ) {}

@@ -11,7 +11,6 @@ import com.github.kraudy.InventoryBackend.service.OrdenSeguimientoService;
 
 import lombok.RequiredArgsConstructor;
 
-import com.github.kraudy.InventoryBackend.dto.OrdenSeguimientoDetalleFacturacionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;

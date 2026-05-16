@@ -26,6 +26,7 @@ public class OrdenSeguimientoService {
 
     private final ProductoRepository productoRepository;
     private final OrdenDetalleRepository ordenDetalleRepository;
+    private final FacturaRepository facturaRepository;
 
     private final CurrentUserService currentUserService;
 
@@ -40,6 +41,21 @@ public class OrdenSeguimientoService {
 
         if (actual.getSecuencia() <= 1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No hay estado anterior disponible");
+        }
+
+        // No se puede reversar un detalle si la orden ya fue facturada
+        if (facturaRepository.existsByIdOrden(idOrden)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "No se puede reversar: la orden ya tiene una factura creada");
+        }
+
+        // No se puede reversar un detalle si la orden ya fue entregada o facturada
+        Orden ordenActual = ordenRepository.findById(idOrden)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden no encontrada"));
+        String estadoOrden = ordenActual.getEstado();
+        if ("Entregado".equals(estadoOrden) || "Facturado".equals(estadoOrden)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "No se puede reversar: la orden esta en estado " + estadoOrden);
         }
 
         // Estado previo

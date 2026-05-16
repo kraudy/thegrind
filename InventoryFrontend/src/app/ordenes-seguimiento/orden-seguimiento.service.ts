@@ -11,9 +11,7 @@ import { UsuarioNombre } from '../usuarios/usuario-nombre.model';
 import { OrdenSeguimientoDetallePreparacion } from './orden-seguimiento-detalle-preparacion.model';
 import { OrdenSeguimientoDetalleEntrega } from './orden-seguimiento-detalle-entrega.model';
 import { OrdenSeguimientoDetalleGeneral } from './orden-seguimiento-detalle-general.model';
-
-import { OrdenFacturacion } from '../ordenes-facturacion/orden-facturacion.model';
-import { OrdenFacturacionDetalle } from '../ordenes-facturacion/orden-facturacion-detalle.model';
+import { OrdenEntregaFacturacion } from './orden-entrega-facturacion.model';
 
 
 @Injectable({
@@ -58,26 +56,8 @@ export class OrdenSeguimientoService {
     return this.http.get<OrdenSeguimientoDetallePreparacion[]>(`${this.apiUrl}/para-preparacion/${idOrden}`);
   }
 
-  /* Seguimiento para entrega */
-  getOrdenesParaEntrega(): Observable<OrdenSeguimiento[]> {
-    return this.http.get<OrdenSeguimiento[]>(`${this.apiUrl}/para-entrega`);
-  }
-
-  getOrdenDetalleParaEntrega(idOrden: number): Observable<OrdenSeguimientoDetalleEntrega[]> {
-    return this.http.get<OrdenSeguimientoDetalleEntrega[]>(`${this.apiUrl}/para-entrega/${idOrden}`);
-  }
-
-  /* Seguimiento para repartir */
-  getOrdenesParaRepartir(): Observable<OrdenSeguimiento[]> {
-    return this.http.get<OrdenSeguimiento[]>(`${this.apiUrl}/para-repartir`);
-  }
-
-  getOrdenDetalleParaRepartir(idOrden: number): Observable<OrdenSeguimientoDetalle[]> {
-    return this.http.get<OrdenSeguimientoDetalle[]>(`${this.apiUrl}/para-repartir/${idOrden}`);
-  }
-
-  /* Seguimiento para facturacion */
-  getOrdenesParaFacturacion(filters: { id?: number; cliente?: string; trabajador?: string } = {}): Observable<OrdenFacturacion[]> {
+  /* Seguimiento para entrega y facturacion (pantalla unificada) */
+  getOrdenesParaEntrega(filters: { id?: number; cliente?: string; trabajador?: string } = {}): Observable<OrdenEntregaFacturacion[]> {
     let params = new HttpParams();
 
     if (filters.id != null && !Number.isNaN(filters.id)) {
@@ -92,11 +72,20 @@ export class OrdenSeguimientoService {
       params = params.set('trabajador', filters.trabajador.trim());
     }
 
-    return this.http.get<OrdenFacturacion[]>(`${this.apiUrl}/para-facturacion`, { params });
+    return this.http.get<OrdenEntregaFacturacion[]>(`${this.apiUrl}/para-entrega`, { params });
   }
 
-  getOrdenDetalleParaFacturacion(idOrden: number): Observable<OrdenFacturacionDetalle[]> {
-    return this.http.get<OrdenFacturacionDetalle[]>(`${this.apiUrl}/para-facturacion/${idOrden}`);
+  getOrdenDetalleParaEntrega(idOrden: number): Observable<OrdenSeguimientoDetalleEntrega[]> {
+    return this.http.get<OrdenSeguimientoDetalleEntrega[]>(`${this.apiUrl}/para-entrega/${idOrden}`);
+  }
+
+  /* Seguimiento para repartir */
+  getOrdenesParaRepartir(): Observable<OrdenSeguimiento[]> {
+    return this.http.get<OrdenSeguimiento[]>(`${this.apiUrl}/para-repartir`);
+  }
+
+  getOrdenDetalleParaRepartir(idOrden: number): Observable<OrdenSeguimientoDetalle[]> {
+    return this.http.get<OrdenSeguimientoDetalle[]>(`${this.apiUrl}/para-repartir/${idOrden}`);
   }
 
   getByDetalle(idOrden: number, idOrdenDetalle: number): Observable<OrdenSeguimientoDetalle[]> {
