@@ -13,7 +13,7 @@ public class OrdenCalendarioScheduler {
 
     private final OrdenCalendarioCarryOverService carryOverService;
 
-    // Runs every day at 6:00 AM (change time as you like)
+    // Runs every day at 6:00 AM
     @Scheduled(cron = "0 0 6 * * ?")   // second, minute, hour, day, month, weekday
     public void runDailyCarryOver() {
         carryOverService.carryOverUnfinishedOrders();

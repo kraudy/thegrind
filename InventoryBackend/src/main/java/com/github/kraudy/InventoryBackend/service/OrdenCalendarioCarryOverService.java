@@ -23,9 +23,11 @@ public class OrdenCalendarioCarryOverService {
     public void carryOverUnfinishedOrders() {
       LocalDate today = LocalDate.now();
 
-      // 1. Find all orders scheduled before today
+      // 1. Find all orders scheduled before today that are still in 'Repartida'.
+      //    Orders already 'Listo'/'Entregado'/'Facturado' don't need carry-over because
+      //    the work is done.
       List<OrdenCalendario> overdue = ordenCalendarioRepository
-              .findByFechaBefore(today);
+              .findOverdueRepartidas(today);
 
       if (overdue.isEmpty()) {
         System.out.println("✅ Carry-over: No overdue orders found.");
@@ -46,11 +48,19 @@ public class OrdenCalendarioCarryOverService {
         // 3. Update original to TODAY
         oc.setFecha(today);
         oc.setFechaTrabajo(LocalDateTime.now()); // or today at 08:00 if you prefer
-        // Optional: you can also reset estado if needed
+
+        // 4. Bump prioridad: Normal -> Alta, Alta -> Urgente, Urgente stays
+        oc.setPrioridad(bumpPrioridad(oc.getPrioridad()));
       }
 
       ordenCalendarioRepository.saveAll(overdue);
 
       System.out.println("✅ Carry-over completed: " + overdue.size() + " orders moved to today.");
+  }
+
+  private String bumpPrioridad(String current) {
+    if (current == null || "Normal".equals(current)) return "Alta";
+    if ("Alta".equals(current)) return "Urgente";
+    return current; // Urgente or unknown stays as-is
   }
 }

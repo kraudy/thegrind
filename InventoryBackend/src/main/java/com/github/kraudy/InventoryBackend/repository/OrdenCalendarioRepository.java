@@ -112,9 +112,10 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
         days.day_name,
         days.relative_to_today,
         days.week_label,
-        COALESCE(COUNT(oc.id_orden), 0) AS order_count
+        COALESCE(COUNT(ord.id), 0) AS order_count
       FROM days
       LEFT JOIN orden_calendario oc ON DATE(oc.fecha_trabajo) = days.date
+      LEFT JOIN orden ord ON ord.id = oc.id_orden AND ord.estado = 'Repartida'
       GROUP BY days.date, days.day_name, days.relative_to_today, days.week_label
       ORDER BY days.date
       """, nativeQuery = true)
@@ -141,11 +142,19 @@ public interface OrdenCalendarioRepository extends JpaRepository<OrdenCalendario
       JOIN cliente cte on (cte.id = ord.id_cliente)
       WHERE cal.fecha >= date_trunc('week', CURRENT_DATE)::date 
         AND cal.fecha <= date_trunc('week', CURRENT_DATE)::date + 13
+        AND ord.estado = 'Repartida'
       ORDER BY cal.fecha_trabajo ASC
       """, nativeQuery = true)
   List<OrdenCalendarioDTO> getOrdersInTwoWeeks();
 
   List<OrdenCalendario> findByFechaBefore(LocalDate fecha);
+
+  @Query("""
+      SELECT oc FROM OrdenCalendario oc
+      WHERE oc.fecha < :fecha
+        AND oc.orden.estado = 'Repartida'
+      """)
+  List<OrdenCalendario> findOverdueRepartidas(@Param("fecha") LocalDate fecha);
 
   @Query(value = """
       SELECT COUNT(*) 

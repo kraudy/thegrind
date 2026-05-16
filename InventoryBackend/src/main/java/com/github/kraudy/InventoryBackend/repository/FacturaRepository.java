@@ -12,6 +12,8 @@ import com.github.kraudy.InventoryBackend.model.Factura;
 
 public interface FacturaRepository extends JpaRepository<Factura, Long> {
 
+  boolean existsByIdOrden(Long idOrden);
+
   @Query(value ="""
     SELECT 
       fact.id AS id,

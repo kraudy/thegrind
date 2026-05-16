@@ -37,6 +37,12 @@ public class FacturaService {
 
     //factura.setSoloFecha(factura.getFechaTrabajo().toLocalDate());
 
+    // Idempotencia: no permitir crear dos facturas para la misma orden
+    if (facturaRepository.existsByIdOrden(orden.getId())) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+              "La orden " + orden.getId() + " ya tiene una factura creada");
+    }
+
     String estadoFactura = facturaDetalleRepository.validarTipoPago(orden.getId());
     if (estadoFactura.equals("Pendiente")) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se puede crear la factura porque no hay pagos aprobados");
