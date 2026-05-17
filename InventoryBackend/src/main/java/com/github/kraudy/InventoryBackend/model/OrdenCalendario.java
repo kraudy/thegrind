@@ -32,7 +32,7 @@ public class OrdenCalendario {
   private LocalDate fecha;
 
   @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'Normal'")
-  private String prioridad;
+  private String prioridad = "Normal";
 
   @CreationTimestamp
   @Column(updatable = false, nullable = false)

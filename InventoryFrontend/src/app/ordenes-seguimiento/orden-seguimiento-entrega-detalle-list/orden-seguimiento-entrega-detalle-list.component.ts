@@ -16,6 +16,7 @@ import { ToastService } from '../../shared/toast/toast.service';
 import { OrdenPagoService } from '../../ordenes-pago/orden-pago.service';
 import { OrdenPago } from '../../ordenes-pago/orden-pago.model';
 import { FacturaService } from '../../facturas/factura.service';
+import { OrdenService } from '../../ordenes/orden.service';
 
 @Component({
   selector: 'app-orden-seguimiento-entrega-detalle-list',
@@ -71,7 +72,8 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDe
     private toastService: ToastService,
     private cd: ChangeDetectorRef,
     private ordenPagoService: OrdenPagoService,
-    private facturaService: FacturaService
+    private facturaService: FacturaService,
+    private ordenService: OrdenService
   ) {}
 
   ngOnInit() {
@@ -106,8 +108,21 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDe
   }
 
   private loadAll() {
+    this.loadOrdenEstado();
     this.loadDetalles();
     this.loadPagos();
+  }
+
+  private loadOrdenEstado() {
+    if (!this.idOrden) return;
+    this.ordenService.getById(this.idOrden).subscribe({
+      next: (orden) => {
+        this.ordenEstado = orden?.estado || this.ordenEstado;
+        this.recalcSaldoPendiente();
+        this.cd.detectChanges();
+      },
+      error: (err) => console.error('Error cargando estado de orden', err)
+    });
   }
 
   private loadDetalles() {
