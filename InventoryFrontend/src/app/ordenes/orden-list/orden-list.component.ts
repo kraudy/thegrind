@@ -92,20 +92,6 @@ export class OrdenListComponent implements OnInit {
     this.loadOrdenes();
   }
 
-  canModifyOrden(orden?: Orden): boolean {
-    return (orden?.estado || '').toLowerCase() === 'recibida';
-  }
-
-  deleteOrden(orden?: Orden): void {
-    if (!orden?.id || !this.canModifyOrden(orden)) {
-      return;
-    }
-
-    if (confirm('¿Seguro desea eliminar?')){
-      this.ordenService.delete(orden.id).subscribe(() => this.loadOrdenes());
-    }
-  }
-
   // Query params para conservar el canal al navegar
   get canalQueryParams(): any {
     return this.lockedCanal ? { canal: this.lockedCanal } : {};

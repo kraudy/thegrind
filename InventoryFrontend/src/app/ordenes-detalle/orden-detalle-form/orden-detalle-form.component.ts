@@ -141,6 +141,12 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
 
     // Load filter options (always - harmless in edit mode)
     this.loadTipos();
+
+    // Debounced product search to avoid spamming requests/toasts on every keystroke
+    this.searchTerms.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(() => this.performProductSearch());
   }
 
   ngOnChanges(): void {
@@ -277,7 +283,7 @@ export class OrdenDetalleFormComponent implements OnChanges, OnInit {
 
   onSearchChange(newValue: string): void {
     this.searchProducto = newValue;
-    this.performProductSearch();
+    this.searchTerms.next(newValue);
   }
 
   seleccionarProducto(producto: Producto): void {

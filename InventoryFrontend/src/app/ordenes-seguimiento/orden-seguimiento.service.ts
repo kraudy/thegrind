@@ -22,12 +22,16 @@ export class OrdenSeguimientoService {
 
   constructor(private http: HttpClient) {}
 
-  getOrdenesSeguimientoGeneral(search: string = '', estadoOrden: string = ''): Observable<OrdenSeguimientoDetalleGeneral[]> {
+  getOrdenesSeguimientoGeneral(search: string = '', creadaPor: string = '', estadoOrden: string = ''): Observable<OrdenSeguimientoDetalleGeneral[]> {
     let params = new HttpParams();
 
     // Only send search if user actually typed something
     if (search?.trim()) {
       params = params.set('search', search.trim());
+    }
+
+    if (creadaPor?.trim()) {
+      params = params.set('creadaPor', creadaPor.trim());
     }
 
     // Only send estadoOrden if a real filter is selected

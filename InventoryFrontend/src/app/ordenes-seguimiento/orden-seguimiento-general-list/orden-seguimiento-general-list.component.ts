@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 import { OrdenCalendarioService } from '../../ordenes-calendario/orden-calendario.service';
 import { OrdenEstadisticas } from '../../ordenes-calendario/orden-estadisticas.model';
@@ -28,12 +28,16 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
 
   ordenes: OrdenSeguimientoDetalleGeneral[] = [];
   loading = false;
+  initialLoadDone = false;
   errorMessage = '';
 
   getPrioridadRowClass = getPrioridadRowClass;
 
   searchTerm = '';
+  creadaPorTerm = '';
   selectedStateFilter = ''; // '' = all, or 'Recibida' / 'Repartida' / 'Listo'
+
+  private filterChanged$ = new Subject<void>();
 
   estadisticas: OrdenEstadisticas = {
     ordenesRecibidas: 0,
@@ -71,6 +75,11 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
         }
       });
 
+    // Debounced filter changes — only refresh the list, no full-page reload
+    this.filterChanged$
+      .pipe(debounceTime(300), distinctUntilChanged((_a, _b) => false), takeUntil(this.destroy$))
+      .subscribe(() => this.loadOrdenesGeneral());
+
     this.loadOrdenesGeneral();
     this.loadEstadisticas();
   }
@@ -81,20 +90,26 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
   }
 
   loadOrdenesGeneral(): void {
-    this.loading = true;
+    // Only show full loading state on the very first load.
+    // Subsequent calls (filters, debounced search) just refresh the list in place.
+    if (!this.initialLoadDone) {
+      this.loading = true;
+    }
     this.errorMessage = '';
 
-    this.ordenSeguimientoService.getOrdenesSeguimientoGeneral(this.searchTerm, this.selectedStateFilter)
+    this.ordenSeguimientoService.getOrdenesSeguimientoGeneral(this.searchTerm, this.creadaPorTerm, this.selectedStateFilter)
       .subscribe({
         next: (data) => {
           this.ordenes = data || [];
           this.loading = false;
+          this.initialLoadDone = true;
           this.cd.detectChanges();
         },
         error: (err: any) => {
           console.error('[OrdenSeguimientoGeneralList] error', err);
           this.ordenes = [];
           this.loading = false;
+          this.initialLoadDone = true;
           this.errorMessage = 'No se pudo cargar el seguimiento general.';
           this.cd.detectChanges();
         }
@@ -113,11 +128,12 @@ export class OrdenSeguimientoGeneralListComponent implements OnInit, OnDestroy {
 
   // Called when user types or changes filter
   onFilterChange() {
-    this.loadOrdenesGeneral();
+    this.filterChanged$.next();
   }
 
   clearFilters() {
     this.searchTerm = '';
+    this.creadaPorTerm = '';
     this.selectedStateFilter = '';
     this.loadOrdenesGeneral();
   }

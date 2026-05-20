@@ -91,8 +91,9 @@ public class OrdenSeguimientoController {
   @GetMapping("/general")
   public List<OrdenSeguimientoEstadosGeneralDTO> getOrdenesSeguimientoGeneral(
           @RequestParam(required = false) String search,
+          @RequestParam(required = false) String creadaPor,
           @RequestParam(required = false) String estadoOrden) {
-    return ordenSeguimientoRepository.getOrdenesPorEstadosSeguimiento(search, estadoOrden);
+    return ordenSeguimientoRepository.getOrdenesPorEstadosSeguimiento(search, creadaPor, estadoOrden);
   }
 
   

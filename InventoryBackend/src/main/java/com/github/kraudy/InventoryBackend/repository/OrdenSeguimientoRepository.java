@@ -504,13 +504,13 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
 
     WHERE (:search IS NULL OR 
            CAST(cal.id_orden AS TEXT) ILIKE '%' || LOWER(:search) || '%' OR
-           LOWER(cal.clienteNombre) ILIKE '%' || LOWER(:search) || '%' OR
-           LOWER(cal.creada_por) ILIKE '%' || LOWER(:search) || '%')
+           LOWER(cal.clienteNombre) ILIKE '%' || LOWER(:search) || '%')
+      AND (:creadaPor IS NULL OR LOWER(cal.creada_por) ILIKE '%' || LOWER(:creadaPor) || '%')
       AND (:estadoOrden IS NULL OR cal.estadoOrden = :estadoOrden)
 
     ORDER BY cal.id_cliente, cal.fecha_vencimiento ASC
   """, nativeQuery = true)
-  List<OrdenSeguimientoEstadosGeneralDTO> getOrdenesPorEstadosSeguimiento(@Param("search") String search, @Param("estadoOrden") String estadoOrden);
+  List<OrdenSeguimientoEstadosGeneralDTO> getOrdenesPorEstadosSeguimiento(@Param("search") String search, @Param("creadaPor") String creadaPor, @Param("estadoOrden") String estadoOrden);
 
 
   @Modifying

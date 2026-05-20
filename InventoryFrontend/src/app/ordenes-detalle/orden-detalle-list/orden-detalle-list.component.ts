@@ -268,8 +268,34 @@ export class OrdenDetalleListComponent implements OnInit, OnChanges, OnDestroy {
     return (this.orden?.estado || '').toLowerCase() === 'recibida';
   }
 
+  canModifyOrden(): boolean {
+    return (this.orden?.estado || '').toLowerCase() === 'recibida';
+  }
+
   get isWhatsappContext(): boolean {
     return this.orden?.canal === 'Whatsapp';
+  }
+
+  get canalQueryParams(): any {
+    return this.isWhatsappContext ? { canal: 'Whatsapp' } : {};
+  }
+
+  deleteOrden(): void {
+    if (!this.orden?.id || !this.canModifyOrden()) {
+      return;
+    }
+
+    if (confirm('¿Seguro desea eliminar esta orden?')) {
+      this.ordenService.delete(this.orden.id).subscribe({
+        next: () => {
+          this.router.navigate(['/ordenes'], { queryParams: this.canalQueryParams });
+        },
+        error: (err) => {
+          console.error('Error al eliminar orden', err);
+          alert('No se pudo eliminar la orden. Ver consola para más detalles.');
+        }
+      });
+    }
   }
 
   goToNuevoDetalle(): void {

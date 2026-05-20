@@ -87,6 +87,31 @@
         <p class="text-lg text-gray-900">{{ orden.creadaPor }}</p>
       </div>
     </div>
+
+    <div class="mt-8 pt-6 border-t flex justify-between items-center gap-4 flex-wrap">
+      <a *ngIf="canModifyOrden(); else ordenEditDisabled"
+         [routerLink]="['/ordenes', orden.id, 'edit']"
+         [queryParams]="canalQueryParams"
+         class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition transform hover:scale-105">
+        ✏️ Editar Orden
+      </a>
+      <ng-template #ordenEditDisabled>
+        <span class="px-6 py-3 bg-gray-300 text-gray-500 font-medium rounded-lg cursor-not-allowed">
+          ✏️ Editar Orden
+        </span>
+      </ng-template>
+      <button (click)="deleteOrden()"
+              [disabled]="!canModifyOrden()"
+              [class.bg-red-600]="canModifyOrden()"
+              [class.hover:bg-red-700]="canModifyOrden()"
+              [class.text-white]="canModifyOrden()"
+              [class.bg-gray-300]="!canModifyOrden()"
+              [class.text-gray-500]="!canModifyOrden()"
+              [class.cursor-not-allowed]="!canModifyOrden()"
+              class="px-6 py-3 font-medium rounded-lg shadow-md transition transform hover:scale-105 disabled:transform-none">
+        🗑️ Eliminar Orden
+      </button>
+    </div>
   </div>
 
   <!-- Tabla de detalles -->
