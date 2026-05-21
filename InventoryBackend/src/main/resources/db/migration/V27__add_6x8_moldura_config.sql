@@ -16,6 +16,6 @@ SELECT
   mod.modelo,
   'Dorada'
 FROM (VALUES ('Normal'), ('Reparacion'), ('Vacio')) AS st(sub_tipo)
-CROSS JOIN (VALUES ('12x16'), ('11x17'), ('11x14'), ('10x15'), ('8.5x11'), ('8x10'), ('6x8')) AS m(medida)
+CROSS JOIN (VALUES ('12x16'), ('11x17'), ('11x14'), ('10x15'), ('8.5x11'), ('8x10'), ('6x8'), ('10x12')) AS m(medida)
 CROSS JOIN (VALUES ('1040')) AS mod(modelo)
 ;
