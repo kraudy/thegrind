@@ -5,6 +5,7 @@ export interface OrdenSeguimientoDetalleEntrega {
   idProducto: number;
   nombreProducto: string;
   cantidad: number;
+  precioUnitario: number;
   tipoProducto: string;
   subTipoProducto: string;
   estadoActual: string;
@@ -17,6 +18,11 @@ export interface OrdenSeguimientoDetalleEntrega {
   trabajadorPrevio: string;
   cantidadAsignadaPrevio: number;
   cantidadTrabajadaPrevio: number;
+
+  // Trabajo en estado='Entregado'
+  trabajadorEntrega: string;
+  cantidadAsignadaEntrega: number;
+  cantidadEntregada: number;
 
   permiteMover: boolean;
 }

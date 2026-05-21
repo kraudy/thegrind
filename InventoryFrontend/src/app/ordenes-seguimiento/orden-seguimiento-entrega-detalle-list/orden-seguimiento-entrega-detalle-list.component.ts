@@ -33,15 +33,22 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDe
   detalles: OrdenSeguimientoDetalleEntrega[] = [];
   clienteNombre = 'Cargando...';
 
-  // Estado de la orden a nivel cabecera (Listo o Entregado) - llega por queryParam
+  // Estado de la orden a nivel cabecera (Listo o Entregado)
   ordenEstado: string = '';
 
-  // Totales de facturacion - llegan por queryParams desde el listado
+  // Totales (computados reactivamente desde detalles + pagos)
   totalProductosOrden: number = 0;
   totalMontoOrden: number = 0;
   totalProductosFactura: number = 0;
   totalMontoFactura: number = 0;
   saldoPendiente: number = 0;
+
+  // Input manual por detalle (cantidad a marcar como entregada en esta accion)
+  cantidadAEntregarInputs: { [idOrdenDetalle: number]: number } = {};
+
+  // Auto-advance: previene reintentos infinitos si el backend rechaza el avance
+  private autoAdvanceSignatureMap: { [idOrdenDetalle: number]: string } = {};
+  private advancingDetailMap: { [idOrdenDetalle: number]: boolean } = {};
 
   // Pagos registrados
   pagos: OrdenPago[] = [];
@@ -91,13 +98,8 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDe
     this.idOrden = Number(this.route.snapshot.paramMap.get('idOrden'));
     this.clienteNombre = String(this.route.snapshot.paramMap.get('clienteNombre'));
 
-    const qp = this.route.snapshot.queryParamMap;
-    this.ordenEstado = qp.get('estado') || '';
-    this.totalProductosOrden = Number(qp.get('totalProductosOrden')) || 0;
-    this.totalMontoOrden = Number(qp.get('totalMontoOrden')) || 0;
-    this.totalProductosFactura = Number(qp.get('totalProductosFactura')) || 0;
-    this.totalMontoFactura = Number(qp.get('totalMontoFactura')) || 0;
-    this.saldoPendiente = Number(qp.get('saldoPendiente')) || 0;
+    // Estado inicial (puede venir por queryParam para evitar parpadeo) — se refresca via loadOrdenEstado
+    this.ordenEstado = this.route.snapshot.queryParamMap.get('estado') || '';
 
     this.loadAll();
   }
@@ -118,7 +120,7 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDe
     this.ordenService.getById(this.idOrden).subscribe({
       next: (orden) => {
         this.ordenEstado = orden?.estado || this.ordenEstado;
-        this.recalcSaldoPendiente();
+        this.recalcTotales();
         this.cd.detectChanges();
       },
       error: (err) => console.error('Error cargando estado de orden', err)
@@ -129,11 +131,20 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDe
     this.service.getOrdenDetalleParaEntrega(this.idOrden).subscribe({
       next: (data) => {
         this.detalles = data || [];
+        // Inicializar input por detalle con la cantidad pendiente por entregar
+        this.detalles.forEach(det => {
+          const pendiente = Math.max(0, (det.cantidad || 0) - (det.cantidadEntregada || 0));
+          if (this.cantidadAEntregarInputs[det.idOrdenDetalle] === undefined) {
+            this.cantidadAEntregarInputs[det.idOrdenDetalle] = pendiente;
+          }
+        });
         this.loadStepperDataForAll();
+        this.recalcTotales();
         this.cd.detectChanges();
+        this.tryAutoAdvanceCompletedDetails();
       },
       error: (err) => {
-        console.error('❌ Error cargando detalle de entrega', err);
+        console.error('Error cargando detalle de entrega', err);
         this.toastService.showToast('error', 'Error al cargar', 'No se pudo cargar la informacion de la orden', 6000);
       },
     });
@@ -144,7 +155,7 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDe
     this.ordenPagoService.getPagosByOrden(this.idOrden).subscribe({
       next: (pagos) => {
         this.pagos = pagos || [];
-        this.recalcSaldoPendiente();
+        this.recalcTotales();
         this.cd.detectChanges();
       },
       error: (err) => {
@@ -154,14 +165,60 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDe
     });
   }
 
-  private recalcSaldoPendiente() {
+  /**
+   * Unica fuente de verdad para los totales de la pantalla. Recalcula:
+   *  - totalProductosOrden / totalMontoOrden  (basado en cantidad y precio de orden_detalle)
+   *  - totalProductosFactura / totalMontoFactura (basado en cantidad_trabajada de orden_trabajo estado='Entregado')
+   *  - saldoPendiente (contra el total relevante segun estado de la orden)
+   */
+  private recalcTotales() {
+    const dets = this.detalles || [];
+    this.totalProductosOrden = dets.reduce((acc, d) => acc + Number(d.cantidad || 0), 0);
+    this.totalMontoOrden = dets.reduce((acc, d) =>
+      acc + Number(d.cantidad || 0) * Number(d.precioUnitario || 0), 0);
+    this.totalProductosFactura = dets.reduce((acc, d) => acc + Number(d.cantidadEntregada || 0), 0);
+    this.totalMontoFactura = dets.reduce((acc, d) =>
+      acc + Number(d.cantidadEntregada || 0) * Number(d.precioUnitario || 0), 0);
+
     const totalAPagar = this.ordenEstado === 'Entregado'
-      ? (this.totalMontoFactura || 0)
-      : (this.totalMontoOrden || 0);
+      ? this.totalMontoFactura
+      : this.totalMontoOrden;
     const totalPagado = (this.pagos || []).reduce((acc, p) => acc + Number(p.monto || 0), 0);
     const pendiente = totalAPagar - totalPagado;
     this.saldoPendiente = pendiente > 0 ? Number(pendiente.toFixed(2)) : 0;
   }
+
+  /** Subtotal por detalle para mostrar en la columna 'Orden' */
+  subtotalOrden(det: OrdenSeguimientoDetalleEntrega): number {
+    return Number(det.cantidad || 0) * Number(det.precioUnitario || 0);
+  }
+
+  /** Subtotal por detalle para mostrar en la columna 'Entregado' (lo que sera facturado) */
+  subtotalEntregado(det: OrdenSeguimientoDetalleEntrega): number {
+    return Number(det.cantidadEntregada || 0) * Number(det.precioUnitario || 0);
+  }
+
+  /** Cuantos quedan por entregar para este detalle */
+  cantidadPendienteEntrega(det: OrdenSeguimientoDetalleEntrega): number {
+    return Math.max(0, Number(det.cantidad || 0) - Number(det.cantidadEntregada || 0));
+  }
+
+  /** El detalle ya esta en estado Entregado a nivel seguimiento y todas las unidades fueron entregadas. */
+  isFullyEntregado(det: OrdenSeguimientoDetalleEntrega): boolean {
+    return det.estadoActual === 'Entregado'
+      && Number(det.cantidad || 0) > 0
+      && Number(det.cantidadEntregada || 0) >= Number(det.cantidad || 0);
+  }
+
+  /** El detalle esta en Entregado pero con cantidad menor a la pedida (entrega parcial cerrada). */
+  isPartiallyEntregado(det: OrdenSeguimientoDetalleEntrega): boolean {
+    return det.estadoActual === 'Entregado'
+      && Number(det.cantidadEntregada || 0) > 0
+      && Number(det.cantidadEntregada || 0) < Number(det.cantidad || 0);
+  }
+
+  /** trackBy para *ngFor de detalles: evita destruir/recrear el DOM (y por tanto el salto de scroll) en cada reload. */
+  trackByDetalle = (_index: number, det: OrdenSeguimientoDetalleEntrega): number => det.idOrdenDetalle;
 
   private loadStepperDataForAll() {
     this.possibleStatesMap.clear();
@@ -188,42 +245,107 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDe
     }
   }
 
-  advanceDetail(det: OrdenSeguimientoDetalleEntrega) {
-    let cantidad = 0;
-    if (det.tipoProducto === 'Molduras' || det.tipoProducto === 'Retablos' || det.tipoProducto === 'Tabla' ||
-      det.tipoProducto === 'Baner' || det.tipoProducto === 'Calado' || det.tipoProducto === 'Camisa' ||
-      det.tipoProducto === 'Taza' || det.tipoProducto === 'Llavero'
-    ) {
-      cantidad = det.cantidadTrabajadaActual;
-    } else {
-      cantidad = det.cantidadTrabajadaPrevio;
+  /**
+   * Registra cantidad entregada para un detalle (acumulativa en orden_trabajo estado='Entregado').
+   * No avanza el estado; el usuario decide cuando avanzar via 'Marcar como Entregado'.
+   */
+  registrarEntrega(det: OrdenSeguimientoDetalleEntrega) {
+    const cantidad = Number(this.cantidadAEntregarInputs[det.idOrdenDetalle] || 0);
+    const pendiente = this.cantidadPendienteEntrega(det);
+
+    if (cantidad <= 0) {
+      this.toastService.showToast('warning', 'Cantidad invalida',
+        'Ingrese una cantidad mayor a 0 para registrar la entrega.', 5000);
+      return;
+    }
+    if (cantidad > pendiente) {
+      this.toastService.showToast('warning', 'Cantidad excede pendiente',
+        `Solo quedan ${pendiente} unidades por entregar para este detalle.`, 5000);
+      return;
     }
 
     this.service.progresoTrabajo(det.idOrden, det.idOrdenDetalle, cantidad).subscribe({
       next: () => {
+        this.cantidadAEntregarInputs[det.idOrdenDetalle] = 0;
+        this.toastService.showToast('success', 'Entrega registrada',
+          `Se registraron ${cantidad} unidades entregadas para #${det.idOrdenDetalle}.`, 4000);
         this.loadAll();
       },
       error: (err) => {
-        console.error('Error adding progress:', err);
-        this.toastService.showToast(
-          'error',
-          'Error al agregar progreso',
-          'No se pudo registrar el progreso del trabajo. Verifique la cantidad.',
-          7000
-        );
-        return;
+        console.error('Error registrando entrega:', err);
+        const msg = err?.error?.message || 'No se pudo registrar la entrega. Verifique la cantidad.';
+        this.toastService.showToast('error', 'Error al registrar entrega', msg, 7000);
       }
     });
+  }
 
-    this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe(() => {
-      this.loadAll();
-      this.toastService.showToast(
-        'success',
-        'Estado avanzado',
-        `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) avanzo a Entregado correctamente`,
-        4000
+  /**
+   * Avanza el detalle al siguiente estado (Listo -> Entregado a nivel seguimiento).
+   * No requiere que toda la cantidad este entregada — el operador decide si entrega parcial cierra el detalle.
+   */
+  advanceDetail(det: OrdenSeguimientoDetalleEntrega) {
+    if (!det.permiteMover) return;
+    if (this.advancingDetailMap[det.idOrdenDetalle]) return;
+
+    const entregada = Number(det.cantidadEntregada || 0);
+    if (entregada <= 0) {
+      this.toastService.showToast('warning', 'Sin cantidad entregada',
+        `Registre al menos 1 unidad entregada antes de marcar el detalle como Entregado.`, 5000);
+      return;
+    }
+
+    const pendiente = this.cantidadPendienteEntrega(det);
+    if (pendiente > 0) {
+      const ok = confirm(
+        `Se entregaron ${entregada} de ${det.cantidad} unidades para #${det.idOrdenDetalle} (${det.nombreProducto}).\n` +
+        `¿Marcar el detalle como Entregado con esta cantidad parcial?`
       );
+      if (!ok) return;
+    }
+
+    this.advancingDetailMap[det.idOrdenDetalle] = true;
+    this.service.advance(det.idOrden, det.idOrdenDetalle).subscribe({
+      next: () => {
+        this.advancingDetailMap[det.idOrdenDetalle] = false;
+        this.loadAll();
+        this.toastService.showToast('success', 'Detalle entregado',
+          `Detalle #${det.idOrdenDetalle} (${det.nombreProducto || 'Sin nombre'}) avanzo a Entregado.`, 4000);
+      },
+      error: (err) => {
+        this.advancingDetailMap[det.idOrdenDetalle] = false;
+        console.error('Error avanzando estado:', err);
+        const msg = err?.error?.message || 'No se pudo avanzar el estado del detalle.';
+        this.toastService.showToast('error', 'Error al avanzar', msg, 7000);
+      }
     });
+  }
+
+  /**
+   * Si un detalle tiene cantidadEntregada >= cantidad pedida y aun esta en Listo,
+   * lo avanza automaticamente a Entregado. Usa una firma para evitar bucles si el avance falla.
+   */
+  private tryAutoAdvanceCompletedDetails(): void {
+    for (const det of this.detalles) {
+      if (!this.shouldAutoAdvance(det)) continue;
+
+      const signature = this.buildAutoAdvanceSignature(det);
+      if (this.autoAdvanceSignatureMap[det.idOrdenDetalle] === signature) continue;
+
+      this.autoAdvanceSignatureMap[det.idOrdenDetalle] = signature;
+      this.advanceDetail(det);
+      break; // loadAll() volvera a disparar este metodo para el siguiente detalle
+    }
+  }
+
+  private shouldAutoAdvance(det: OrdenSeguimientoDetalleEntrega): boolean {
+    if (!det.permiteMover) return false;
+    if (this.advancingDetailMap[det.idOrdenDetalle]) return false;
+    return Number(det.cantidad || 0) > 0
+      && Number(det.cantidadEntregada || 0) >= Number(det.cantidad || 0);
+  }
+
+  private buildAutoAdvanceSignature(det: OrdenSeguimientoDetalleEntrega): string {
+    return [det.idOrden, det.idOrdenDetalle, det.estadoActual, det.cantidad, det.cantidadEntregada, det.permiteMover].join('|');
   }
 
   getPossibleStates(detId: number): ProductoTipoEstado[] {
@@ -303,8 +425,34 @@ export class OrdenSeguimientoEntregaDetalleListComponent implements OnInit, OnDe
   }
 
   // ==================== Factura ====================
+  /** Suma de pagos aprobados (la unica fuente de verdad para autorizar facturacion). */
+  totalPagadoAprobado(): number {
+    return (this.pagos || [])
+      .filter(p => p.estado === 'Aprobado')
+      .reduce((acc, p) => acc + Number(p.monto || 0), 0);
+  }
+
+  /** Saldo pendiente contra el total factura, considerando solo pagos aprobados. */
+  saldoFacturaPendiente(): number {
+    const pendiente = Number(this.totalMontoFactura || 0) - this.totalPagadoAprobado();
+    return pendiente > 0 ? Number(pendiente.toFixed(2)) : 0;
+  }
+
   canGenerarFactura(): boolean {
-    return this.ordenEstado === 'Entregado' && !this.creatingFactura;
+    if (this.creatingFactura) return false;
+    if (this.ordenEstado !== 'Entregado') return false;
+    if (Number(this.totalMontoFactura || 0) <= 0) return false;
+    return this.saldoFacturaPendiente() <= 0;
+  }
+
+  generarFacturaTooltip(): string {
+    if (this.ordenEstado !== 'Entregado') {
+      return 'Solo se puede facturar cuando la orden esta Entregada';
+    }
+    if (this.saldoFacturaPendiente() > 0) {
+      return `Faltan C$ ${this.saldoFacturaPendiente().toFixed(2)} en pagos aprobados para cubrir la factura`;
+    }
+    return '';
   }
 
   generarFactura(): void {

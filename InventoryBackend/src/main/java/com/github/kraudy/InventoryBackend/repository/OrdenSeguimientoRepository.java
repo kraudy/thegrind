@@ -371,6 +371,7 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
         det.id_producto,
         prod.nombre,
         det.cantidad,
+        det.precio_unitario AS precioUnitario,
         seg.tipo,
         seg.sub_tipo,
         seg.estado AS estadoActual,
@@ -383,6 +384,11 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
         COALESCE(trabajoPrevio.trabajador, '') AS trabajadorPrevio,
         COALESCE(trabajoPrevio.cantidad_asignada, 0) AS cantidadAsignadaPrevio,
         COALESCE(trabajoPrevio.cantidad_trabajada, 0) AS cantidadTrabajadaPrevio,
+
+        -- Trabajo en estado='Entregado': fuente de verdad para lo que sera facturado
+        COALESCE(trabajoEntrega.trabajador, '') AS trabajadorEntrega,
+        COALESCE(trabajoEntrega.cantidad_asignada, 0) AS cantidadAsignadaEntrega,
+        COALESCE(trabajoEntrega.cantidad_trabajada, 0) AS cantidadEntregada,
 
         CASE 
           WHEN seg.estado IN ('Listo') THEN true 
@@ -403,6 +409,11 @@ public interface OrdenSeguimientoRepository extends JpaRepository<OrdenSeguimien
                          ON trabajoActual.id_orden = seg.id_orden
                         AND trabajoActual.id_orden_detalle = seg.id_orden_detalle
                         AND trabajoActual.estado IN ('Pegado', 'Enmarcado', 'Armado', 'Calado', 'Sublimacion', 'Bodega') -- Lo ocupamos para obtener la cantidad trabajada actualmente
+
+    LEFT JOIN orden_trabajo trabajoEntrega
+                         ON trabajoEntrega.id_orden = seg.id_orden
+                        AND trabajoEntrega.id_orden_detalle = seg.id_orden_detalle
+                        AND trabajoEntrega.estado = 'Entregado'             -- Trabajo de entrega: cantidad_trabajada = cantidad realmente entregada al cliente
 
     WHERE seg.id_orden = :idOrden
                                                                             -- por ahora mostramos todos los estados

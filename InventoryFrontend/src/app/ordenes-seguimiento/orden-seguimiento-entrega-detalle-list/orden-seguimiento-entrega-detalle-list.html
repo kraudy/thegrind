@@ -55,48 +55,91 @@
   </div>
 
   <!-- Detalles con stepper -->
-  <div *ngFor="let det of detalles" class="mb-12 bg-white rounded-3xl shadow-xl overflow-hidden"
-       [ngClass]="{'opacity-50': !det.permiteMover}">
+  <div *ngFor="let det of detalles; trackBy: trackByDetalle"
+       class="mb-12 bg-white rounded-3xl shadow-xl overflow-hidden transition-opacity"
+       [ngClass]="{
+         'opacity-60 ring-2 ring-emerald-200': isFullyEntregado(det),
+         'opacity-80 ring-2 ring-amber-200': isPartiallyEntregado(det)
+       }">
 
     <!-- Cabecera -->
     <div class="p-8 border-b bg-gray-50 flex justify-between items-center">
       <div>
-        <span class="text-2xl font-bold">#{{ det.idOrdenDetalle }} - {{ det.nombreProducto }} - {{ det.cantidad }} unidades</span>
+        <span class="text-2xl font-bold">#{{ det.idOrdenDetalle }} - {{ det.nombreProducto }}</span>
         <p class="text-gray-500 mt-1">{{ det.tipoProducto }} / {{ det.subTipoProducto }}</p>
+        <div class="mt-2 flex gap-4 text-sm">
+          <span class="text-blue-600 font-medium">Pedidas: {{ det.cantidad }}</span>
+          <span class="text-emerald-600 font-medium">Entregadas: {{ det.cantidadEntregada }}</span>
+          <span class="text-orange-600 font-medium">Pendientes: {{ cantidadPendienteEntrega(det) }}</span>
+          <span *ngIf="det.trabajadorEntrega" class="text-gray-600 font-medium">Recibe: {{ det.trabajadorEntrega }}</span>
+        </div>
       </div>
-      <span class="px-5 py-2 bg-purple-100 text-purple-700 rounded-2xl text-sm font-medium">
+      <span class="px-5 py-2 rounded-2xl text-sm font-medium"
+            [ngClass]="det.estadoActual === 'Entregado' ? 'bg-emerald-100 text-emerald-700' : 'bg-purple-100 text-purple-700'">
         {{ det.estadoActual || 'Sin estado' }}
       </span>
     </div>
 
-    <!-- Estado Previo y Actual -->
+    <!-- Orden vs Entregado: comparacion clara con precio y subtotal -->
     <div class="p-8 bg-white border-b">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-gray-50 rounded-xl p-6">
-          <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">Estado Previo</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="flex justify-between"><span class="text-gray-600">Estado:</span><span class="font-medium">{{ det.estadoPrevio || 'N/A' }}</span></div>
-            <div class="flex justify-between"><span class="text-gray-600">Trabajador:</span><span class="font-medium">{{ det.trabajadorPrevio || 'N/A' }}</span></div>
-            <div class="flex justify-between"><span class="text-gray-600">Asignado:</span><span class="font-medium">{{ det.cantidadAsignadaPrevio || 0 }}</span></div>
-            <div class="flex justify-between"><span class="text-gray-600">Trabajado:</span><span class="font-medium">{{ det.cantidadTrabajadaPrevio || 0 }}</span></div>
+
+        <!-- Columna ORDEN -->
+        <div class="bg-blue-50 rounded-xl p-6">
+          <h3 class="text-lg font-semibold text-blue-800 mb-4 text-center">Orden</h3>
+          <div class="space-y-3">
+            <div class="flex justify-between"><span class="text-gray-600">Cantidad pedida:</span><span class="font-bold">{{ det.cantidad }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Precio unitario:</span><span class="font-medium">C$ {{ det.precioUnitario | number:'1.2-2' }}</span></div>
+            <div class="flex justify-between border-t pt-3"><span class="text-gray-700 font-semibold">Subtotal:</span><span class="font-bold text-blue-800">C$ {{ subtotalOrden(det) | number:'1.2-2' }}</span></div>
           </div>
         </div>
 
-        <div *ngIf="det.permiteMover" class="bg-purple-50 rounded-xl p-6">
-          <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">Estado Actual</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="flex justify-between"><span class="text-gray-600">Estado:</span><span class="font-medium">{{ det.estadoActual || 'N/A' }}</span></div>
-            <div class="flex justify-between"><span class="text-gray-600">Trabajador:</span><span class="font-medium">{{ det.trabajadorActual || 'N/A' }}</span></div>
-            <div class="flex justify-between"><span class="text-gray-600">Asignado:</span><span class="font-medium">{{ det.cantidadAsignadaActual || 0 }}</span></div>
-            <div class="flex justify-between"><span class="text-gray-600">Trabajado:</span><span class="font-medium">{{ det.cantidadTrabajadaActual || 0 }}</span></div>
+        <!-- Columna ENTREGADO / FACTURA -->
+        <div class="bg-emerald-50 rounded-xl p-6">
+          <h3 class="text-lg font-semibold text-emerald-800 mb-4 text-center">Entregado (Factura)</h3>
+          <div class="space-y-3">
+            <div class="flex justify-between"><span class="text-gray-600">Cantidad entregada:</span><span class="font-bold">{{ det.cantidadEntregada }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-600">Precio unitario:</span><span class="font-medium">C$ {{ det.precioUnitario | number:'1.2-2' }}</span></div>
+            <div class="flex justify-between border-t pt-3"><span class="text-gray-700 font-semibold">Subtotal factura:</span><span class="font-bold text-emerald-800">C$ {{ subtotalEntregado(det) | number:'1.2-2' }}</span></div>
           </div>
         </div>
+      </div>
+
+      <!-- Input manual de cantidad entregada (solo cuando el detalle aun se puede mover, i.e. seg.estado = Listo) -->
+      <div *ngIf="det.permiteMover" class="mt-6 p-5 bg-amber-50 rounded-xl border border-amber-200">
+        <h4 class="text-base font-semibold text-amber-800 mb-3">Registrar cantidad entregada</h4>
+        <div class="flex flex-wrap gap-3 items-end">
+          <div class="flex-1 min-w-45">
+            <label class="block text-sm font-medium text-amber-700 mb-1">
+              Cantidad a entregar ahora (max {{ cantidadPendienteEntrega(det) }})
+            </label>
+            <input type="number"
+                   min="0"
+                   [max]="cantidadPendienteEntrega(det)"
+                   [(ngModel)]="cantidadAEntregarInputs[det.idOrdenDetalle]"
+                   class="w-full px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                   placeholder="Cantidad">
+          </div>
+          <button (click)="registrarEntrega(det)"
+                  [disabled]="cantidadPendienteEntrega(det) <= 0 || !(cantidadAEntregarInputs[det.idOrdenDetalle] > 0)"
+                  class="px-6 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 text-white font-medium rounded-lg transition">
+            Registrar entrega
+          </button>
+          <button (click)="advanceDetail(det)"
+                  [disabled]="det.cantidadEntregada <= 0 || isLastState(det.idOrdenDetalle)"
+                  class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white font-semibold rounded-lg transition">
+            Marcar como Entregado
+          </button>
+        </div>
+        <p class="mt-2 text-xs text-amber-700">
+          Tip: registre la cantidad real entregada al cliente y luego marque el detalle como Entregado. Permite entrega parcial.
+        </p>
       </div>
     </div>
 
     <!-- STEPPER -->
     <div class="p-8 bg-gray-50">
-      <div class="flex items-center justify-between relative mb-8">
+      <div class="flex items-center justify-between relative mb-2">
         <div *ngFor="let state of getPossibleStates(det.idOrdenDetalle); let i = index"
              class="flex-1 text-center relative z-10">
 
@@ -124,17 +167,6 @@
             {{ state.estado }}
           </div>
         </div>
-      </div>
-
-      <div class="flex justify-end" *ngIf="det.permiteMover">
-        <button (click)="advanceDetail(det)"
-                [disabled]="isLastState(det.idOrdenDetalle)"
-                class="px-10 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 text-white font-semibold rounded-2xl flex items-center gap-3 transition">
-          Avanzar al siguiente estado
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7-7 7" />
-          </svg>
-        </button>
       </div>
     </div>
   </div>
@@ -197,7 +229,12 @@
   </div>
 
   <!-- Botones de accion -->
-  <div class="flex flex-wrap justify-end gap-4 mt-8" *ngIf="idOrden">
+  <div class="flex flex-wrap justify-end items-center gap-4 mt-8" *ngIf="idOrden">
+    <div *ngIf="ordenEstado === 'Entregado' && saldoFacturaPendiente() > 0"
+         class="text-sm text-amber-700 bg-amber-50 border border-amber-200 px-4 py-2 rounded-lg">
+      Faltan <span class="font-semibold">C$ {{ saldoFacturaPendiente() | number:'1.2-2' }}</span> en pagos aprobados para facturar.
+    </div>
+
     <button (click)="openRegistrarSaldoModal()"
             class="inline-flex items-center px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white text-lg font-semibold rounded-2xl shadow-xl transition transform hover:scale-105">
       <span class="text-2xl mr-3">💰</span>
@@ -206,7 +243,7 @@
 
     <button (click)="generarFactura()"
             [disabled]="!canGenerarFactura()"
-            [title]="ordenEstado !== 'Entregado' ? 'Solo se puede facturar cuando la orden esta Entregada' : ''"
+            [title]="generarFacturaTooltip()"
             class="inline-flex items-center px-8 py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-lg font-semibold rounded-2xl shadow-xl transition transform hover:scale-105 disabled:hover:scale-100">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H3a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />

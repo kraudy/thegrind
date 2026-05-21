@@ -44,8 +44,9 @@ public class FacturaService {
     }
 
     String estadoFactura = facturaDetalleRepository.validarTipoPago(orden.getId());
-    if (estadoFactura.equals("Pendiente")) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se puede crear la factura porque no hay pagos aprobados");
+    if (!"Pagada".equals(estadoFactura)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              "No se puede crear la factura: la orden no esta completamente pagada (pagos aprobados deben cubrir el total entregado).");
     }
 
     String currentUser = currentUserService.getCurrentUser();
